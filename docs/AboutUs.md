@@ -27,14 +27,14 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Backend
 
-### Johnny Doe
+### Lin Bo-Ruei
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/spoinornus.png" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
+[[github](http://github.com/spoinornus)] 
 
-* Role: Developer
-* Responsibilities: Data
+* Role: Developer, Yapper
+* Responsibilities: Yapping, Organising
 
 ### Edmund Tan
 
