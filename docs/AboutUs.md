@@ -48,12 +48,12 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Dev Ops + Threading
 
-### James Doe
+### Koh Yu Jun
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/yjenexd.png" width="200px">
 
-[[github](http://github.com/johndoe)]
+[[github](https://github.com/yjenexd)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Developer
-* Responsibilities: UI
+* Role: Celery Worker
+* Responsibilities: Full Stack
