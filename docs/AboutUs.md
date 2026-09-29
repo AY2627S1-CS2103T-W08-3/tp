@@ -9,25 +9,23 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Aw Guangyang Amos
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/somawa.png" width="200px">
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/somawa)]
 
-* Role: Project Advisor
-
-### Jane Doe
-
-<img src="images/johndoe.png" width="200px">
-
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
-
-* Role: Team Lead
+* Role: Developer
 * Responsibilities: UI
+
+### Sakthi
+
+<img src="images/sakthi-dev-tech.png" width="200px">
+
+[[github](http://github.com/Sakthi-dev-tech)]
+
+* Role: Developer
+* Responsibilities: Backend
 
 ### Lin Bo-Ruei
 
@@ -38,22 +36,22 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer, Yapper
 * Responsibilities: Yapping, Organising
 
-### Jean Doe
+### Edmund Tan
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/edmundtan37.png" width="200px">
 
-[[github](http://github.com/johndoe)]
+[[github](https://github.com/EdmundTan37)]
 [[portfolio](team/johndoe.md)]
 
 * Role: Developer
 * Responsibilities: Dev Ops + Threading
 
-### James Doe
+### Koh Yu Jun
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/yjenexd.png" width="200px">
 
-[[github](http://github.com/johndoe)]
+[[github](https://github.com/yjenexd)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Developer
-* Responsibilities: UI
+* Role: Celery Worker
+* Responsibilities: Full Stack
