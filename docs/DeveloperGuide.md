@@ -326,6 +326,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Insurance Agent**: Point of contact for insurance products, manages a list of insurance clients' information
+* **Insurance Client**: Consumer of insurance products, with an associated insurance agent who has the client's contact information
+* **Policyholder**: Insurance client of a specific insurance product, in particular with a purchased policy with an associated policynumber
 
 --------------------------------------------------------------------------------------------------------------------
 
