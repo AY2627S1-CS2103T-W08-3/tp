@@ -31,7 +31,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 <img src="images/spoinornus.png" width="200px">
 
-[[github](http://github.com/spoinornus)] 
+[[github](http://github.com/spoinornus)]
 
 * Role: Developer, Yapper
 * Responsibilities: Yapping, Organising
