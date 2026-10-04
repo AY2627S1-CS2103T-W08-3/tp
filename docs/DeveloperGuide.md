@@ -293,7 +293,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to add a client by providing the name, phone, email, address and optional tags.
+1.  User requests to add a client by entering the name, phone, email, address and optional tags.
 2.  ClientConnect validates the details.
 3.  ClientConnect adds the client and shows a success message with the client's details.
 
@@ -301,7 +301,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. The command format is invalid (e.g. a compulsory prefix such as `n/` is missing).
+* 1a. The command format is invalid 
 
     * 1a1. ClientConnect shows an invalid command format error with the correct usage.
     * 1a2. User re-enters the command with the corrected format.
@@ -309,13 +309,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       Steps 1a1-1a2 are repeated until the command format is valid.
       Use case resumes at step 2.
 
-* 1b. A single-valued prefix (e.g. `n/`) is specified more than once.
-
-    * 1b1. ClientConnect shows an error listing the repeated prefix.
-    * 1b2. User re-enters the command with each single-valued prefix used once.
-
-      Steps 1b1-1b2 are repeated until the command is valid.
-      Use case resumes at step 2.
 
 * 2a. One or more field values are invalid (e.g. a phone number with fewer than 8 digits, or a tag containing spaces).
 
