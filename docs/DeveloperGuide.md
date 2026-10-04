@@ -287,30 +287,171 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+(For all use cases below, the **System** is `ClientConnect` and the **Actor** is the `user` (an insurance agent), unless specified otherwise)
 
-**Use case: Delete a person**
+**Use case: UC1 - Add a new client**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User requests to add a client by entering the name, phone, email, address and optional tags.
+2.  ClientConnect validates the details.
+3.  ClientConnect adds the client and shows a success message with the client's details.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 1a. The command format is invalid 
 
-  Use case ends.
+    * 1a1. ClientConnect shows an invalid command format error with the correct usage.
+    * 1a2. User re-enters the command with the corrected format.
 
-* 3a. The given index is invalid.
+      Steps 1a1-1a2 are repeated until the command format is valid.
+      Use case resumes at step 2.
 
-    * 3a1. AddressBook shows an error message.
+
+* 2a. One or more field values are invalid (e.g. a phone number with fewer than 8 digits, or a tag containing spaces).
+
+    * 2a1. ClientConnect shows the error message for the first invalid field.
+    * 2a2. User re-enters the command with a corrected value.
+
+      Steps 2a1-2a2 are repeated until all values are valid.
+      Use case resumes at step 3.
+
+* 2b. A client with the same name already exists (case-insensitive, ignoring leading and trailing spaces).
+
+    * 2b1. ClientConnect rejects the entry and shows "This client already exists in the address book."
+    * 2b2. User decides to update the existing client instead (see UC4).
+
+      Use case ends.
+
+**Use case: UC2 - Find a client and retrieve their details during a call**
+
+**MSS**
+
+1.  User requests to find clients by entering one or more keywords (a name or a tag).
+2.  ClientConnect shows the matching clients in the list and the number of clients listed.
+3.  User reads the required details from the client's card.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. No keyword is provided.
+
+    * 1a1. ClientConnect shows an invalid command format error with the correct usage.
+    * 1a2. User re-enters the command with at least one keyword.
+
+      Steps 1a1-1a2 are repeated until a keyword is provided.
+      Use case resumes at step 2.
+
+* 2a. No clients match the keywords.
+
+    * 2a1. ClientConnect shows "0 persons listed!" and an empty list.
+    * 2a2. User re-enters the command with different keywords (e.g. an alternative spelling).
+
+      Steps 2a1-2a2 are repeated until at least one client matches.
+      Use case resumes at step 3.
+
+* 2b. Too many clients match to find the right one quickly.
+
+    * 2b1. User re-enters the command with a more specific keyword (e.g. a full name instead of a first name).
 
       Use case resumes at step 2.
+
+* 3a. User wants to return to the full client list.
+
+    * 3a1. User requests to list all clients.
+    * 3a2. ClientConnect shows all clients.
+
+      Use case ends.
+
+**Use case: UC3 - Delete an obsolete client**
+
+**MSS**
+
+1.  User searches for the client to delete (UC2).
+2.  User requests to delete a specific client in the displayed list by its index.
+3.  ClientConnect deletes the client and shows a success message with the deleted client's name.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. The displayed list is empty.
+
+    Use case ends.
+
+* 2a. The index is not a positive integer (e.g. missing, `0`, negative, a decimal or contains letters).
+
+    * 2a1. ClientConnect shows an invalid command format error with the correct usage.
+    * 2a2. User re-enters the command with a valid index.
+
+      Steps 2a1-2a2 are repeated until the index is valid.
+      Use case resumes at step 3.
+
+* 2b. The index is larger than the number of clients displayed.
+
+    * 2b1. ClientConnect shows "The client index provided is invalid."
+    * 2b2. User re-enters the command with an index within the displayed list.
+
+      Steps 2b1-2b2 are repeated until the index is valid.
+      Use case resumes at step 3.
+
+* 2c. User realises that the wrong client is displayed at the chosen index.
+
+    * 2c1. User searches again or lists all clients, then re-enters the delete command with the correct index.
+
+      Use case resumes at step 2.
+
+**Use case: UC4 - Update an existing client's details**
+
+**MSS**
+
+1.  User searches for the client to update (UC2).
+2.  User requests to edit a specific client in the displayed list by its index, providing the fields to change (e.g. a new phone number or additional tags).
+3.  ClientConnect validates the new values.
+4.  ClientConnect updates the client and shows a success message with the updated details.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. The displayed list is empty.
+
+    Use case ends.
+
+* 2a. The index is invalid.
+
+    * 2a1. ClientConnect shows an error message.
+    * 2a2. User re-enters the command with a valid index.
+
+      Steps 2a1-2a2 are repeated until the index is valid.
+      Use case resumes at step 3.
+
+* 2b. No fields to edit are provided.
+
+    * 2b1. ClientConnect shows an error message stating that at least one field must be provided.
+    * 2b2. User re-enters the command with at least one field.
+
+      Steps 2b1-2b2 are repeated until at least one field is provided.
+      Use case resumes at step 3.
+
+* 3a. A provided value is invalid.
+
+    * 3a1. ClientConnect shows the error message for the first invalid field.
+    * 3a2. User re-enters the command with a corrected value.
+
+      Steps 3a1-3a2 are repeated until all values are valid.
+      Use case resumes at step 4.
+
+* 3b. The new name matches another existing client's name (case-insensitive).
+
+    * 3b1. ClientConnect rejects the edit and shows a duplicate client error.
+    * 3b2. User re-enters the command with a different name.
+
+      Steps 3b1-3b2 are repeated until the name is unique.
+      Use case resumes at step 4.
 
 *{More to be added}*
 
