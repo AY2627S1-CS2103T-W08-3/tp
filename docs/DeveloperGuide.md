@@ -261,27 +261,32 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* Insurance advisory agent
+* Oversees a large contact portfolio
+* Highly comfortable with CLI-first, GUI-assisted applications
+* Types quickly and intentionally minimises mouse usage
+* Prefers dedicated, low latency desktop software over browser-based or mobile apps for productivity and lookup
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: A keyboard-driven, ultra-fast desktop address book that empowers insurance agents to manage and search through high volumes of client portfolios, eliminating mouse friction completely.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                     | So that I can…​                                                        |
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `* * *`  | new user                                   | see usage instructions         | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person               |                                                                        |
-| `* * *`  | user                                       | delete a person                | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name          | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details   | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name           | locate a person easily                                                 |
+| Priority | As a …​      | I want to …​                                                  | So that I can…​                                                          |
+| -------- |-----------------|------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| `* * *`  | insurance agent | quickly update client information                                | maintain accurate records of life changes that impact policy coverage needs |
+| `* * *`  | insurance agent | sort clients by key parameters                                   | efficiently structure my daily outreach.                                    |
+| `* * *`  | insurance agent | view a complete list of all my clients                           | scan key metrics and navigate quickly to specific profiles                  |
+| `* * *`  | insurance agent | add a new client with their contact information                  | immediately capture leads and initiate the policy assessment process        |
+| `* * *`  | insurance agent | search clients by name                                           | access their profile immediately during real time client interactions       |
+| `* * *`  | insurance agent | search client by tag                                             | generate target lists for specialised policy reviews                        |
+| `* * *`  | insurance agent | delete client contact                                            | keep my active directory remains free of outdated or redundant contacts     |
+| `* * *`  | insurance agent | assign tags to clients                                           | categorise them according to risk profile and product interest              |
+| `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
+| `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
+| `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
 
 *{More to be added}*
 
