@@ -29,3 +29,6 @@ CLAUDE.md
 
 # Temp files
 _temp/
+
+# Generated output
+/bin/
