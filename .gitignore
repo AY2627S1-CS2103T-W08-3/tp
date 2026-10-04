@@ -30,5 +30,8 @@ CLAUDE.md
 # Temp files
 _temp/
 
-# Generated output
+# Eclipse and generated output
 /bin/
+/.classpath
+/.project
+/.settings/
