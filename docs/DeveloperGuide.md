@@ -261,66 +261,214 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* Insurance advisory agent
+* Oversees a large contact portfolio
+* Highly comfortable with CLI-first, GUI-assisted applications
+* Types quickly and intentionally minimises mouse usage
+* Prefers dedicated, low latency desktop software over browser-based or mobile apps for productivity and lookup
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: A keyboard-driven, ultra-fast desktop address book that empowers insurance agents to manage and search through high volumes of client portfolios, eliminating mouse friction completely.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                     | So that I can…​                                                        |
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `* * *`  | new user                                   | see usage instructions         | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person               |                                                                        |
-| `* * *`  | user                                       | delete a person                | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name          | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details   | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name           | locate a person easily                                                 |
+| Priority | As a …​      | I want to …​                                                  | So that I can…​                                                          |
+| -------- |-----------------|------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| `* * *`  | insurance agent | quickly update client information                                | maintain accurate records of life changes that impact policy coverage needs |
+| `* * *`  | insurance agent | sort clients by key parameters                                   | efficiently structure my daily outreach.                                    |
+| `* * *`  | insurance agent | view a complete list of all my clients                           | scan key metrics and navigate quickly to specific profiles                  |
+| `* * *`  | insurance agent | add a new client with their contact information                  | immediately capture leads and initiate the policy assessment process        |
+| `* * *`  | insurance agent | search clients by name                                           | access their profile immediately during real time client interactions       |
+| `* * *`  | insurance agent | search client by tag                                             | generate target lists for specialised policy reviews                        |
+| `* * *`  | insurance agent | delete client contact                                            | keep my active directory remains free of outdated or redundant contacts     |
+| `* * *`  | insurance agent | assign tags to clients                                           | categorise them according to risk profile and product interest              |
+| `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
+| `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
+| `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
 
 *{More to be added}*
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+(For all use cases below, the **System** is `ClientConnect` and the **Actor** is the `user` (an insurance agent), unless specified otherwise)
 
-**Use case: Delete a person**
+**Use case: UC1 - Add a new client**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User requests to add a client by entering the name, phone, email, address and optional tags.
+2.  ClientConnect validates the details.
+3.  ClientConnect adds the client and shows a success message with the client's details.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 1a. The command format is invalid 
 
-  Use case ends.
+    * 1a1. ClientConnect shows an invalid command format error with the correct usage.
+    * 1a2. User re-enters the command with the corrected format.
 
-* 3a. The given index is invalid.
+      Steps 1a1-1a2 are repeated until the command format is valid.
+      Use case resumes at step 2.
 
-    * 3a1. AddressBook shows an error message.
+
+* 2a. One or more field values are invalid (e.g. a phone number with fewer than 8 digits, or a tag containing spaces).
+
+    * 2a1. ClientConnect shows the error message for the first invalid field.
+    * 2a2. User re-enters the command with a corrected value.
+
+      Steps 2a1-2a2 are repeated until all values are valid.
+      Use case resumes at step 3.
+
+* 2b. A client with the same name already exists (case-insensitive, ignoring leading and trailing spaces).
+
+    * 2b1. ClientConnect rejects the entry and shows "This client already exists in the address book."
+    * 2b2. User decides to update the existing client instead (see UC4).
+
+      Use case ends.
+
+**Use case: UC2 - Find a client and retrieve their details during a call**
+
+**MSS**
+
+1.  User requests to find clients by entering one or more keywords (a name or a tag).
+2.  ClientConnect shows the matching clients in the list and the number of clients listed.
+3.  User reads the required details from the client's card.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. No keyword is provided.
+
+    * 1a1. ClientConnect shows an invalid command format error with the correct usage.
+    * 1a2. User re-enters the command with at least one keyword.
+
+      Steps 1a1-1a2 are repeated until a keyword is provided.
+      Use case resumes at step 2.
+
+* 2a. No clients match the keywords.
+
+    * 2a1. ClientConnect shows "0 persons listed!" and an empty list.
+    * 2a2. User re-enters the command with different keywords (e.g. an alternative spelling).
+
+      Steps 2a1-2a2 are repeated until at least one client matches.
+      Use case resumes at step 3.
+
+* 2b. Too many clients match to find the right one quickly.
+
+    * 2b1. User re-enters the command with a more specific keyword (e.g. a full name instead of a first name).
 
       Use case resumes at step 2.
+
+* 3a. User wants to return to the full client list.
+
+    * 3a1. User requests to list all clients.
+    * 3a2. ClientConnect shows all clients.
+
+      Use case ends.
+
+**Use case: UC3 - Delete an obsolete client**
+
+**MSS**
+
+1.  User searches for the client to delete (UC2).
+2.  User requests to delete a specific client in the displayed list by its index.
+3.  ClientConnect deletes the client and shows a success message with the deleted client's name.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. The displayed list is empty.
+
+    Use case ends.
+
+* 2a. The index is not a positive integer (e.g. missing, `0`, negative, a decimal or contains letters).
+
+    * 2a1. ClientConnect shows an invalid command format error with the correct usage.
+    * 2a2. User re-enters the command with a valid index.
+
+      Steps 2a1-2a2 are repeated until the index is valid.
+      Use case resumes at step 3.
+
+* 2b. The index is larger than the number of clients displayed.
+
+    * 2b1. ClientConnect shows "The client index provided is invalid."
+    * 2b2. User re-enters the command with an index within the displayed list.
+
+      Steps 2b1-2b2 are repeated until the index is valid.
+      Use case resumes at step 3.
+
+* 2c. User realises that the wrong client is displayed at the chosen index.
+
+    * 2c1. User searches again or lists all clients, then re-enters the delete command with the correct index.
+
+      Use case resumes at step 2.
+
+**Use case: UC4 - Update an existing client's details**
+
+**MSS**
+
+1.  User searches for the client to update (UC2).
+2.  User requests to edit a specific client in the displayed list by its index, providing the fields to change (e.g. a new phone number or additional tags).
+3.  ClientConnect validates the new values.
+4.  ClientConnect updates the client and shows a success message with the updated details.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. The displayed list is empty.
+
+    Use case ends.
+
+* 2a. The index is invalid.
+
+    * 2a1. ClientConnect shows an error message.
+    * 2a2. User re-enters the command with a valid index.
+
+      Steps 2a1-2a2 are repeated until the index is valid.
+      Use case resumes at step 3.
+
+* 2b. No fields to edit are provided.
+
+    * 2b1. ClientConnect shows an error message stating that at least one field must be provided.
+    * 2b2. User re-enters the command with at least one field.
+
+      Steps 2b1-2b2 are repeated until at least one field is provided.
+      Use case resumes at step 3.
+
+* 3a. A provided value is invalid.
+
+    * 3a1. ClientConnect shows the error message for the first invalid field.
+    * 3a2. User re-enters the command with a corrected value.
+
+      Steps 3a1-3a2 are repeated until all values are valid.
+      Use case resumes at step 4.
+
+* 3b. The new name matches another existing client's name (case-insensitive).
+
+    * 3b1. ClientConnect rejects the edit and shows a duplicate client error.
+    * 3b2. User re-enters the command with a different name.
+
+      Steps 3b1-3b2 are repeated until the name is unique.
+      Use case resumes at step 4.
 
 *{More to be added}*
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-
-*{More to be added}*
+1.  The application should work on any _mainstream OS_ with Java `25` or above installed.
+2.  With up to 1000 client records, adding, editing, finding, deleting, and listing records should each complete within 2 seconds on a computer with at least a dual-core processor and 8 GB of RAM.
+3.  An insurance agent should be able to complete the core client-management tasks (add, edit, find, list, and delete) using only the keyboard, without needing to use a mouse.
+4.  The command input and search results should remain usable through keyboard navigation, including when a search returns multiple clients.
+5.  The application should save each successful change to client data automatically, and saved data should remain available after the application is closed and reopened.
+6.  Invalid commands or invalid client data should show an actionable error message without changing existing client records.
+7.  The application should be usable without an internet connection and should not transmit client data to an external service during normal use.
 
 ### Glossary
 
