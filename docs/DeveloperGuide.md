@@ -263,7 +263,7 @@ _{Explain here how the data archiving feature will be implemented}_
 
 * Insurance advisory agent
 * Oversees a large contact portfolio
-* Highly comfortable with CLI applications
+* Highly comfortable with GUI applications
 * Types quickly and intentionally minimises mouse usage
 * Prefers dedicated, low latency desktop software over browser-based or mobile apps for productivity and lookup
 
