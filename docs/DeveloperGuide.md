@@ -316,11 +316,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-
-*{More to be added}*
+1.  The application should work on any _mainstream OS_ with Java `25` or above installed.
+2.  With up to 1000 client records, adding, editing, finding, deleting, and listing records should each complete within 2 seconds on a computer with at least a dual-core processor and 8 GB of RAM.
+3.  An insurance agent should be able to complete the core client-management tasks (add, edit, find, list, and delete) using only the keyboard, without needing to use a mouse.
+4.  The command input and search results should remain usable through keyboard navigation, including when a search returns multiple clients.
+5.  The application should save each successful change to client data automatically, and saved data should remain available after the application is closed and reopened.
+6.  Invalid commands or invalid client data should show an actionable error message without changing existing client records.
+7.  The application should be usable without an internet connection and should not transmit client data to an external service during normal use.
 
 ### Glossary
 
