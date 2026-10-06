@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug AB3 (Main)",
+            "request": "launch",
+            "mainClass": "seedu.address.Main",
+            "projectName": "tp"
+        }
+    ]
+}
