@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
@@ -17,6 +18,7 @@ import seedu.address.model.tag.Tag;
 public class Person {
 
     // Identity fields
+    private final UUID uuid;
     private final Name name;
     private final Phone phone;
     private final Email email;
@@ -26,15 +28,35 @@ public class Person {
     private final Set<Tag> tags = new HashSet<>();
 
     /**
-     * Every field must be present and not null.
+     * Every field must be present and not null. A fresh UUID is generated for this person.
      */
     public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
+        this(UUID.randomUUID(), name, phone, email, address, tags);
+    }
+
+    /**
+     * Every field must be present and not null. Used when the UUID is already known,
+     * e.g. when reconstructing a person loaded from storage.
+     */
+    public Person(UUID uuid, Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
+        requireAllNonNull(uuid, name, phone, email, address, tags);
+        this.uuid = uuid;
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.tags.addAll(tags);
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Returns the first 7 characters of this person's UUID, for compact display.
+     */
+    public String getShortUuid() {
+        return uuid.toString().substring(0, 7);
     }
 
     public Name getName() {
