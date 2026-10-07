@@ -132,6 +132,13 @@
     -fx-text-fill: #010504;
 }
 
+.cell_uuid_label {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #888888;
+}
+
 .stack-pane {
      -fx-background-color: derive(#1d1d1d, 20%);
 }
