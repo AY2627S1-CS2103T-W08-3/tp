@@ -1,4 +1,4 @@
-[![CI Status](https://github.com/se-edu/addressbook-level3/workflows/Java%20CI/badge.svg)](https://github.com/se-edu/addressbook-level3/actions)
+[![Build Status](https://github.com/AY2627S1-CS2103T-W08-3/tp/actions/workflows/gradle.yml/badge.svg)](https://github.com/AY2627S1-CS2103T-W08-3/tp/actions/workflows/gradle.yml)
 
 ![Ui](docs/images/Ui.png)
 
@@ -13,4 +13,3 @@
 * Why hestitate? Use **ClientConnect** and bring your client connections to another level!
   * To download the latest release of ClientConnect, go to **[ClientConnect Releases Page](https://github.com/AY2627S1-CS2103T-W08-3/tp/releases)**.
   * For the detailed documentation for this project, see the **[ClientConnect Documentation Website](https://ay2627s1-cs2103t-w08-3.github.io/tp/)**.
-
