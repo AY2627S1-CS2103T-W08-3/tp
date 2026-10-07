@@ -55,4 +55,16 @@ public class NameOrTagContainsKeywordsPredicateTest {
         assertFalse(predicate.equals(new NameOrTagContainsKeywordsPredicate(List.of("Bob"), List.of("friends"))));
         assertFalse(predicate.equals(new NameOrTagContainsKeywordsPredicate(List.of("Alice"), List.of("colleagues"))));
     }
+
+    @Test
+    public void toStringMethod() {
+        NameOrTagContainsKeywordsPredicate predicate = new NameOrTagContainsKeywordsPredicate(
+                List.of("Alice"), List.of("friends"));
+
+        String expected = NameOrTagContainsKeywordsPredicate.class.getCanonicalName()
+                + "{namePredicate=" + new NameContainsKeywordsPredicate(List.of("Alice"))
+                + ", tagKeywords=[friends]}";
+
+        assertEquals(expected, predicate.toString());
+    }
 }
