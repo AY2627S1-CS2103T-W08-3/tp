@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
@@ -11,6 +12,7 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.parser.ParserUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -43,6 +45,28 @@ public class RemarkCommandTest {
         assertCommandSuccess(command, model,
                 String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
                         Messages.format(editedPerson)), expectedModel);
+    }
+
+    @Test
+    public void execute_emptyRemark_success() throws ParseException {
+        final Remark remark = ParserUtil.parseRemark("");
+        RemarkCommand command = new RemarkCommand(INDEX_FIRST_PERSON, remark);
+        Person originalPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
+        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        expectedModel.setPerson(originalPerson, editedPerson);
+
+        assertCommandSuccess(command, model,
+                String.format(RemarkCommand.MESSAGE_DELETE_REMARK_SUCCESS,
+                        Messages.format(editedPerson)), expectedModel);
+    }
+
+    @Test
+    public void execute_invalidIndex_failure() throws ParseException {
+        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        RemarkCommand command = new RemarkCommand(outOfBoundIndex, ParserUtil.parseRemark("Some remark"));
+
+        assertCommandFailure(command, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
     }
 
     @Test
