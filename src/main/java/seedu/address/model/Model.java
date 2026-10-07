@@ -1,5 +1,6 @@
 package seedu.address.model;
 
+import java.util.Comparator;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -68,4 +69,10 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /**
+     * Updates the displayed person order using {@code comparator}.
+     * A null comparator restores the underlying address book order.
+     */
+    void updatePersonListComparator(Comparator<Person> comparator);
 }
