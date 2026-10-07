@@ -26,6 +26,7 @@ AGENTS.md
 CLAUDE.md
 /.claude/
 /.codex/
+/.agents/
 
 # Temp files
 _temp/
