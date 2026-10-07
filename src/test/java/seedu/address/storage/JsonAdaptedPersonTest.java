@@ -1,6 +1,7 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static seedu.address.storage.JsonAdaptedPerson.MISSING_FIELD_MESSAGE_FORMAT;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.BENSON;
@@ -43,6 +44,14 @@ public class JsonAdaptedPersonTest {
     public void toModelType_preservesUuid_returnsPersonWithSameUuid() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(BENSON);
         assertEquals(BENSON.getUuid(), person.toModelType().getUuid());
+    }
+
+    @Test
+    public void toModelType_nullUuid_generatesUuid() throws Exception {
+        // A legacy save with no uuid should still load, with a freshly generated uuid.
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(null, VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+        assertNotNull(person.toModelType().getUuid());
     }
 
     @Test
