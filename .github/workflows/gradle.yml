@@ -29,12 +29,16 @@ jobs:
           java-package: jdk+fx
 
       - name: Build and check with Gradle
-        run: |
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            xvfb-run ./gradlew check coverage
-          else
-            ./gradlew check coverage
-          fi
+        if: runner.os == 'Linux'
+        run: xvfb-run ./gradlew check coverage
+
+      - name: Build and check with Gradle (macOS)
+        if: runner.os == 'macOS'
+        run: ./gradlew check coverage
+
+      - name: Build and check with Gradle (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat check coverage
 
       - name: Upload coverage reports to Codecov
         if: runner.os == 'Linux'
