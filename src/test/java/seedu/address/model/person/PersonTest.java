@@ -98,7 +98,7 @@ public class PersonTest {
     public void hashCode_sameValues_returnsSameHashCode() {
         Person aliceCopy = new PersonBuilder(ALICE).build();
         assertEquals(ALICE.hashCode(), aliceCopy.hashCode());
-    
+
     @Test
     public void getShortUuid_returnsFirstSevenCharactersOfUuid() {
         // ALICE's UUID is "aaaaaaaa-0000-0000-0000-000000000000"
