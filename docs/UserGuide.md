@@ -109,20 +109,32 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
-### Locating persons by name: `find`
+### Locating persons by name or tag: `find`
 
-Finds persons whose names contain any of the given keywords.
+Finds persons whose names contain any given name keyword or whose tags match any given tag.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`
+
+Supply at least one name keyword or tag. Put name keywords before any `t/` prefixes.
 
 * The search is case-insensitive; for example, `hans` matches `Hans`.
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
-* The search considers only names.
+* Keywords without a prefix search only names. Each `t/TAG` searches only tags.
 * Only full words match; for example, `Han` does not match `Hans`.
+* Tags are case-insensitive and must match completely; `t/friends` matches `Friends` but not `bestfriends`.
+  Use one `t/` prefix per tag. Empty tags and tags containing spaces or punctuation are invalid.
 * Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+* OR matching is automatic when you enter multiple keywords; separate them with spaces.
+  This helps when you misremember part of a name, as only one keyword needs to match.
+* Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
 Examples:
 * `find John` returns `john` and `John Doe`
+* `find Alice Richards` returns `Alice Davidson` and `Alison Richards`, if present,
+  because either `Alice` or `Richards` matches. It also returns `Alice Richards`, if present.
+* `find t/friends` returns persons tagged `friends`.
+* `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
+* `find Alice t/friends` returns persons whose names contain `Alice` or who have the `friends` tag.
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
@@ -193,6 +205,6 @@ Action | Format, Examples
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
-**Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
 **Help** | `help`

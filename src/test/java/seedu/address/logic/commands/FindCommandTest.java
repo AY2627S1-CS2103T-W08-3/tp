@@ -14,10 +14,16 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) for {@code FindCommand}.
@@ -71,6 +77,56 @@ public class FindCommandTest {
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(List.of(CARL, ELLE, FIONA), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_misrememberedName_matchesEitherWholeWord() throws ParseException, CommandException {
+        Person aliceDavidson = new PersonBuilder().withName("Alice Davidson").build();
+        Person alisonRichards = new PersonBuilder().withName("Alison Richards").build();
+        Person aliceRichards = new PersonBuilder().withName("Alice Richards").build();
+        Person alisonRichardson = new PersonBuilder().withName("Alison Richardson").build();
+        AddressBook addressBook = new AddressBook();
+        addressBook.addPerson(aliceDavidson);
+        addressBook.addPerson(alisonRichards);
+        addressBook.addPerson(aliceRichards);
+        addressBook.addPerson(alisonRichardson);
+        Model searchModel = new ModelManager(addressBook, new UserPrefs());
+        Command command = new AddressBookParser().parseCommand("find aLIce rICHards");
+
+        CommandResult result = command.execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 3), result.getFeedbackToUser());
+        assertEquals(List.of(aliceDavidson, alisonRichards, aliceRichards), searchModel.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_namesAndTags_matchesAnyTermWithoutDuplicates() throws ParseException, CommandException {
+        Person nameMatch = new PersonBuilder().withName("Alice Davidson").build();
+        Person tagMatch = new PersonBuilder().withName("Alison Richards").withTags("FRIENDS").build();
+        Person bothMatch = new PersonBuilder().withName("Alice Richards").withTags("colleagues").build();
+        Person noMatch = new PersonBuilder().withName("Bob Smith").withTags("friendship").build();
+        AddressBook addressBook = new AddressBook();
+        addressBook.addPerson(nameMatch);
+        addressBook.addPerson(tagMatch);
+        addressBook.addPerson(bothMatch);
+        addressBook.addPerson(noMatch);
+        Model searchModel = new ModelManager(addressBook, new UserPrefs());
+        AddressBookParser parser = new AddressBookParser();
+
+        CommandResult mixedResult = parser.parseCommand("find Alice t/friends t/colleagues").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 3), mixedResult.getFeedbackToUser());
+        assertEquals(List.of(nameMatch, tagMatch, bothMatch), searchModel.getFilteredPersonList());
+
+        CommandResult tagsResult = parser.parseCommand("find t/friends t/colleagues").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 2), tagsResult.getFeedbackToUser());
+        assertEquals(List.of(tagMatch, bothMatch), searchModel.getFilteredPersonList());
+
+        CommandResult noMatchResult = parser.parseCommand("find t/family").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0), noMatchResult.getFeedbackToUser());
+        assertEquals(List.of(), searchModel.getFilteredPersonList());
     }
 
     @Test
