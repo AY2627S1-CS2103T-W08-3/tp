@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.NameOrTagContainsKeywordsPredicate;
+import seedu.address.model.tag.Tag;
 
 public class FindCommandParserTest {
 
@@ -29,6 +31,31 @@ public class FindCommandParserTest {
 
         // multiple whitespaces between keywords
         assertParseSuccess(parser, " \n Alice \n \t Bob  \t", expectedFindCommand);
+    }
+
+    @Test
+    public void parse_tags_returnsFindCommand() {
+        FindCommand expectedCommand = new FindCommand(
+                new NameOrTagContainsKeywordsPredicate(List.of(), List.of("friends", "colleagues")));
+        assertParseSuccess(parser, "t/friends t/colleagues", expectedCommand);
+        assertParseSuccess(parser, " \t t/friends\n\t t/colleagues ", expectedCommand);
+    }
+
+    @Test
+    public void parse_namesAndTags_returnsFindCommand() {
+        FindCommand expectedCommand = new FindCommand(
+                new NameOrTagContainsKeywordsPredicate(List.of("Alice", "Richards"), List.of("friends")));
+        assertParseSuccess(parser, "Alice Richards t/friends", expectedCommand);
+        assertParseSuccess(parser, " Alice\t Richards\n t/friends ", expectedCommand);
+    }
+
+    @Test
+    public void parse_invalidTag_throwsParseException() {
+        assertParseFailure(parser, "t/", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "Alice t/", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "t/friends t/", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "t/friends!", Tag.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "t/friends colleagues", Tag.MESSAGE_CONSTRAINTS);
     }
 
 }

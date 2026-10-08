@@ -24,8 +24,10 @@ docs/_site/
 # AI Agents
 AGENTS.md
 CLAUDE.md
+/.agents/
 /.claude/
 /.codex/
+/.agents/
 
 # Temp files
 _temp/

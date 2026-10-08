@@ -57,6 +57,13 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void add_personWithNameDifferingInCase_throwsDuplicatePersonException() {
+        uniquePersonList.add(ALICE);
+        Person personWithSameName = new PersonBuilder(ALICE).withName(ALICE.getName().fullName.toLowerCase()).build();
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.add(personWithSameName));
+    }
+
+    @Test
     public void setPerson_nullTargetPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniquePersonList.setPerson(null, ALICE));
     }
