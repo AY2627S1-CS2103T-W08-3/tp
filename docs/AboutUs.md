@@ -15,8 +15,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](https://github.com/somawa)]
 
-* Role: Developer
-* Responsibilities: UI
+* Role: Developer, Head of Documentation
+* Responsibilities: UI, In Charge of Remark Command
 
 ### Sakthi
 
@@ -24,8 +24,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](http://github.com/Sakthi-dev-tech)]
 
-* Role: Developer
-* Responsibilities: Backend
+* Role: Developer, Head of Code Quality
+* Responsibilities: Backend, In Charge of Find Command
 
 ### Lin Bo-Ruei
 
@@ -33,8 +33,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 [[github](http://github.com/spoinornus)]
 
-* Role: Developer, Yapper
-* Responsibilities: Yapping, Organising
+* Role: Developer, Yapper, Head of Deliverables and Deadlines
+* Responsibilities: Yapping, Organising, In Charge of Add Command
 
 ### Edmund Tan
 
@@ -43,8 +43,8 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](https://github.com/EdmundTan37)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Developer
-* Responsibilities: Dev Ops + Threading
+* Role: Developer, Head of Scheduling and Tracking
+* Responsibilities: Dev Ops, Threading, In Charge of Sort Command
 
 ### Koh Yu Jun
 
@@ -53,5 +53,5 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](https://github.com/yjenexd)]
 [[portfolio](team/johndoe.md)]
 
-* Role: Celery Worker
-* Responsibilities: Full Stack
+* Role: Celery Worker, Testing/QCE Specialist
+* Responsibilities: Full Stack, In Charge of Delete Command
