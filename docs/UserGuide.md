@@ -93,6 +93,12 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+### Sorting all persons alphabetically: `sort`
+
+Displays the list of all persons in the address book, sorted ascending alphabetically.
+
+Format: `sort`
+
 ### Editing a person: `edit`
 
 Edits an existing person in the address book.
@@ -207,4 +213,5 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
+**Sort** | `sort`
 **Help** | `help`
