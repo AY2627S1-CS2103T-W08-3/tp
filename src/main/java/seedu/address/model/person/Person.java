@@ -31,8 +31,8 @@ public class Person {
     /**
      * Every field must be present and not null. A fresh UUID is generated for this person.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Remark, Set<Tag> tags) {
-        this(UUID.randomUUID(), name, phone, email, address, Remark, tags);
+    public Person(Name name, Phone phone, Email email, Address address, Remark remark, Set<Tag> tags) {
+        this(UUID.randomUUID(), name, phone, email, address, remark, tags);
     }
 
     /**
