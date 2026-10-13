@@ -115,6 +115,22 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
+### Name typo warnings
+
+When adding a person or editing a person's name, AddressBook compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match.
+
+The comparison:
+
+* ignores leading and trailing spaces, repeated internal spaces, and letter case;
+* preserves punctuation when comparing names;
+* requires at least three characters and uses a stricter similarity requirement for short names;
+* checks only the person's name, not phone numbers, email addresses, addresses, remarks, or tags; and
+* does not warn for a case-only match, an exact duplicate, or the person currently being edited.
+
+Additional or misplaced spaces are flagged separately. For example, `John  Smith` may warn about the existing `John Smith`.
+
+The warning is advisory only. The add or edit command is still completed and the input is saved; AddressBook does not ask for confirmation. If the warning identifies the intended existing person, review the result and correct it with another command if necessary. If the new entry is intentional, no further action is required.
+
 ### Locating persons by name or tag: `find`
 
 Finds persons whose names contain any given name keyword or whose tags match any given tag.
