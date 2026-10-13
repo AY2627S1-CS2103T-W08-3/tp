@@ -147,6 +147,25 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_nameWithSlash_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withName("Peter s/o Tan").withTags().build();
+        String nameWithSlash = " " + PREFIX_NAME + "Peter s/o Tan";
+
+        assertParseSuccess(parser, nameWithSlash + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_nameWithDaughterOrSonNotation_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withName("Jane d/o Mary").withTags().build();
+        String nameWithDaughterOrSonNotation = " " + PREFIX_NAME + "Jane d/o Mary";
+
+        assertParseSuccess(parser,
+                nameWithDaughterOrSonNotation + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_phoneWithLettersSpacesParenthesesAndHyphens_success() {
         String phoneWithLabels = "1234 5678 (HP) 1111-3333 (Office)";
         Person expectedPerson = new PersonBuilder(BOB).withPhone(phoneWithLabels).withTags().build();

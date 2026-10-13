@@ -79,7 +79,11 @@ Adds a person to the address book.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
 
-Names may contain alphanumeric characters, spaces, and parentheses.
+Names may contain alphanumeric characters, spaces, parentheses, and slashes. For example, `John s/o Peter`.
+
+If a name contains `/`, avoid placing a recognized field prefix such as `p/`, `e/`, or `a/` after a space within
+the name. The parser may interpret it as a separate field instead of part of the name. For example, `s/o` is safe,
+but `p/` within a name may be interpreted as the phone field.
 
 Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens. For example:
 `1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.

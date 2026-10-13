@@ -45,6 +45,7 @@ public class EditCommand extends Command {
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_TAG + "TAG]...\n"
+            + "Names may contain alphanumeric characters, spaces, parentheses, and slashes.\n"
             + "Phone numbers must contain at least one letter or digit and may include "
             + "spaces, parentheses, and hyphens.\n"
             + "Email addresses may be separated or annotated with spaces and parentheses.\n"
