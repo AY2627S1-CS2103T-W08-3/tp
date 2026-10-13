@@ -45,9 +45,12 @@ public class EditCommand extends Command {
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_TAG + "TAG]...\n"
+            + "Phone numbers must contain at least one letter or digit and may include "
+            + "spaces, parentheses, and hyphens.\n"
+            + "Email addresses may be separated or annotated with spaces and parentheses.\n"
             + "Example: " + COMMAND_WORD + " 1 "
-            + PREFIX_PHONE + "91234567 "
-            + PREFIX_EMAIL + "johndoe@example.com";
+            + PREFIX_PHONE + "1234 5678 (HP) 1111-3333 (Office) "
+            + PREFIX_EMAIL + "johndoe@example.com (Work) jane@example.com (Personal)";
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited person: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";

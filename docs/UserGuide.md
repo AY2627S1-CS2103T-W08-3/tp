@@ -79,12 +79,20 @@ Adds a person to the address book.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
 
+Names may contain alphanumeric characters, spaces, and parentheses.
+
+Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens. For example:
+`1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
+
+Email addresses may be separated or annotated with spaces and parentheses. For example:
+`peter@example.com (Work) jane@example.com (Personal)`.
+
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.
 </div>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
+* `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 
 ### Listing all persons: `list`
@@ -104,6 +112,10 @@ Format: `sort`
 Edits an existing person in the address book.
 
 Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
+
+Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens.
+
+Email addresses may be separated or annotated with spaces and parentheses.
 
 * Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.
