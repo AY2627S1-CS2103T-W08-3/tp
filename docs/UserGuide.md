@@ -32,6 +32,8 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
+   * `remark 1 r/Likes to swim.` : Adds a remark to the 1st person.
+
    * `clear` : Deletes all contacts.
 
    * `exit` : Exits the app.
@@ -79,12 +81,24 @@ Adds a person to the address book.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
 
+Names may contain alphanumeric characters, spaces, parentheses, and slashes. For example, `John s/o Peter`.
+
+If a name contains `/`, avoid placing a recognized field prefix such as `p/`, `e/`, or `a/` after a space within
+the name. The parser may interpret it as a separate field instead of part of the name. For example, `s/o` is safe,
+but `p/` within a name may be interpreted as the phone field.
+
+Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens. For example:
+`1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
+
+Email addresses may be separated or annotated with spaces and parentheses. For example:
+`peter@example.com (Work) jane@example.com (Personal)`.
+
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.
 </div>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
+* `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 
 ### Listing all persons: `list`
@@ -95,15 +109,21 @@ Format: `list`
 
 ### Sorting all persons alphabetically: `sort`
 
-Displays the list of all persons in the address book, sorted ascending alphabetically.
+Displays all persons alphabetically by name, ignoring capitalization.
+Use `A-Z` for ascending order or `Z-A` for descending order.
+Missing or invalid parameters produce an error without changing the displayed list.
 
-Format: `sort`
+Format: `sort A-Z` or `sort Z-A`
 
 ### Editing a person: `edit`
 
 Edits an existing person in the address book.
 
 Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
+
+Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens.
+
+Email addresses may be separated or annotated with spaces and parentheses.
 
 * Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.
@@ -114,6 +134,36 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+
+### Adding or removing a remark: `remark`
+
+Adds or updates a remark for an existing person in the address book. The existing remark will be overwritten.
+
+Format: `remark INDEX r/REMARK`
+
+* Updates the remark of the person at the specified `INDEX`.
+* The index refers to the index number shown in the displayed person list.
+* The index **must be a positive integer** 1, 2, 3, …​
+* To remove an existing remark, enter `r/` without any text after it.
+
+Examples:
+* `remark 1 r/Likes to swim.` adds a remark to the 1st person.
+* `remark 2 r/` removes the remark from the 2nd person.
+### Name typo warnings
+
+When adding a person or editing a person's name, AddressBook compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match.
+
+The comparison:
+
+* ignores leading and trailing spaces, repeated internal spaces, and letter case;
+* preserves punctuation when comparing names;
+* requires at least three characters and uses a stricter similarity requirement for short names;
+* checks only the person's name, not phone numbers, email addresses, addresses, remarks, or tags; and
+* does not warn for a case-only match, an exact duplicate, or the person currently being edited.
+
+Additional or misplaced spaces are flagged separately. For example, `John  Smith` may warn about the existing `John Smith`.
+
+The warning is advisory only. The add or edit command is still completed and the input is saved; AddressBook does not ask for confirmation. If the warning identifies the intended existing person, review the result and correct it with another command if necessary. If the new entry is intentional, no further action is required.
 
 ### Locating persons by name or tag: `find`
 
@@ -126,7 +176,7 @@ Supply at least one name keyword or tag. Put name keywords before any `t/` prefi
 * The search is case-insensitive; for example, `hans` matches `Hans`.
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
 * Keywords without a prefix search only names. Each `t/TAG` searches only tags.
-* Only full words match; for example, `Han` does not match `Hans`.
+* Name keywords match any part of a name; for example, `Han` matches `Hans` and `Johann`.
 * Tags are case-insensitive and must match completely; `t/friends` matches `Friends` but not `bestfriends`.
   Use one `t/` prefix per tag. Empty tags and tags containing spaces or punctuation are invalid.
 * Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
@@ -213,5 +263,6 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
-**Sort** | `sort`
+**Sort** | `sort A-Z` or `sort Z-A`
+**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 1 r/Likes to swim.`
 **Help** | `help`
