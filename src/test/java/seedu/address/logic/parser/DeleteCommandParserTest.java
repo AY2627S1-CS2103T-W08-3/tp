@@ -26,7 +26,23 @@ public class DeleteCommandParserTest {
     }
 
     @Test
+    public void parse_validShortUuid_returnsDeleteCommand() {
+        assertParseSuccess(parser, "1a2b3c4", new DeleteCommand("1a2b3c4"));
+    }
+
+    @Test
+    public void parse_uppercaseShortUuid_normalisedToLowercase() {
+        assertParseSuccess(parser, "1A2B3C4", new DeleteCommand("1a2b3c4"));
+    }
+
+    @Test
     public void parse_invalidArgs_throwsParseException() {
         assertParseFailure(parser, "a", String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_nonHexSevenChars_throwsParseException() {
+        assertParseFailure(parser, "123456g", String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                DeleteCommand.MESSAGE_USAGE));
     }
 }
