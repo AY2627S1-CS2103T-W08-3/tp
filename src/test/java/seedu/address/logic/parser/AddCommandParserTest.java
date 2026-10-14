@@ -138,6 +138,63 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_nameWithParentheses_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withName("Peter (Pete) Tan").withTags().build();
+        String nameWithParentheses = " " + PREFIX_NAME + "Peter (Pete) Tan";
+
+        assertParseSuccess(parser, nameWithParentheses + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_nameWithSlash_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withName("Peter s/o Tan").withTags().build();
+        String nameWithSlash = " " + PREFIX_NAME + "Peter s/o Tan";
+
+        assertParseSuccess(parser, nameWithSlash + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_nameWithDaughterOrSonNotation_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withName("Jane d/o Mary").withTags().build();
+        String nameWithDaughterOrSonNotation = " " + PREFIX_NAME + "Jane d/o Mary";
+
+        assertParseSuccess(parser,
+                nameWithDaughterOrSonNotation + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_phoneWithLettersSpacesParenthesesAndHyphens_success() {
+        String phoneWithLabels = "1234 5678 (HP) 1111-3333 (Office)";
+        Person expectedPerson = new PersonBuilder(BOB).withPhone(phoneWithLabels).withTags().build();
+        String phoneDescription = " " + PREFIX_PHONE + phoneWithLabels;
+
+        assertParseSuccess(parser, NAME_DESC_BOB + phoneDescription + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_unknownPhone_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withPhone("Unknown").withTags().build();
+        String phoneDescription = " " + PREFIX_PHONE + "Unknown";
+
+        assertParseSuccess(parser, NAME_DESC_BOB + phoneDescription + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_emailWithSpacesAndParentheses_success() {
+        String emailWithLabels = "peter@example.com (Work) jane@example.com (Personal)";
+        Person expectedPerson = new PersonBuilder(BOB).withEmail(emailWithLabels).withTags().build();
+        String emailDescription = " " + PREFIX_EMAIL + emailWithLabels;
+
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + emailDescription + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_compulsoryFieldMissing_failure() {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
 
