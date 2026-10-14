@@ -1,6 +1,7 @@
 package seedu.address.model;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -47,6 +48,13 @@ public interface Model {
      * The person must exist in the address book.
      */
     void deletePerson(Person target);
+
+    /**
+     * Returns all persons whose short UUID matches {@code shortUuid}, searching the
+     * entire address book rather than only the filtered list. The match is a
+     * case-insensitive prefix match against each person's UUID.
+     */
+    List<Person> getPersonsByShortUuid(String shortUuid);
 
     /**
      * Adds the given person.
