@@ -3,7 +3,6 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class SortCommandTest {
         new SortCommand(SortCommand.SortOrder.DESCENDING).execute(model);
         assertEquals(List.of(zoe, bob, alice), model.getFilteredPersonList());
         assertEquals(List.of(zoe, alice, bob), model.getAddressBook().getPersonList());
-        new DeleteCommand(INDEX_FIRST_PERSON).execute(model);
+        new DeleteCommand(zoe.getShortUuid()).execute(model);
         assertEquals(List.of(bob, alice), model.getFilteredPersonList());
         new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
         assertEquals(List.of(alice, bob), model.getFilteredPersonList());
@@ -64,10 +63,10 @@ public class SortCommandTest {
     }
 
     @Test
-    public void execute_sortedContacts_indexCommandsUseDisplayedOrder() throws Exception {
+    public void execute_sortedContacts_deleteByUuidRemovesCorrectPerson() throws Exception {
         Model model = createModel();
         new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
-        new DeleteCommand(INDEX_FIRST_PERSON).execute(model);
+        new DeleteCommand(alice.getShortUuid()).execute(model);
         assertEquals(List.of(bob, zoe), model.getFilteredPersonList());
         assertEquals(List.of(zoe, bob), model.getAddressBook().getPersonList());
     }
