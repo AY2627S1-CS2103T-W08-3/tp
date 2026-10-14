@@ -95,9 +95,11 @@ Format: `list`
 
 ### Sorting all persons alphabetically: `sort`
 
-Displays the list of all persons in the address book, sorted ascending alphabetically.
+Displays all persons alphabetically by name, ignoring capitalization.
+Use `A-Z` for ascending order or `Z-A` for descending order.
+Missing or invalid parameters produce an error without changing the displayed list.
 
-Format: `sort`
+Format: `sort A-Z` or `sort Z-A`
 
 ### Editing a person: `edit`
 
@@ -213,5 +215,5 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
-**Sort** | `sort`
+**Sort** | `sort A-Z` or `sort Z-A`
 **Help** | `help`

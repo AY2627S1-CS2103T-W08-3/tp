@@ -25,12 +25,25 @@ public class SortCommandTest {
     private final Person bob = new PersonBuilder().withName("Bob").build();
 
     @Test
+    public void execute_descendingThenAscending_changesDirectionWithoutChangingData() throws Exception {
+        Model model = createModel();
+        new SortCommand(SortCommand.SortOrder.DESCENDING).execute(model);
+        assertEquals(List.of(zoe, bob, alice), model.getFilteredPersonList());
+        assertEquals(List.of(zoe, alice, bob), model.getAddressBook().getPersonList());
+        new DeleteCommand(INDEX_FIRST_PERSON).execute(model);
+        assertEquals(List.of(bob, alice), model.getFilteredPersonList());
+        new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
+        assertEquals(List.of(alice, bob), model.getFilteredPersonList());
+    }
+
+    @Test
     public void execute_unsortedContacts_displaysAlphabeticallyWithoutChangingData() {
         Model model = createModel();
-        assertEquals(SortCommand.MESSAGE_SUCCESS, new SortCommand().execute(model).getFeedbackToUser());
+        assertEquals(SortCommand.MESSAGE_SUCCESS,
+                new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model).getFeedbackToUser());
         assertEquals(List.of(alice, bob, zoe), model.getFilteredPersonList());
         assertEquals(List.of(zoe, alice, bob), model.getAddressBook().getPersonList());
-        new SortCommand().execute(model);
+        new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
         assertEquals(List.of(alice, bob, zoe), model.getFilteredPersonList());
     }
 
@@ -38,21 +51,21 @@ public class SortCommandTest {
     public void execute_filteredContacts_showsAllContacts() {
         Model model = createModel();
         model.updateFilteredPersonList(person -> person.equals(zoe));
-        new SortCommand().execute(model);
+        new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
         assertEquals(List.of(alice, bob, zoe), model.getFilteredPersonList());
     }
 
     @Test
     public void execute_emptyAddressBook_success() {
         Model model = new ModelManager();
-        new SortCommand().execute(model);
+        new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
         assertTrue(model.getFilteredPersonList().isEmpty());
     }
 
     @Test
     public void execute_sortedContacts_indexCommandsUseDisplayedOrder() throws Exception {
         Model model = createModel();
-        new SortCommand().execute(model);
+        new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
         new DeleteCommand(INDEX_FIRST_PERSON).execute(model);
         assertEquals(List.of(bob, zoe), model.getFilteredPersonList());
         assertEquals(List.of(zoe, bob), model.getAddressBook().getPersonList());
@@ -61,7 +74,7 @@ public class SortCommandTest {
     @Test
     public void execute_sortedContacts_addAndEditMaintainOrder() {
         Model model = createModel();
-        new SortCommand().execute(model);
+        new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model);
         Person aaron = new PersonBuilder().withName("Aaron").build();
         model.addPerson(aaron);
         assertEquals(List.of(aaron, alice, bob, zoe), model.getFilteredPersonList());

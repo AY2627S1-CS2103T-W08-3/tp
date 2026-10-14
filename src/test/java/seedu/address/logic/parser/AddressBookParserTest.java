@@ -36,8 +36,10 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_sort() throws Exception {
-        assertTrue(parser.parseCommand(SortCommand.COMMAND_WORD) instanceof SortCommand);
-        assertTrue(parser.parseCommand(SortCommand.COMMAND_WORD + " extra") instanceof SortCommand);
+        assertEquals(new SortCommand(SortCommand.SortOrder.ASCENDING), parser.parseCommand("sort A-Z"));
+        assertEquals(new SortCommand(SortCommand.SortOrder.DESCENDING), parser.parseCommand("sort Z-A"));
+        assertThrows(ParseException.class, () -> parser.parseCommand("sort"));
+        assertThrows(ParseException.class, () -> parser.parseCommand("sort extra"));
     }
 
     @Test
