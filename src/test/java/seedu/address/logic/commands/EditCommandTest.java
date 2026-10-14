@@ -74,6 +74,41 @@ public class EditCommandTest {
     }
 
     @Test
+    public void execute_similarName_succeedsWithWarning() {
+        Person existingPerson = new PersonBuilder().withName("Alice Paulin").build();
+        model.addPerson(existingPerson);
+
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(personToEdit).withName("Alice Paulina").build();
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
+                .withName("Alice Paulina").build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson))
+                + String.format(Messages.MESSAGE_SIMILAR_NAME_WARNING_FORMAT,
+                        editedPerson.getName(), existingPerson.getName());
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(personToEdit, editedPerson);
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_nameSimilarOnlyToEditedEntry_succeedsWithoutWarning() {
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(personToEdit).withName("Alice Paulin").build();
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
+                .withName("Alice Paulin").build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(personToEdit, editedPerson);
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
     public void execute_noFieldSpecifiedUnfilteredList_success() {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptor());
         Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());

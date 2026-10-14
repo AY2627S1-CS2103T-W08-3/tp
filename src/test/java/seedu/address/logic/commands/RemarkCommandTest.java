@@ -1,11 +1,13 @@
 package seedu.address.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
+import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
@@ -16,6 +18,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.parser.ParserUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -31,7 +34,7 @@ public class RemarkCommandTest {
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
-    public void execute() throws ParseException {
+    public void execute_nonEmptyRemark_success() throws ParseException {
         final Remark remark = ParserUtil.parseRemark("Some remark");
         RemarkCommand command = new RemarkCommand(INDEX_FIRST_PERSON, remark);
         PersonBuilder personBuilder = new PersonBuilder(model.getFilteredPersonList()
@@ -45,6 +48,24 @@ public class RemarkCommandTest {
         assertCommandSuccess(command, model,
                 String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
                         Messages.format(editedPerson)), expectedModel);
+    }
+
+    @Test
+    public void execute_filteredList_success() throws ParseException {
+        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+
+        Person originalPerson = model.getFilteredPersonList().get(0);
+        Remark remark = ParserUtil.parseRemark("Updated remark");
+        RemarkCommand command = new RemarkCommand(INDEX_FIRST_PERSON, remark);
+        Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(originalPerson, editedPerson);
+
+        assertCommandSuccess(command, model,
+                String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS, Messages.format(editedPerson)), expectedModel);
+
+        Person actualPerson = model.getAddressBook().getPersonList().get(0);
+        assertEquals(originalPerson.getUuid(), actualPerson.getUuid());
     }
 
     @Test

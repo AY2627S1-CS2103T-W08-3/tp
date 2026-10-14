@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +55,31 @@ public class NameContainsKeywordsPredicateTest {
         // Mixed-case keywords
         predicate = new NameContainsKeywordsPredicate(List.of("aLIce", "bOB"));
         assertTrue(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
+    }
+
+    @Test
+    public void test_partialKeywords_matchesSubstringsOnly() {
+        Person person = new PersonBuilder().withName("Alice Davidson").build();
+
+        assertTrue(new NameContainsKeywordsPredicate(List.of("aLI")).test(person));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("LIC")).test(person));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("SoN")).test(person));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Bob", "vid")).test(person));
+        assertFalse(new NameContainsKeywordsPredicate(List.of("Alce")).test(person));
+    }
+
+    @Test
+    public void test_partialKeywords_isIndependentOfDefaultLocale() {
+        Locale originalLocale = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            Person person = new PersonBuilder().withName("ALICE Davidson").build();
+
+            assertTrue(new NameContainsKeywordsPredicate(List.of("lic")).test(person));
+            assertTrue(new NameContainsKeywordsPredicate(List.of("LIC")).test(person));
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
     }
 
     @Test

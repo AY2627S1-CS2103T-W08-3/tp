@@ -80,7 +80,7 @@ public class FindCommandTest {
     }
 
     @Test
-    public void execute_misrememberedName_matchesEitherWholeWord() throws ParseException, CommandException {
+    public void execute_partialName_matchesAnySubstring() throws ParseException, CommandException {
         Person aliceDavidson = new PersonBuilder().withName("Alice Davidson").build();
         Person alisonRichards = new PersonBuilder().withName("Alison Richards").build();
         Person aliceRichards = new PersonBuilder().withName("Alice Richards").build();
@@ -90,13 +90,15 @@ public class FindCommandTest {
         addressBook.addPerson(alisonRichards);
         addressBook.addPerson(aliceRichards);
         addressBook.addPerson(alisonRichardson);
+        addressBook.addPerson(new PersonBuilder().withName("Bob Smith").build());
         Model searchModel = new ModelManager(addressBook, new UserPrefs());
-        Command command = new AddressBookParser().parseCommand("find aLIce rICHards");
+        Command command = new AddressBookParser().parseCommand("find aLIc rICHards");
 
         CommandResult result = command.execute(searchModel);
 
-        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 3), result.getFeedbackToUser());
-        assertEquals(List.of(aliceDavidson, alisonRichards, aliceRichards), searchModel.getFilteredPersonList());
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 4), result.getFeedbackToUser());
+        assertEquals(List.of(aliceDavidson, alisonRichards, aliceRichards, alisonRichardson),
+                searchModel.getFilteredPersonList());
     }
 
     @Test
@@ -113,7 +115,7 @@ public class FindCommandTest {
         Model searchModel = new ModelManager(addressBook, new UserPrefs());
         AddressBookParser parser = new AddressBookParser();
 
-        CommandResult mixedResult = parser.parseCommand("find Alice t/friends t/colleagues").execute(searchModel);
+        CommandResult mixedResult = parser.parseCommand("find aLIc t/friends t/colleagues").execute(searchModel);
 
         assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 3), mixedResult.getFeedbackToUser());
         assertEquals(List.of(nameMatch, tagMatch, bothMatch), searchModel.getFilteredPersonList());

@@ -25,6 +25,16 @@ public class NameOrTagContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_partialNameKeywords_matchNamesWithCompleteTags() {
+        NameOrTagContainsKeywordsPredicate predicate = new NameOrTagContainsKeywordsPredicate(
+                List.of("lIC"), List.of("friends"));
+
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice Davidson").build()));
+        assertTrue(predicate.test(new PersonBuilder().withName("Bob Smith").withTags("FRIENDS").build()));
+        assertFalse(predicate.test(new PersonBuilder().withName("Bob Smith").withTags("lic", "bestfriends").build()));
+    }
+
+    @Test
     public void test_tagKeywords_onlyMatchTags() {
         NameOrTagContainsKeywordsPredicate predicate = new NameOrTagContainsKeywordsPredicate(
                 List.of(), List.of("friends"));
