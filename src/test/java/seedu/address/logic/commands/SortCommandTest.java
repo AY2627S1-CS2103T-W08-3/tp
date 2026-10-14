@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
@@ -81,6 +82,27 @@ public class SortCommandTest {
         Person charlie = new PersonBuilder(bob).withName("Charlie").build();
         model.setPerson(bob, charlie);
         assertEquals(List.of(aaron, alice, charlie, zoe), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void equals() {
+        SortCommand ascending = new SortCommand(SortCommand.SortOrder.ASCENDING);
+        SortCommand descending = new SortCommand(SortCommand.SortOrder.DESCENDING);
+
+        // Same instance.
+        assertTrue(ascending.equals(ascending));
+
+        // Different instances with the same direction.
+        assertTrue(ascending.equals(new SortCommand(SortCommand.SortOrder.ASCENDING)));
+
+        // Different directions.
+        assertFalse(ascending.equals(descending));
+
+        // Null.
+        assertFalse(ascending.equals(null));
+
+        // Different type.
+        assertFalse(ascending.equals("sort"));
     }
 
     private Model createModel() {
