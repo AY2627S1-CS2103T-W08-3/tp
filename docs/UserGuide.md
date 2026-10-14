@@ -32,6 +32,8 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
+   * `remark 1 r/Likes to swim.` : Adds a remark to the 1st person.
+
    * `clear` : Deletes all contacts.
 
    * `exit` : Exits the app.
@@ -131,6 +133,20 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
+### Adding or removing a remark: `remark`
+
+Adds or updates a remark for an existing person in the address book. The existing remark will be overwritten.
+
+Format: `remark INDEX r/REMARK`
+
+* Updates the remark of the person at the specified `INDEX`.
+* The index refers to the index number shown in the displayed person list.
+* The index **must be a positive integer** 1, 2, 3, …​
+* To remove an existing remark, enter `r/` without any text after it.
+
+Examples:
+* `remark 1 r/Likes to swim.` adds a remark to the 1st person.
+* `remark 2 r/` removes the remark from the 2nd person.
 ### Name typo warnings
 
 When adding a person or editing a person's name, AddressBook compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match.
@@ -246,4 +262,5 @@ Action | Format, Examples
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
 **Sort** | `sort`
+**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 1 r/Likes to swim.`
 **Help** | `help`
