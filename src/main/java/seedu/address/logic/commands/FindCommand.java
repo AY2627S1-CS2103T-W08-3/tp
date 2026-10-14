@@ -18,7 +18,7 @@ public class FindCommand extends Command {
     public static final String COMMAND_WORD = "find";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons matching any name keyword or tag "
-            + "(case-insensitive, whole-word names and complete tags, OR search) "
+            + "(case-insensitive, partial names and complete tags, OR search) "
             + "and displays them as a list with index numbers.\n"
             + "Parameters: [KEYWORD [MORE_KEYWORDS]...] [t/TAG]... (at least one keyword or tag required)\n"
             + "Example: " + COMMAND_WORD + " Alice t/friends t/colleagues\n"

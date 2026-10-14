@@ -36,8 +36,6 @@ public class EmailTest {
         // invalid parts
         assertFalse(Email.isValidEmail("peterjack@-")); // invalid domain name
         assertFalse(Email.isValidEmail("peterjack@exam_ple.com")); // underscore in domain name
-        assertFalse(Email.isValidEmail("peter jack@example.com")); // spaces in local part
-        assertFalse(Email.isValidEmail("peterjack@exam ple.com")); // spaces in domain name
         assertFalse(Email.isValidEmail(" peterjack@example.com")); // leading space
         assertFalse(Email.isValidEmail("peterjack@example.com ")); // trailing space
         assertFalse(Email.isValidEmail("peterjack@@example.com")); // double '@' symbol
@@ -64,6 +62,8 @@ public class EmailTest {
         assertTrue(Email.isValidEmail("peter_jack@very-very-very-long-example.com")); // long domain name
         assertTrue(Email.isValidEmail("if.you.dream.it_you.can.do.it@example.com")); // long local part
         assertTrue(Email.isValidEmail("e1234567@u.nus.edu")); // more than one period in domain
+        assertTrue(Email.isValidEmail("peter@example.com jane@example.com")); // multiple email addresses
+        assertTrue(Email.isValidEmail("peter@example.com (Work) jane@example.com (Personal)"));
     }
 
     @Test
