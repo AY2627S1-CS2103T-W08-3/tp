@@ -51,7 +51,7 @@ The bulk of the app's work is done by the following four components:
 
 **How the architecture components interact with each other**
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
+The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1a2b3c4`.
 
 <img src="images/ArchitectureSequenceDiagram.png" width="574" />
 
@@ -91,9 +91,9 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <img src="images/LogicClassDiagram.png" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1a2b3c4")` API call as an example.
 
-![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
+![Interactions Inside the Logic Component for the `delete 1a2b3c4` Command](images/DeleteSequenceDiagram.png)
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
 </div>
@@ -173,7 +173,7 @@ Step 1. The user launches the application for the first time. The `VersionedAddr
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
+Step 2. The user executes `delete 1a2b3c4` command to delete the person whose short UUID is `1a2b3c4` from the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 1a2b3c4` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
 
 ![UndoRedoState1](images/UndoRedoState1.png)
 
@@ -375,37 +375,37 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User searches for the client to delete (UC2).
-2.  User requests to delete a specific client in the displayed list by its index.
+1.  User reads the short UUID shown on the card of the client to delete.
+2.  User requests to delete that client by its short UUID.
 3.  ClientConnect deletes the client and shows a success message with the deleted client's name.
 
     Use case ends.
 
 **Extensions**
 
-* 1a. The displayed list is empty.
+* 1a. The address book is empty.
 
     Use case ends.
 
-* 2a. The index is not a positive integer (e.g. missing, `0`, negative, a decimal or contains letters).
+* 2a. The short UUID is not 7 hexadecimal characters (e.g. missing, too short, too long or contains non-hex characters).
 
     * 2a1. ClientConnect shows an invalid command format error with the correct usage.
-    * 2a2. User re-enters the command with a valid index.
+    * 2a2. User re-enters the command with a valid short UUID.
 
-      Steps 2a1-2a2 are repeated until the index is valid.
+      Steps 2a1-2a2 are repeated until the short UUID is valid.
       Use case resumes at step 3.
 
-* 2b. The index is larger than the number of clients displayed.
+* 2b. No client has the given short UUID.
 
-    * 2b1. ClientConnect shows "The client index provided is invalid."
-    * 2b2. User re-enters the command with an index within the displayed list.
+    * 2b1. ClientConnect shows "No person with UUID: &lt;short UUID&gt;".
+    * 2b2. User re-enters the command with a short UUID that exists.
 
-      Steps 2b1-2b2 are repeated until the index is valid.
+      Steps 2b1-2b2 are repeated until a matching client is found.
       Use case resumes at step 3.
 
-* 2c. User realises that the wrong client is displayed at the chosen index.
+* 2c. More than one client matches the given short UUID.
 
-    * 2c1. User searches again or lists all clients, then re-enters the delete command with the correct index.
+    * 2c1. ClientConnect shows an ambiguity error asking the user to use a more specific identifier.
 
       Use case resumes at step 2.
 
@@ -509,18 +509,21 @@ testers are expected to do more *exploratory* testing.
 
 ### Deleting a person
 
-1. Deleting a person while all persons are being shown
+1. Deleting a person by short UUID
 
-   1. Prerequisites: List all persons using the `list` command, with multiple persons in the list.
+   1. Prerequisites: List all persons using the `list` command, with multiple persons in the list. Note the short UUID (`#xxxxxxx`) shown on a contact's card.
+
+   1. Test case: `delete <shortUuid>` (using a short UUID that appears on a card)<br>
+      Expected: The matching contact is deleted, regardless of the current filter. The status message shows the deleted contact's details.
+
+   1. Test case: `delete 9999999` (a well-formed short UUID that no contact has)<br>
+      Expected: No person is deleted. The status message shows `No person with UUID: 9999999`.
 
    1. Test case: `delete 1`<br>
-      Expected: The first contact is deleted from the list. The status message shows the deleted contact's details.
+      Expected: No person is deleted. The status message shows an invalid command format error, as a short UUID must be 7 hexadecimal characters.
 
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. The status message shows error details.
-
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+   1. Other incorrect delete commands to try: `delete`, `delete x`, `delete 123456g` (contains a non-hex character)<br>
+      Expected: Similar to previous — an invalid command format error.
 
 1. _{ more test cases …​ }_
 
