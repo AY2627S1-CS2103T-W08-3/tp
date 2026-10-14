@@ -216,4 +216,5 @@ Action | Format, Examples
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
 **Sort** | `sort A-Z` or `sort Z-A`
+**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 1 r/Likes to swim.`
 **Help** | `help`
