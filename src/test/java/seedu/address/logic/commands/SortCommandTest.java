@@ -2,7 +2,6 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import java.util.List;
 
@@ -50,10 +49,10 @@ public class SortCommandTest {
     }
 
     @Test
-    public void execute_sortedContacts_indexCommandsUseDisplayedOrder() throws Exception {
+    public void execute_sortedContacts_deleteByUuidRemovesCorrectPerson() throws Exception {
         Model model = createModel();
         new SortCommand().execute(model);
-        new DeleteCommand(INDEX_FIRST_PERSON).execute(model);
+        new DeleteCommand(alice.getShortUuid()).execute(model);
         assertEquals(List.of(bob, zoe), model.getFilteredPersonList());
         assertEquals(List.of(zoe, bob), model.getAddressBook().getPersonList());
     }
