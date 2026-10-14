@@ -158,7 +158,7 @@ Supply at least one name keyword or tag. Put name keywords before any `t/` prefi
 * The search is case-insensitive; for example, `hans` matches `Hans`.
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
 * Keywords without a prefix search only names. Each `t/TAG` searches only tags.
-* Only full words match; for example, `Han` does not match `Hans`.
+* Name keywords match any part of a name; for example, `Han` matches `Hans` and `Johann`.
 * Tags are case-insensitive and must match completely; `t/friends` matches `Friends` but not `bestfriends`.
   Use one `t/` prefix per tag. Empty tags and tags containing spaces or punctuation are invalid.
 * Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
