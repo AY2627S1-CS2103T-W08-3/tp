@@ -30,7 +30,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
 
-   * `delete 3` : Deletes the 3rd contact shown in the current list.
+   * `delete 1a2b3c4` : Deletes the contact whose card shows the short UUID `#1a2b3c4`.
 
    * `remark 1 r/Likes to swim.` : Adds a remark to the 1st person.
 
@@ -198,15 +198,19 @@ Examples:
 
 Deletes the specified person from the address book.
 
-Format: `delete INDEX`
+Format: `delete SHORT_UUID`
 
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
-* The index **must be a positive integer** 1, 2, 3, …​
+* Deletes the person whose short UUID matches `SHORT_UUID`.
+* The short UUID is the 7-character code shown as `#xxxxxxx` on each person's card.
+* `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
+* The match is made against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is deleted.
 
 Examples:
-* `list` followed by `delete 2` deletes the 2nd person in the address book.
-* `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
+* `delete 1a2b3c4` deletes the person whose card shows `#1a2b3c4`.
+
+Errors:
+* If no person has that short UUID, the command fails with `No person with UUID: 1a2b3c4`.
+* If more than one person matches, the command fails asking you to use a more specific identifier.
 
 ### Clearing all entries: `clear`
 
@@ -259,7 +263,7 @@ Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
+**Delete** | `delete SHORT_UUID`<br> e.g., `delete 1a2b3c4`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
