@@ -39,6 +39,45 @@ public class AddCommandIntegrationTest {
     }
 
     @Test
+    public void execute_similarName_addsPersonWithWarning() {
+        Person existingPerson = model.getAddressBook().getPersonList().get(0);
+        Person personWithTypo = new PersonBuilder().withName("Alice Paulin").build();
+
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.addPerson(personWithTypo);
+        String expectedMessage = String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(personWithTypo))
+                + String.format(Messages.MESSAGE_SIMILAR_NAME_WARNING_FORMAT,
+                        personWithTypo.getName(), existingPerson.getName());
+
+        assertCommandSuccess(new AddCommand(personWithTypo), model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_extraSpacesInName_addsPersonWithWarning() {
+        Person existingPerson = model.getAddressBook().getPersonList().get(0);
+        Person personWithExtraSpace = new PersonBuilder().withName("Alice  Pauline").build();
+
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.addPerson(personWithExtraSpace);
+        String expectedMessage = String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(personWithExtraSpace))
+                + String.format(Messages.MESSAGE_SIMILAR_NAME_WARNING_FORMAT,
+                        personWithExtraSpace.getName(), existingPerson.getName());
+
+        assertCommandSuccess(new AddCommand(personWithExtraSpace), model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_unrelatedName_succeedsWithoutWarning() {
+        Person unrelatedPerson = new PersonBuilder().withName("Zachary Zimmer").build();
+
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.addPerson(unrelatedPerson);
+
+        assertCommandSuccess(new AddCommand(unrelatedPerson), model,
+                String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(unrelatedPerson)), expectedModel);
+    }
+
+    @Test
     public void execute_duplicatePerson_throwsCommandException() {
         Person personInList = model.getAddressBook().getPersonList().get(0);
         assertCommandFailure(new AddCommand(personInList), model,
