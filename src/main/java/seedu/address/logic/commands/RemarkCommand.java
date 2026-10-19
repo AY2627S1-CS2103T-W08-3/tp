@@ -1,11 +1,11 @@
 package seedu.address.logic.commands;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.List;
 
-import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -23,36 +23,43 @@ public class RemarkCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Edits the remark of the person identified "
-            + "by the index number used in the last person listing. "
+            + "by the short UUID shown on the person's card. "
             + "Existing remark will be overwritten by the input.\n"
-            + "Parameters: INDEX (must be a positive integer) "
+            + "Parameters: SHORT_UUID (7 hexadecimal characters) "
             + "r/ [REMARK]\n"
-            + "Example: " + COMMAND_WORD + " 1 "
+            + "Example: " + COMMAND_WORD + " 1a2b3c4 "
             + "r/ Likes to swim.";
 
-    private final Index index;
+    public static final String MESSAGE_NO_PERSON_WITH_UUID = "No person with UUID: %s";
+    public static final String MESSAGE_AMBIGUOUS_UUID =
+            "Multiple persons match UUID: %s. Please use a more specific identifier.";
+
+    private final String targetUuid;
     private final Remark remark;
 
     /**
-     * @param index of the person in the filtered person list to edit the remark
+     * @param targetUuid short UUID of the person to edit the remark
      * @param remark of the person to be updated to
      */
-    public RemarkCommand(Index index, Remark remark) {
-        requireAllNonNull(index, remark);
+    public RemarkCommand(String targetUuid, Remark remark) {
+        requireAllNonNull(targetUuid, remark);
 
-        this.index = index;
+        this.targetUuid = targetUuid;
         this.remark = remark;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
-        List<Person> lastShownList = model.getFilteredPersonList();
-
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        requireNonNull(model);
+        List<Person> matches = model.getPersonsByShortUuid(targetUuid);
+        if (matches.isEmpty()) {
+            throw new CommandException(String.format(MESSAGE_NO_PERSON_WITH_UUID, targetUuid));
+        }
+        if (matches.size() > 1) {
+            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuid));
         }
 
-        Person personToEdit = lastShownList.get(index.getZeroBased());
+        Person personToEdit = matches.get(0);
         Person editedPerson = new Person(
                 personToEdit.getUuid(), personToEdit.getName(), personToEdit.getPhone(),
                 personToEdit.getEmail(), personToEdit.getAddress(), remark,
@@ -86,7 +93,7 @@ public class RemarkCommand extends Command {
         }
 
         RemarkCommand e = (RemarkCommand) other;
-        return index.equals(e.index)
+        return targetUuid.equals(e.targetUuid)
                 && remark.equals(e.remark);
     }
 }
