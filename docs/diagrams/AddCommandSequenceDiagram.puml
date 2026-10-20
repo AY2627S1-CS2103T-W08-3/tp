@@ -1,0 +1,91 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":AddCommandParser" as AddCommandParser LOGIC_COLOR
+participant "a:AddCommand" as AddCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+participant ":Messages" as Messages LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("add n/Amy p/123456 e/amy@example.com a/123 Main Street t/friend")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("add ...")
+activate AddressBookParser
+
+create AddCommandParser
+AddressBookParser -> AddCommandParser
+activate AddCommandParser
+
+AddCommandParser -> AddCommandParser : tokenize and validate prefixes
+note right
+Required: name, phone, email, address
+Optional: zero or more tags
+Rejects preambles and repeated non-tag prefixes
+end note
+
+alt invalid command format or field value
+    AddCommandParser --> AddressBookParser : throws ParseException
+    destroy AddCommandParser
+    AddressBookParser --> LogicManager : throws ParseException
+    deactivate AddressBookParser
+    [<--LogicManager
+    deactivate LogicManager
+else valid input
+    AddCommandParser -> AddCommandParser : parse fields and tags
+    AddCommandParser -> AddCommand : create Person and AddCommand
+    AddCommand --> AddCommandParser
+    AddCommandParser --> AddressBookParser : a
+    deactivate AddCommandParser
+    destroy AddCommandParser
+
+    AddressBookParser --> LogicManager : a
+    deactivate AddressBookParser
+
+    LogicManager -> AddCommand : execute(m)
+    activate AddCommand
+    AddCommand -> Model : hasPerson(toAdd)
+    activate Model
+    Model --> AddCommand : duplicate status
+    deactivate Model
+
+    alt duplicate person
+        AddCommand --> LogicManager : throws CommandException
+        deactivate AddCommand
+    else new person
+        AddCommand -> Model : getAddressBook().getPersonList()
+        activate Model
+        Model --> AddCommand : existing persons
+        deactivate Model
+        AddCommand -> Messages : getSimilarNameWarning(...)
+        activate Messages
+        Messages --> AddCommand : warning or empty string
+        deactivate Messages
+
+        AddCommand -> Model : addPerson(toAdd)
+        activate Model
+        Model --> AddCommand
+        deactivate Model
+        AddCommand -> Messages : format(toAdd)
+        activate Messages
+        Messages --> AddCommand : formatted person
+        deactivate Messages
+        create CommandResult
+        AddCommand -> CommandResult : create success result
+        CommandResult --> AddCommand
+        deactivate CommandResult
+        AddCommand --> LogicManager : r
+        deactivate AddCommand
+    end
+    [<--LogicManager
+    deactivate LogicManager
+end
+@enduml

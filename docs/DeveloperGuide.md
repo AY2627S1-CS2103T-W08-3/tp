@@ -155,6 +155,40 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Add command
+
+#### Implementation
+
+The `add` command creates a new `Person` and stores it in the address book. It requires a name,
+phone number, email address, and postal address, while tags are optional and may be supplied more
+than once.
+
+The main classes involved in the implementation are shown in the following class diagram:
+
+<img src="images/AddCommandClassDiagram.png" width="650" />
+
+The sequence diagram below illustrates the interactions for
+`execute("add n/Amy p/123456 e/amy@example.com a/123 Main Street t/friend")`:
+
+<img src="images/AddCommandSequenceDiagram.png" width="900" />
+
+How the `add` command works:
+
+1. `LogicManager` passes the user input to `AddressBookParser`, which creates an
+   `AddCommandParser` for the `add` command.
+1. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
+   that there is no non-empty preamble, and that non-tag prefixes are not repeated.
+1. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
+   classes validate their respective constraints. The parser also creates an empty `Remark`
+   because a newly added person has no remark.
+1. For valid input, the parser creates an `AddCommand` containing the new `Person`.
+   Missing prefixes, repeated non-tag prefixes, and invalid field values result in a
+   `ParseException` instead.
+1. During execution, `AddCommand` asks the `Model` whether a person with the same identity
+   already exists. If so, it throws a `CommandException` and does not modify the address book.
+1. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
+   `Model`, and returns a `CommandResult` containing the success message and any warning.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
