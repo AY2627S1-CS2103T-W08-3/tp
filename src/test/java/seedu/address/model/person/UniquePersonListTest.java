@@ -57,6 +57,29 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void addAtIndex_nullPerson_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> uniquePersonList.add(0, null));
+    }
+
+    @Test
+    public void addAtIndex_duplicatePerson_throwsDuplicatePersonException() {
+        uniquePersonList.add(ALICE);
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.add(0, ALICE));
+    }
+
+    @Test
+    public void addAtIndex_indexPastEndOfList_throwsIndexOutOfBoundsException() {
+        assertThrows(IndexOutOfBoundsException.class, () -> uniquePersonList.add(1, ALICE));
+    }
+
+    @Test
+    public void addAtIndex_validIndex_insertsPersonAtIndex() {
+        uniquePersonList.add(BOB);
+        uniquePersonList.add(0, ALICE);
+        assertEquals(List.of(ALICE, BOB), uniquePersonList.asUnmodifiableObservableList());
+    }
+
+    @Test
     public void add_personWithNameDifferingInCase_throwsDuplicatePersonException() {
         uniquePersonList.add(ALICE);
         Person personWithSameName = new PersonBuilder(ALICE).withName(ALICE.getName().fullName.toLowerCase()).build();

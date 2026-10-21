@@ -9,11 +9,14 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.exceptions.DuplicatePersonException;
+import seedu.address.model.person.exceptions.PersonNotFoundException;
 import seedu.address.testutil.AddressBookBuilder;
 
 public class ModelManagerTest {
@@ -71,6 +74,67 @@ public class ModelManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void hasDeletedPersons_noDeletes_returnsFalse() {
+        assertFalse(modelManager.hasDeletedPersons());
+    }
+
+    @Test
+    public void hasDeletedPersons_afterDelete_returnsTrue() {
+        modelManager.addPerson(ALICE);
+        modelManager.deletePerson(ALICE);
+        assertTrue(modelManager.hasDeletedPersons());
+    }
+
+    @Test
+    public void deletePerson_personNotInAddressBook_throwsPersonNotFoundExceptionAndKeepsNoHistory() {
+        assertThrows(PersonNotFoundException.class, () -> modelManager.deletePerson(ALICE));
+        assertFalse(modelManager.hasDeletedPersons());
+    }
+
+    @Test
+    public void getLastDeletedPerson_noDeletes_throwsNoSuchElementException() {
+        assertThrows(NoSuchElementException.class, () -> modelManager.getLastDeletedPerson());
+    }
+
+    @Test
+    public void getLastDeletedPerson_afterDeletes_returnsMostRecentWithoutRestoring() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        modelManager.deletePerson(ALICE);
+        modelManager.deletePerson(BENSON);
+
+        assertEquals(BENSON, modelManager.getLastDeletedPerson());
+        assertFalse(modelManager.hasPerson(BENSON));
+    }
+
+    @Test
+    public void restoreLastDeletedPerson_noDeletes_throwsNoSuchElementException() {
+        assertThrows(NoSuchElementException.class, () -> modelManager.restoreLastDeletedPerson());
+    }
+
+    @Test
+    public void restoreLastDeletedPerson_afterDelete_restoresAtOriginalIndexAndClearsHistory() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        modelManager.deletePerson(ALICE);
+
+        modelManager.restoreLastDeletedPerson();
+
+        assertEquals(List.of(ALICE, BENSON), modelManager.getAddressBook().getPersonList());
+        assertFalse(modelManager.hasDeletedPersons());
+    }
+
+    @Test
+    public void restoreLastDeletedPerson_duplicatePerson_throwsDuplicatePersonExceptionAndKeepsHistory() {
+        modelManager.addPerson(ALICE);
+        modelManager.deletePerson(ALICE);
+        modelManager.addPerson(ALICE);
+
+        assertThrows(DuplicatePersonException.class, () -> modelManager.restoreLastDeletedPerson());
+        assertTrue(modelManager.hasDeletedPersons());
     }
 
     @Test
