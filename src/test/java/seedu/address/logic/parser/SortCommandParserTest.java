@@ -1,5 +1,7 @@
 package seedu.address.logic.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
@@ -8,6 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SortCommand;
 import seedu.address.logic.commands.SortCommand.SortOrder;
+import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
+import seedu.address.testutil.PersonBuilder;
 
 /**
  * Tests accepted sort directions and invalid arguments.
@@ -15,6 +21,28 @@ import seedu.address.logic.commands.SortCommand.SortOrder;
 public class SortCommandParserTest {
 
     private final SortCommandParser parser = new SortCommandParser();
+
+    @Test
+    public void parse_nullArgs_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> parser.parse(null));
+    }
+
+    @Test
+    public void parse_invalidDirection_preservesExistingDisplay() {
+        Model model = new ModelManager();
+        model.addPerson(new PersonBuilder().withName("Zoe").build());
+        model.addPerson(new PersonBuilder().withName("Alice").build());
+        new SortCommand(SortOrder.DESCENDING).execute(model);
+        model.updateFilteredPersonList(person -> person.getName().fullName.equals("Zoe"));
+        Model expectedModel = new ModelManager(model.getAddressBook(), model.getUserPrefs());
+        new SortCommand(SortOrder.DESCENDING).execute(expectedModel);
+        expectedModel.updateFilteredPersonList(person -> person.getName().fullName.equals("Zoe"));
+
+        for (String input : new String[] {"sort", "sort A-Z extra", "sort invalid"}) {
+            assertThrows(ParseException.class, () -> new AddressBookParser().parseCommand(input).execute(model));
+            assertEquals(expectedModel, model);
+        }
+    }
 
     @Test
     public void parse_validDirection_returnsSortCommand() {
