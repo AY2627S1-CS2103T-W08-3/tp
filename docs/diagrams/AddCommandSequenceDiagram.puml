@@ -37,7 +37,7 @@ AddCommandParser -> AddCommandParser : validate input and parse fields
 
 alt invalid command format or field value
     AddCommandParser --> AddressBookParser : throws ParseException
-    destroy AddCommandParser
+    deactivate AddCommandParser
     AddressBookParser --> LogicManager : throws ParseException
     deactivate AddressBookParser
     [<--LogicManager
@@ -47,7 +47,6 @@ else valid input
     AddCommand --> AddCommandParser
     AddCommandParser --> AddressBookParser : a
     deactivate AddCommandParser
-    destroy AddCommandParser
 
     AddressBookParser --> LogicManager : a
     deactivate AddressBookParser
