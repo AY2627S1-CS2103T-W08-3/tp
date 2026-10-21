@@ -1,6 +1,14 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam DefaultFontSize 18
+skinparam Sequence {
+    ArrowFontSize 18
+    ParticipantFontSize 18
+    BoxFontSize 18
+}
+skinparam NoteFontSize 18
+skinparam ParticipantPadding 0
 
 title Find clients by name or tag (successful search)
 
@@ -16,26 +24,21 @@ box Model MODEL_COLOR_T1
 participant "m:ModelManager" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute("find Alice t/friends")
+[-> LogicManager : execute(\n"find Alice t/friends")
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand("find Alice t/friends")
+LogicManager -> AddressBookParser : parseCommand(\n"find Alice t/friends")
 activate AddressBookParser
 
 create FindCommandParser
-AddressBookParser -> FindCommandParser : new FindCommandParser()
-AddressBookParser -> FindCommandParser : parse(" Alice t/friends")
+AddressBookParser -> FindCommandParser : new\nFindCommandParser()
+AddressBookParser -> FindCommandParser : parse(\n" Alice t/friends")
 activate FindCommandParser
 
-note over FindCommandParser
-Normalize whitespace and tokenize arguments.
-nameKeywords = ["Alice"]
-tagKeywords = ["friends"]
-Validate each tag with ParserUtil.parseTag().
-
-Create p = NameOrTagContainsKeywordsPredicate(
-    nameKeywords, tagKeywords).
-Without tags, use NameContainsKeywordsPredicate.
+note right of FindCommandParser
+Tokenize and validate arguments.
+Create predicate p for
+name "Alice" OR tag "friends".
 end note
 
 create FindCommand
@@ -55,20 +58,16 @@ activate FindCommand
 
 FindCommand -> Model : updateFilteredPersonList(p)
 activate Model
-note right of Model
-ModelManager calls filteredPersons.setPredicate(p).
-The FilteredList evaluates p against all clients:
-  name contains any keyword OR
-  a tag equals any complete tag value.
-Both comparisons ignore case.
-The UI observes the filtered and sorted list.
+note left of Model
+Apply p to the full client list.
+The UI observes the results.
 end note
 Model --> FindCommand
 deactivate Model
 
 FindCommand -> Model : getFilteredPersonList()
 activate Model
-Model --> FindCommand : filtered and sorted clients
+Model --> FindCommand : filtered and\nsorted clients
 deactivate Model
 
 note over FindCommand
@@ -76,7 +75,7 @@ N = returnedList.size()
 end note
 
 create CommandResult
-FindCommand -> CommandResult : new CommandResult("N person(s) listed!")
+FindCommand -> CommandResult : new CommandResult(\n"N person(s) listed!")
 activate CommandResult
 CommandResult --> FindCommand : r
 deactivate CommandResult
@@ -84,9 +83,6 @@ deactivate CommandResult
 FindCommand --> LogicManager : r
 deactivate FindCommand
 
-note over LogicManager
-Standard storage save omitted.
-end note
 [<-- LogicManager : r
 deactivate LogicManager
 @enduml

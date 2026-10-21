@@ -169,8 +169,6 @@ The `find` command filters the displayed client list by name keywords and/or tag
 
 Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
 
-The editable diagram source is [`FindSequenceDiagram.puml`](diagrams/FindSequenceDiagram.puml); its rendered image is [`FindSequenceDiagram.png`](images/FindSequenceDiagram.png).
-
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
