@@ -21,6 +21,7 @@ public class FindCommandParser implements Parser<FindCommand> {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public FindCommand parse(String args) throws ParseException {
+        assert args != null : "Find command arguments must not be null";
         String trimmedArgs = args.trim();
         if (trimmedArgs.isEmpty()) {
             throw new ParseException(
@@ -34,6 +35,9 @@ public class FindCommandParser implements Parser<FindCommand> {
         for (String tagKeyword : tagKeywords) {
             ParserUtil.parseTag(tagKeyword);
         }
+
+        assert !nameKeywords.isEmpty() || !tagKeywords.isEmpty()
+                : "Non-empty find arguments must produce at least one search term";
 
         if (tagKeywords.isEmpty()) {
             return new FindCommand(new NameContainsKeywordsPredicate(nameKeywords));
