@@ -155,89 +155,75 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
-### \[Proposed\] Undo/redo feature
+### Undelete feature
 
-#### Proposed Implementation
+#### Implementation
 
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
+The undelete mechanism is facilitated by `ModelManager`, which keeps a stack, `deletedPersons`, of the persons deleted during the current session. Each entry is a `DeletedPerson` record holding the deleted `Person` and the index in the address book that they were deleted from. `ModelManager` exposes the stack through three `Model` operations:
 
-* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
+* `Model#hasDeletedPersons()` — Returns true if there is a deleted person that can be restored.
+* `Model#getLastDeletedPerson()` — Returns the most recently deleted person, without restoring them.
+* `Model#restoreLastDeletedPerson()` — Reinserts the most recently deleted person at their original index, removes them from the stack, and resets the filtered person list to show all persons.
 
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
+`Model#deletePerson()` pushes an entry onto the stack after it removes the person, so every successful `delete` can be reversed. `clear` replaces the address book through `Model#setAddressBook()` instead, so it does not add to the stack.
 
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
+Given below is an example usage scenario and how the undelete mechanism behaves at each step.
 
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
+Step 1. The user launches the application. `deletedPersons` is empty, so `undelete` fails with an error.
 
-![UndoRedoState0](images/UndoRedoState0.png)
+Step 2. The user executes `delete 1a2b3c4` to delete Benson, the 2nd person in the address book. `Model#deletePerson()` pushes `(Benson, 1)` onto `deletedPersons`.
 
-Step 2. The user executes `delete 1a2b3c4` command to delete the person whose short UUID is `1a2b3c4` from the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 1a2b3c4` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
+Step 3. The user executes `delete 0f9e8d7` to delete Alice, the 1st person. `Model#deletePerson()` pushes `(Alice, 0)`, which is now on top of `(Benson, 1)`.
 
-![UndoRedoState1](images/UndoRedoState1.png)
+Step 4. The user realises that deleting Alice was a mistake, and executes `undelete`. `UndeleteCommand` checks that there is a deleted person to restore, and that no person with the same identity as Alice already exists. It then calls `Model#restoreLastDeletedPerson()`, which reinserts Alice at index 0 and pops `(Alice, 0)` off the stack.
 
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
+The following sequence diagram shows how the `undelete` command in step 4 goes through the `Logic` and `Model` components:
 
-![UndoRedoState2](images/UndoRedoState2.png)
+![UndeleteSequenceDiagram](images/UndeleteSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
+Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so the address book is back in its original order, and `deletedPersons` is empty again.
 
-</div>
-
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
-
-![UndoRedoState3](images/UndoRedoState3.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same identity has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`. The entry stays on the stack, so the user can rename the clashing person and run `undelete` again.
 
 </div>
 
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Logic.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If persons were removed after the delete without going through `Model#deletePerson()` (e.g. by `clear`), the original index can be past the end of the list. `Model#restoreLastDeletedPerson()` then appends the person to the end instead.
 
 </div>
 
-Similarly, how an undo operation goes through the `Model` component is shown below:
+`deletedPersons` exists only in memory. It is not saved by `Storage`, and it is not part of `ModelManager#equals()`, so it is lost when the app closes.
 
-![UndoSequenceDiagram](images/UndoSequenceDiagram-Model.png)
+#### Design considerations
 
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
+**Aspect: What is stored to restore a deleted person:**
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
+* **Alternative 1 (current choice):** Store only the deleted person and their index.
+  * Pros: Uses little memory, and does not affect any other command.
+  * Cons: Only `delete` can be reversed.
 
-</div>
+* **Alternative 2:** Save a copy of the whole address book before every change, and restore the copy.
+  * Pros: Can reverse any command.
+  * Cons: Uses memory in proportion to the address book size for every command. Restoring a copy also reverses every command made after it, e.g. reversing a delete would also remove a person added afterwards.
 
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
+**Aspect: Command word:**
 
-![UndoRedoState4](images/UndoRedoState4.png)
+* **Alternative 1 (current choice):** `undelete`.
+  * Pros: The name states exactly what it reverses, so users do not expect it to reverse `add` or `edit`.
+  * Cons: Users who know `undo` from other applications may try that first.
 
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
+* **Alternative 2:** `undo`.
+  * Pros: Familiar to most users.
+  * Cons: Users would expect it to reverse every command, not just `delete`.
 
-![UndoRedoState5](images/UndoRedoState5.png)
+**Aspect: Where the restored person is placed:**
 
-The following activity diagram summarizes what happens when a user executes a new command:
+* **Alternative 1 (current choice):** At the index they were deleted from.
+  * Pros: The list looks exactly as it did before the delete.
+  * Cons: The index must be stored, and clamped when the list has since become shorter.
 
-<img src="images/CommitActivityDiagram.png" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo execute:**
-
-* **Alternative 1 (current choice):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command is correct.
-
-_{more aspects and alternatives to be added}_
+* **Alternative 2:** At the end of the list, like `add`.
+  * Pros: Simpler.
+  * Cons: The list order changes, and in a long list the restored person is harder to find.
 
 ### \[Proposed\] Data archiving
 
@@ -286,6 +272,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | insurance agent | assign tags to clients                                           | categorise them according to risk profile and product interest              |
 | `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
 | `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
+| `* *`    | insurance agent | restore a client I deleted by mistake                            | recover their details without re-entering them                              |
 | `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
 
 *{More to be added}*
@@ -526,6 +513,37 @@ testers are expected to do more *exploratory* testing.
       Expected: Similar to previous — an invalid command format error.
 
 1. _{ more test cases …​ }_
+
+### Restoring a deleted person
+
+1. Restoring persons after deleting them
+
+   1. Prerequisites: List all persons using the `list` command, with at least two persons in the list. Note the short UUIDs of the first two persons.
+
+   1. Test case: `delete <first person's short UUID>`, then `undelete`<br>
+      Expected: The first person is restored at the top of the list, with the same short UUID. The status message shows `Restored person:` followed by their details.
+
+   1. Test case: `delete <first person's short UUID>`, `delete <second person's short UUID>`, then `undelete` twice<br>
+      Expected: The first `undelete` restores the second person, and the second `undelete` restores the first person. The list is back in its original order.
+
+   1. Test case: `find <a name that matches nobody>` after a delete, then `undelete`<br>
+      Expected: The person is restored, and the list shows all persons.
+
+   1. Test case: `undelete` with no deletes since the app was launched<br>
+      Expected: Nothing is restored. The status message shows `No deleted persons to restore.`
+
+   1. Test case: `undelete 1`<br>
+      Expected: Nothing is restored. The status message shows an invalid command format error.
+
+1. Restoring a person when a person with the same name exists
+
+   1. Prerequisites: Delete a person, e.g. `John Doe`, then add a new person with the same name.
+
+   1. Test case: `undelete`<br>
+      Expected: Nothing is restored. The status message shows `Cannot undelete: a person identical to John Doe already exists.`
+
+   1. Test case: Rename the new `John Doe` with `edit`, then `undelete`<br>
+      Expected: The original `John Doe` is restored, with their original short UUID.
 
 ### Saving data
 
