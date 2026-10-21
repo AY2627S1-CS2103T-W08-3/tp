@@ -1,5 +1,6 @@
 package seedu.address.model.person;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Collections;
@@ -19,6 +20,9 @@ public class Person {
 
     /** Number of leading UUID characters shown on a person's card and used to identify them in commands. */
     public static final int SHORT_UUID_LENGTH = 7;
+
+    /** Number of hexadecimal digits in a full UUID, not counting its dashes. */
+    public static final int UUID_HEX_LENGTH = 32;
 
     // Identity fields
     private final UUID uuid;
@@ -62,6 +66,17 @@ public class Person {
      */
     public String getShortUuid() {
         return uuid.toString().substring(0, SHORT_UUID_LENGTH);
+    }
+
+    /**
+     * Returns true if this person's UUID, written without dashes, starts with {@code uuidPrefix}.
+     * {@code uuidPrefix} must already be lowercase and contain no dashes.
+     */
+    public boolean hasUuidPrefix(String uuidPrefix) {
+        requireNonNull(uuidPrefix);
+        assert uuidPrefix.equals(uuidPrefix.toLowerCase()) && !uuidPrefix.contains("-")
+                : "UUID prefix must be normalised before matching: " + uuidPrefix;
+        return uuid.toString().replace("-", "").startsWith(uuidPrefix);
     }
 
     public Name getName() {

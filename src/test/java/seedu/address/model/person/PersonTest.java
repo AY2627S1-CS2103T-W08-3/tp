@@ -108,6 +108,26 @@ public class PersonTest {
     }
 
     @Test
+    public void hasUuidPrefix() {
+        // ALICE's UUID is "aaaaaaaa-0000-0000-0000-000000000000"
+
+        // short UUID -> returns true
+        assertTrue(ALICE.hasUuidPrefix("aaaaaaa"));
+
+        // prefix that crosses a dash in the UUID -> returns true
+        assertTrue(ALICE.hasUuidPrefix("aaaaaaaa0000"));
+
+        // full UUID without dashes -> returns true
+        assertTrue(ALICE.hasUuidPrefix("aaaaaaaa" + "0".repeat(24)));
+
+        // different prefix -> returns false
+        assertFalse(ALICE.hasUuidPrefix("bbbbbbb"));
+
+        // null -> throws NullPointerException
+        assertThrows(NullPointerException.class, () -> ALICE.hasUuidPrefix(null));
+    }
+
+    @Test
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress()

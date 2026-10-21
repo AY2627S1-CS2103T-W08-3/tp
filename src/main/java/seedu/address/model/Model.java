@@ -50,11 +50,11 @@ public interface Model {
     void deletePerson(Person target);
 
     /**
-     * Returns all persons whose short UUID matches {@code shortUuid}, searching the
-     * entire address book rather than only the filtered list. The match is a
-     * case-insensitive prefix match against each person's UUID.
+     * Returns an unmodifiable list of all persons whose UUID, written without dashes, starts with
+     * {@code uuidPrefix}. Searches the entire address book rather than only the filtered list.
+     * {@code uuidPrefix} must already be lowercase and contain no dashes.
      */
-    List<Person> getPersonsByShortUuid(String shortUuid);
+    List<Person> getPersonsByUuidPrefix(String uuidPrefix);
 
     /**
      * Adds the given person.
