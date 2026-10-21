@@ -49,11 +49,17 @@ deactivate AddressBookParser
 LogicManager -> DeleteCommand : execute(m)
 activate DeleteCommand
 
-DeleteCommand -> Model : getPersonsByShortUuid("1a2b3c4")
+DeleteCommand -> DeleteCommand : findUniqueMatch(m)
+activate DeleteCommand
+
+DeleteCommand -> Model : getPersonsByUuidPrefix("1a2b3c4")
 activate Model
 
 Model --> DeleteCommand : matches
 deactivate Model
+
+DeleteCommand --> DeleteCommand : toDelete
+deactivate DeleteCommand
 
 DeleteCommand -> Model : deletePerson(toDelete)
 activate Model

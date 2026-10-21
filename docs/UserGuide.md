@@ -198,19 +198,24 @@ Examples:
 
 Deletes the specified person from the address book.
 
-Format: `delete SHORT_UUID`
+Format: `delete UUID_PREFIX`
 
-* Deletes the person whose short UUID matches `SHORT_UUID`.
-* The short UUID is the 7-character code shown as `#xxxxxxx` on each person's card.
-* `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
+* Deletes the person whose UUID starts with `UUID_PREFIX`.
+* Usually, `UUID_PREFIX` is the short UUID: the 7-character code shown as `#xxxxxxx` on each person's card.
+* `UUID_PREFIX` **must be 7 to 32 hexadecimal characters** (`0`–`9`, `a`–`f`). It is case-insensitive, and dashes are ignored, so you can also paste a person's full UUID.
 * The match is made against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is deleted.
 
 Examples:
 * `delete 1a2b3c4` deletes the person whose card shows `#1a2b3c4`.
+* `delete 1a2b3c4d1` deletes the person whose UUID starts with `1a2b3c4d1`, when two persons share the short UUID `#1a2b3c4`.
 
 Errors:
-* If no person has that short UUID, the command fails with `No person with UUID: 1a2b3c4`.
-* If more than one person matches, the command fails asking you to use a more specific identifier.
+* If no person has that UUID prefix, the command fails with `No person with UUID: 1a2b3c4`.
+* If more than one person matches, the command fails and lists the full UUID and name of each match. Enter enough characters of the UUID to tell them apart.
+
+<div markdown="span" class="alert alert-primary">:bulb: **Tip:**
+Two persons sharing a short UUID is very rare, so `delete` with the short UUID from the card is almost always enough.
+</div>
 
 ### Clearing all entries: `clear`
 
@@ -263,7 +268,7 @@ Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
-**Delete** | `delete SHORT_UUID`<br> e.g., `delete 1a2b3c4`
+**Delete** | `delete UUID_PREFIX`<br> e.g., `delete 1a2b3c4`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
