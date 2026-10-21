@@ -1,6 +1,9 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
+skinparam ParticipantFontSize 18
+skinparam SequenceMessageFontSize 17
+skinparam SequenceBoxFontSize 18
 
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
@@ -25,12 +28,7 @@ create AddCommandParser
 AddressBookParser -> AddCommandParser
 activate AddCommandParser
 
-AddCommandParser -> AddCommandParser : tokenize and validate prefixes
-note right
-Required: name, phone, email, address
-Optional: zero or more tags
-Rejects preambles and repeated non-tag prefixes
-end note
+AddCommandParser -> AddCommandParser : validate input and parse fields
 
 alt invalid command format or field value
     AddCommandParser --> AddressBookParser : throws ParseException
@@ -40,7 +38,6 @@ alt invalid command format or field value
     [<--LogicManager
     deactivate LogicManager
 else valid input
-    AddCommandParser -> AddCommandParser : parse fields and tags
     AddCommandParser -> AddCommand : create Person and AddCommand
     AddCommand --> AddCommandParser
     AddCommandParser --> AddressBookParser : a
