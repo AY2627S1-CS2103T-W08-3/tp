@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_BOB;
@@ -29,6 +30,21 @@ import seedu.address.testutil.PersonBuilder;
 public class RemarkCommandTest {
 
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+
+    @Test
+    public void constructor_invalidUuid_throwsIllegalArgumentException() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+
+        assertThrows(IllegalArgumentException.class, () -> new RemarkCommand("invalid", remark));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+        RemarkCommand command = new RemarkCommand("aaaaaaa", remark);
+
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
 
     @Test
     public void execute_nonEmptyRemark_success() throws ParseException {
