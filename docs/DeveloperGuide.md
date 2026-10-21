@@ -364,7 +364,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. The command format is invalid 
+* 1a. The command format is invalid
 
     * 1a1. ClientConnect shows an invalid command format error with the correct usage.
     * 1a2. User re-enters the command with the corrected format.
