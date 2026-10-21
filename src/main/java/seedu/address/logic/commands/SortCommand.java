@@ -1,5 +1,6 @@
 package seedu.address.logic.commands;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.Comparator;
@@ -41,18 +42,12 @@ public class SortCommand extends Command {
      * @throws NullPointerException If {@code sortOrder} is null.
      */
     public SortCommand(SortOrder sortOrder) {
-        if (sortOrder == null) {
-            throw new NullPointerException("Sort order must not be null");
-        } else {
-            this.sortOrder = sortOrder;
-        }
+        this.sortOrder = requireNonNull(sortOrder, "Sort order must not be null");
     }
 
     @Override
     public CommandResult execute(Model model) {
-        if (model == null) {
-            throw new NullPointerException("Model must not be null");
-        }
+        requireNonNull(model, "Model must not be null");
         Comparator<Person> comparator = getComparator();
         int personCount = model.getAddressBook().getPersonList().size();
 
