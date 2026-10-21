@@ -36,9 +36,6 @@ public class FindCommandParser implements Parser<FindCommand> {
             ParserUtil.parseTag(tagKeyword);
         }
 
-        assert !nameKeywords.isEmpty() || !tagKeywords.isEmpty()
-                : "Non-empty find arguments must produce at least one search term";
-
         if (tagKeywords.isEmpty()) {
             return new FindCommand(new NameContainsKeywordsPredicate(nameKeywords));
         }
