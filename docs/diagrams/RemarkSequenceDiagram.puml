@@ -1,0 +1,63 @@
+@startuml
+!include style.puml
+
+skinparam ArrowFontStyle plain
+
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":RemarkCommandParser" as RemarkCommandParser LOGIC_COLOR
+participant "r:RemarkCommand" as RemarkCommand LOGIC_COLOR
+participant "result:CommandResult" as CommandResult LOGIC_COLOR
+participant "m:Model" as Model MODEL_COLOR
+participant "p:Person" as Person MODEL_COLOR
+
+[-> LogicManager : execute("remark 1a2b3c4 r/Likes to swim.")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand(...)
+activate AddressBookParser
+create RemarkCommandParser
+AddressBookParser -> RemarkCommandParser : RemarkCommandParser()
+activate RemarkCommandParser
+RemarkCommandParser --> AddressBookParser
+deactivate RemarkCommandParser
+
+AddressBookParser -> RemarkCommandParser : parse("1a2b3c4 r/...")
+activate RemarkCommandParser
+create RemarkCommand
+RemarkCommandParser -> RemarkCommand : RemarkCommand(targetUuid, remark)
+activate RemarkCommand
+RemarkCommand --> RemarkCommandParser
+deactivate RemarkCommand
+RemarkCommandParser --> AddressBookParser : r
+deactivate RemarkCommandParser
+destroy RemarkCommandParser
+AddressBookParser --> LogicManager : r
+deactivate AddressBookParser
+
+LogicManager -> RemarkCommand : execute(m)
+activate RemarkCommand
+RemarkCommand -> Model : getPersonsByShortUuid("1a2b3c4")
+activate Model
+Model --> RemarkCommand : matching persons
+deactivate Model
+
+create Person
+RemarkCommand -> Person : Person(...)
+activate Person
+Person --> RemarkCommand
+deactivate Person
+RemarkCommand -> Model : setPerson(old, edited)
+RemarkCommand -> Model : updateFilteredPersonList(show all)
+
+create CommandResult
+RemarkCommand -> CommandResult : CommandResult(...)
+activate CommandResult
+CommandResult --> RemarkCommand
+deactivate CommandResult
+RemarkCommand --> LogicManager : result
+deactivate RemarkCommand
+
+[<--LogicManager
+deactivate LogicManager
+@enduml

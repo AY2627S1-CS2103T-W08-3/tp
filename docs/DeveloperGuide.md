@@ -118,6 +118,22 @@ The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteC
 case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
 person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
 
+The following focused class diagrams document the two parts of the feature that are easy to miss in the generic
+`XYZCommand` diagrams above:
+
+<img src="images/ParserClass.png" width="600"/>
+
+The `RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It lowercases
+the UUID before constructing the command, so UUID input is case-insensitive. Invalid UUIDs and duplicate prefixes are
+reported as parse errors before a command reaches the model.
+
+<img src="images/RemarkClass.png" width="600"/>
+
+`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It first checks that exactly
+one person matches the short UUID, creates an edited `Person` carrying over the unchanged fields, and asks the model
+to replace the old value. An empty remark is therefore represented by the same command path and removes the existing
+remark.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -158,6 +174,18 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Remark command
+
+The sequence diagram below shows the successful execution path for `remark 1a2b3c4 r/Likes to swim.`. The parser
+creates a command from the user's text; the command then obtains the target from the complete address book, creates a
+replacement `Person`, and updates the model's filtered list so the UI reflects the new remark.
+
+![Remark command sequence diagram](images/RemarkSequenceDiagram.png)
+
+If the UUID matches no person or more than one person, `RemarkCommand` throws a `CommandException` and does not
+replace any data. If the `r/` value is empty, the same successful path stores an empty `Remark`, which removes the
+displayed remark without requiring a separate command.
 
 ### \[Proposed\] Undo/redo feature
 
