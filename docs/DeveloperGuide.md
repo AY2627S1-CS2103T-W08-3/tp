@@ -167,10 +167,19 @@ The main classes involved in the implementation are shown in the following class
 
 <img src="images/AddCommandClassDiagram.png" width="650" />
 
-The sequence diagram below illustrates the interactions for
-`execute("add n/Amy p/123456 e/amy@example.com a/123 Main Street t/friend")`:
+The `add` command flow is split into the following sequence diagrams:
 
-<img src="images/AddCommandSequenceDiagram.png" width="900" />
+Parsing and validation:
+
+<img src="images/AddCommandParsingSequenceDiagram.png" width="800" />
+
+Execution and duplicate detection:
+
+<img src="images/AddCommandDuplicateSequenceDiagram.png" width="800" />
+
+Successful person addition:
+
+<img src="images/AddCommandSuccessSequenceDiagram.png" width="800" />
 
 How the `add` command works:
 
