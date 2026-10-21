@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
 import seedu.address.logic.parser.ParserUtil;
+import seedu.address.logic.parser.RemarkCommandParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
@@ -101,6 +102,15 @@ public class RemarkCommandTest {
 
         assertCommandFailure(command, ambiguousModel,
                 String.format(RemarkCommand.MESSAGE_AMBIGUOUS_UUID, "1a2b3c4"));
+    }
+
+    @Test
+    public void equals_mixedCaseUuidInput_normalisedToLowercase() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+        RemarkCommand parsedCommand = new RemarkCommandParser().parse("1A2b3C4 r/Some remark");
+        RemarkCommand expectedCommand = new RemarkCommand("1a2b3c4", remark);
+
+        assertTrue(parsedCommand.equals(expectedCommand));
     }
 
     @Test
