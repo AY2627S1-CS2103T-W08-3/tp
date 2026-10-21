@@ -155,6 +155,64 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Sort feature
+
+The `sort` command displays all contacts alphabetically by name, ignoring capitalization.
+It requires exactly one direction: `sort A-Z` selects ascending order, while `sort Z-A`
+selects descending order. Missing directions, unsupported values, and extra arguments
+produce a `ParseException` with usage instructions before the displayed list is changed.
+
+#### Implementation
+
+`AddressBookParser#parseCommand()` delegates sort arguments to `SortCommandParser#parse()`.
+The parser trims surrounding whitespace and creates a `SortCommand` with the corresponding
+`SortOrder` value, either `ASCENDING` or `DESCENDING`. The command stores this required,
+non-null direction in a final field.
+
+When `LogicManager` calls `SortCommand#execute(model)`, the command selects a comparator
+using `Person#getName().fullName` and `String.CASE_INSENSITIVE_ORDER`. Descending order
+uses the reversed comparator. The command then calls these model operations in order:
+
+1. `Model#updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)` removes any existing filter
+   so that all contacts are displayed.
+2. `Model#updatePersonListComparator(comparator)` applies the requested alphabetical order.
+
+`ModelManager` maintains a `FilteredList<Person>` over the address book's person list and
+a `SortedList<Person>` over that filtered list. `ModelManager#getFilteredPersonList()`
+exposes the sorted view to the UI. Updating its comparator notifies the observing
+`PersonListPanel`, so the command does not call the UI directly.
+
+Sorting changes the displayed order without rearranging the underlying address book.
+The comparator remains active during subsequent additions, edits, and searches in the
+same session. `list` shows all contacts while retaining the comparator. Restarting the
+application restores the saved order because the comparator is not persisted.
+
+#### Sequence diagram
+
+The following diagram illustrates the successful execution of `sort A-Z`.
+The object named `s` is the created `SortCommand`, `r` is its `CommandResult`, and `m`
+is the `ModelManager` supplied through the `Model` interface.
+
+![Sequence diagram for the successful sort A-Z command](images/SortSequenceDiagram.png)
+
+The editable PlantUML source is [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
+It uses the shared [diagram style](diagrams/style.puml).
+
+The diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
+Null checks, contact-count retrieval, assertions, logging, and subsequent storage
+interactions are omitted to keep the diagram focused on parsing and sorting.
+`sort Z-A` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
+
+#### Defensive checks
+
+`SortCommand` rejects a null sort order during construction
+and a null model before execution. Invalid user arguments are handled by `ParseException`,
+while assertions check internal postconditions: sorting preserves the contact count,
+displays all contacts, and produces the requested order. Assertions require `-ea` when
+running the application manually; normal input validation does not depend on assertions.
+Diagnostic messages at `FINE` level record the sort direction, contact count, completion,
+and rejected input format.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
