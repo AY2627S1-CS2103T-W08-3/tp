@@ -104,7 +104,7 @@ public class PersonTest {
     public void getShortUuid_returnsFirstSevenCharactersOfUuid() {
         // ALICE's UUID is "aaaaaaaa-0000-0000-0000-000000000000"
         assertEquals("aaaaaaa", ALICE.getShortUuid());
-        assertEquals(ALICE.getUuid().toString().substring(0, 7), ALICE.getShortUuid());
+        assertEquals(ALICE.getUuid().toString().substring(0, Person.SHORT_UUID_LENGTH), ALICE.getShortUuid());
     }
 
     @Test

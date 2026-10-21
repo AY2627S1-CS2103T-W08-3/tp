@@ -17,6 +17,9 @@ import seedu.address.model.tag.Tag;
  */
 public class Person {
 
+    /** Number of leading UUID characters shown on a person's card and used to identify them in commands. */
+    public static final int SHORT_UUID_LENGTH = 7;
+
     // Identity fields
     private final UUID uuid;
     private final Name name;
@@ -55,10 +58,10 @@ public class Person {
     }
 
     /**
-     * Returns the first 7 characters of this person's UUID, for compact display.
+     * Returns the first {@value #SHORT_UUID_LENGTH} characters of this person's UUID, for compact display.
      */
     public String getShortUuid() {
-        return uuid.toString().substring(0, 7);
+        return uuid.toString().substring(0, SHORT_UUID_LENGTH);
     }
 
     public Name getName() {

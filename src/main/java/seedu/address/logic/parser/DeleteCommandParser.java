@@ -4,14 +4,15 @@ import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Person;
 
 /**
  * Parses input arguments and creates a new DeleteCommand object
  */
 public class DeleteCommandParser implements Parser<DeleteCommand> {
 
-    /** A short UUID is the first 7 hexadecimal characters of a person's UUID. */
-    private static final String SHORT_UUID_REGEX = "[0-9a-fA-F]{7}";
+    /** A short UUID is the first {@value Person#SHORT_UUID_LENGTH} hexadecimal characters of a person's UUID. */
+    private static final String SHORT_UUID_REGEX = "[0-9a-fA-F]{" + Person.SHORT_UUID_LENGTH + "}";
 
     /**
      * Parses the given {@code String} of arguments in the context of the DeleteCommand

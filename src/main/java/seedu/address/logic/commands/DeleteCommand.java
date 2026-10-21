@@ -19,7 +19,7 @@ public class DeleteCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Deletes the person identified by the short UUID shown on the person's card.\n"
-            + "Parameters: SHORT_UUID (7 hexadecimal characters)\n"
+            + "Parameters: SHORT_UUID (" + Person.SHORT_UUID_LENGTH + " hexadecimal characters)\n"
             + "Example: " + COMMAND_WORD + " 1a2b3c4";
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted person: %1$s";
