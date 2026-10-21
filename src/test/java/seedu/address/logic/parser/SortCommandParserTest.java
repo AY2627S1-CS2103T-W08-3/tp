@@ -38,8 +38,10 @@ public class SortCommandParserTest {
         new SortCommand(SortOrder.DESCENDING).execute(expectedModel);
         expectedModel.updateFilteredPersonList(person -> person.getName().fullName.equals("Zoe"));
 
-        for (String input : new String[] {"sort", "sort A-Z extra", "sort invalid"}) {
-            assertThrows(ParseException.class, () -> new AddressBookParser().parseCommand(input).execute(model));
+        for (String input : new String[] {"sort", "sort A-Z extra", "sort Z-A extra", "sort invalid"}) {
+            ParseException error = assertThrows(
+                    ParseException.class, () -> new AddressBookParser().parseCommand(input).execute(model));
+            assertEquals(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE), error.getMessage());
             assertEquals(expectedModel, model);
         }
     }
@@ -51,9 +53,24 @@ public class SortCommandParserTest {
     }
 
     @Test
-    public void parse_missingOrInvalidDirection_throwsParseException() {
+    public void parse_missingDirection_throwsParseException() {
         String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
-        for (String input : new String[] {"", "   ", "a-z", "ascending", "A-Z Z-A", "A-Z extra"}) {
+        assertParseFailure(parser, "", message);
+        assertParseFailure(parser, "   ", message);
+    }
+
+    @Test
+    public void parse_unsupportedDirection_throwsParseException() {
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
+        for (String input : new String[] {"a-z", "z-a", "ascending", "descending", "123", "A Z"}) {
+            assertParseFailure(parser, input, message);
+        }
+    }
+
+    @Test
+    public void parse_extraArguments_throwsParseException() {
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
+        for (String input : new String[] {"A-Z Z-A", "A-Z extra", "Z-A extra"}) {
             assertParseFailure(parser, input, message);
         }
     }
