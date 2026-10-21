@@ -114,6 +114,10 @@ How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
+The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteCommand`. Its parser accepts a
+case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
+person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 

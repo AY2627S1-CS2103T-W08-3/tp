@@ -32,7 +32,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `delete 1a2b3c4` : Deletes the contact whose card shows the short UUID `#1a2b3c4`.
 
-   * `remark 1 r/Likes to swim.` : Adds a remark to the 1st person.
+   * `remark 1a2b3c4 r/Likes to swim.` : Adds a remark to the contact whose card shows `#1a2b3c4`.
 
    * `clear` : Deletes all contacts.
 
@@ -139,16 +139,17 @@ Examples:
 
 Adds or updates a remark for an existing person in the address book. The existing remark will be overwritten.
 
-Format: `remark INDEX r/REMARK`
+Format: `remark SHORT_UUID r/REMARK`
 
-* Updates the remark of the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
-* The index **must be a positive integer** 1, 2, 3, …​
+* Updates the remark of the person whose short UUID matches `SHORT_UUID`.
+* The short UUID is the 7-character code shown as `#xxxxxxx` on the person's card.
+* `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
+* The match is made against every person in the address book, not just the currently displayed list.
 * To remove an existing remark, enter `r/` without any text after it.
 
 Examples:
-* `remark 1 r/Likes to swim.` adds a remark to the 1st person.
-* `remark 2 r/` removes the remark from the 2nd person.
+* `remark 1a2b3c4 r/Likes to swim.` adds a remark to the contact whose card shows `#1a2b3c4`.
+* `remark 1a2b3c4 r/` removes the remark from the contact whose card shows `#1a2b3c4`.
 ### Name typo warnings
 
 When adding a person or editing a person's name, AddressBook compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match.
@@ -268,5 +269,5 @@ Action | Format, Examples
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
 **Sort** | `sort A-Z` or `sort Z-A`
-**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 1 r/Likes to swim.`
+**Remark** | `remark SHORT_UUID r/REMARK`<br> e.g., `remark 1a2b3c4 r/Likes to swim.`
 **Help** | `help`
