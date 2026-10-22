@@ -224,6 +224,26 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+### Restoring a deleted person: `undelete`
+
+Restores the most recently deleted person, in case you deleted the wrong one.
+
+Format: `undelete`
+
+* The person is restored with the same short UUID, at the position in the list they were deleted from.
+* Running `undelete` again restores the person deleted before that, and so on, back to the first delete since the app was opened.
+* After a restore, the list shows all persons, so the restored person is always visible.
+* `undelete` only reverses `delete`. It does not reverse `clear`, `add`, `edit` or other commands.
+* Deleted persons can only be restored until the app is closed.
+* `undelete` takes no parameters. Anything typed after it is treated as an invalid command format.
+
+Examples:
+* `delete 1a2b3c4` followed by `undelete` restores the person whose card showed `#1a2b3c4`.
+
+Errors:
+* If there is no deleted person to restore, the command fails with `No deleted persons to restore.`
+* If a person with the same name has been added since the delete, the command fails and nothing is restored. Rename that person with `edit`, then run `undelete` again.
+
 ### Exiting the program: `exit`
 
 Exits the program.

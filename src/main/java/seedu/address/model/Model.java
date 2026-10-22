@@ -83,4 +83,23 @@ public interface Model {
      * A null comparator restores the underlying address book order.
      */
     void updatePersonListComparator(Comparator<Person> comparator);
+
+    /**
+     * Returns true if a person removed with {@link #deletePerson(Person)} this session can still be restored.
+     */
+    boolean hasDeletedPersons();
+
+    /**
+     * Returns the most recently deleted person that has not been restored, without restoring them.
+     * @throws java.util.NoSuchElementException if there are no deleted persons to restore.
+     */
+    Person getLastDeletedPerson();
+
+    /**
+     * Restores the most recently deleted person to the position they were deleted from,
+     * and resets the filtered person list to show all persons.
+     * That person must not already exist in the address book.
+     * @throws java.util.NoSuchElementException if there are no deleted persons to restore.
+     */
+    void restoreLastDeletedPerson();
 }

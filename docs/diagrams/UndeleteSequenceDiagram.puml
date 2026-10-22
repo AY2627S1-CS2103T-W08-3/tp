@@ -1,0 +1,91 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant "u:UndeleteCommand" as UndeleteCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:ModelManager" as ModelManager MODEL_COLOR
+participant "deletedPersons:Deque" as Deque MODEL_COLOR
+participant ":AddressBook" as AddressBook MODEL_COLOR
+end box
+
+[-> LogicManager : execute("undelete")
+activate LogicManager
+
+note right of LogicManager : Parsing "undelete" into u\nis omitted for brevity.
+
+LogicManager -> UndeleteCommand : execute(m)
+activate UndeleteCommand
+
+UndeleteCommand -> ModelManager : hasDeletedPersons()
+activate ModelManager
+
+ModelManager --> UndeleteCommand : true
+deactivate ModelManager
+
+UndeleteCommand -> ModelManager : getLastDeletedPerson()
+activate ModelManager
+
+ModelManager -> Deque : element()
+activate Deque
+
+Deque --> ModelManager : last
+deactivate Deque
+
+ModelManager --> UndeleteCommand : p
+deactivate ModelManager
+
+UndeleteCommand -> ModelManager : hasPerson(p)
+activate ModelManager
+
+ModelManager --> UndeleteCommand : false
+deactivate ModelManager
+
+UndeleteCommand -> ModelManager : restoreLastDeletedPerson()
+activate ModelManager
+
+ModelManager -> Deque : element()
+activate Deque
+
+Deque --> ModelManager : last
+deactivate Deque
+
+ModelManager -> AddressBook : addPerson(index, p)
+activate AddressBook
+
+AddressBook --> ModelManager
+deactivate AddressBook
+
+ModelManager -> Deque : pop()
+activate Deque
+
+Deque --> ModelManager
+deactivate Deque
+
+ModelManager -> ModelManager : updateFilteredPersonList(\nPREDICATE_SHOW_ALL_PERSONS)
+activate ModelManager
+
+ModelManager --> ModelManager
+deactivate ModelManager
+
+ModelManager --> UndeleteCommand
+deactivate ModelManager
+
+create CommandResult
+UndeleteCommand -> CommandResult
+activate CommandResult
+
+CommandResult --> UndeleteCommand
+deactivate CommandResult
+
+UndeleteCommand --> LogicManager : r
+deactivate UndeleteCommand
+
+[<--LogicManager
+deactivate LogicManager
+@enduml

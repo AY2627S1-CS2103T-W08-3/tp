@@ -23,6 +23,7 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RemarkCommand;
 import seedu.address.logic.commands.SortCommand;
+import seedu.address.logic.commands.UndeleteCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
@@ -60,6 +61,13 @@ public class AddressBookParserTest {
         DeleteCommand command = (DeleteCommand) parser.parseCommand(
                 DeleteCommand.COMMAND_WORD + " 1a2b3c4");
         assertEquals(new DeleteCommand("1a2b3c4"), command);
+    }
+
+    @Test
+    public void parseCommand_undelete() throws Exception {
+        assertEquals(new UndeleteCommand(), parser.parseCommand(UndeleteCommand.COMMAND_WORD));
+        assertThrows(ParseException.class, String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                UndeleteCommand.MESSAGE_USAGE), () -> parser.parseCommand(UndeleteCommand.COMMAND_WORD + " 3"));
     }
 
     @Test
