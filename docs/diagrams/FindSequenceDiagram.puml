@@ -1,48 +1,44 @@
 @startuml
 !include style.puml
 skinparam ArrowFontStyle plain
-skinparam DefaultFontSize 18
+skinparam DefaultFontSize 22
+skinparam TitleFontSize 24
 skinparam Sequence {
-    ArrowFontSize 18
-    ParticipantFontSize 18
-    BoxFontSize 18
+    ArrowFontSize 22
+    ParticipantFontSize 22
+    BoxFontSize 22
+    MessageAlign left
 }
-skinparam NoteFontSize 18
+skinparam NoteFontSize 22
 skinparam ParticipantPadding 0
 
-title Find clients by name or tag (successful search)
+title Find clients by name or tag\ninput = "find Alice t/friends"
 
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
-participant ":FindCommandParser" as FindCommandParser LOGIC_COLOR
-participant "f:FindCommand" as FindCommand LOGIC_COLOR
-participant "r:CommandResult" as CommandResult LOGIC_COLOR
+participant ":Logic\nManager" as LogicManager LOGIC_COLOR
+participant ":AddressBook\nParser" as AddressBookParser LOGIC_COLOR
+participant ":FindCommand\nParser" as FindCommandParser LOGIC_COLOR
+participant "f:Find\nCommand" as FindCommand LOGIC_COLOR
+participant "r:Command\nResult" as CommandResult LOGIC_COLOR
 end box
 
 box Model MODEL_COLOR_T1
-participant "m:ModelManager" as Model MODEL_COLOR
+participant "m:Model\nManager" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute(\n"find Alice t/friends")
+[-> LogicManager : execute(input)
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand(\n"find Alice t/friends")
+LogicManager -> AddressBookParser : parseCommand(\ninput)
 activate AddressBookParser
 
 create FindCommandParser
-AddressBookParser -> FindCommandParser : new\nFindCommandParser()
+AddressBookParser -> FindCommandParser : new
 AddressBookParser -> FindCommandParser : parse(\n" Alice t/friends")
 activate FindCommandParser
 
-note right of FindCommandParser
-Tokenize and validate arguments.
-Create predicate p for
-name "Alice" OR tag "friends".
-end note
-
 create FindCommand
-FindCommandParser -> FindCommand : new FindCommand(p)
+FindCommandParser -> FindCommand : new\nFindCommand(p)
 activate FindCommand
 FindCommand --> FindCommandParser : f
 deactivate FindCommand
@@ -56,26 +52,18 @@ deactivate AddressBookParser
 LogicManager -> FindCommand : execute(m)
 activate FindCommand
 
-FindCommand -> Model : updateFilteredPersonList(p)
+FindCommand -> Model : updateFiltered\nPersonList(p)
 activate Model
-note left of Model
-Apply p to the full client list.
-The UI observes the results.
-end note
 Model --> FindCommand
 deactivate Model
 
-FindCommand -> Model : getFilteredPersonList()
+FindCommand -> Model : getFiltered\nPersonList()
 activate Model
-Model --> FindCommand : filtered and\nsorted clients
+Model --> FindCommand : clients\n(N matches)
 deactivate Model
 
-note over FindCommand
-N = returnedList.size()
-end note
-
 create CommandResult
-FindCommand -> CommandResult : new CommandResult(\n"N person(s) listed!")
+FindCommand -> CommandResult : new CommandResult(\n"N person(s)\nlisted!")
 activate CommandResult
 CommandResult --> FindCommand : r
 deactivate CommandResult
