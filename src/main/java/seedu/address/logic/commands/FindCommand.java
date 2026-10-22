@@ -26,7 +26,11 @@ public class FindCommand extends Command {
 
     private final Predicate<Person> predicate;
 
+    /**
+     * Creates a find command with the given non-null search {@code predicate}.
+     */
     public FindCommand(Predicate<Person> predicate) {
+        assert predicate != null : "Find command requires a search predicate";
         this.predicate = predicate;
     }
 
