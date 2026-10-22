@@ -2,8 +2,10 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,43 @@ public class SortCommandTest {
     private final Person zoe = new PersonBuilder().withName("Zoe").build();
     private final Person alice = new PersonBuilder().withName("alice").build();
     private final Person bob = new PersonBuilder().withName("Bob").build();
+
+    @Test
+    public void constructor_nullSortOrder_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new SortCommand(null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        SortCommand command = new SortCommand(SortCommand.SortOrder.ASCENDING);
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
+
+    @Test
+    public void execute_modelDoesNotApplyComparator_throwsAssertionError() {
+        Model model = new ModelManager() {
+            @Override
+            public void updatePersonListComparator(Comparator<Person> comparator) {
+                // Simulates a model bug: the requested comparator is ignored.
+            }
+        };
+        model.addPerson(zoe);
+        model.addPerson(alice);
+        SortCommand command = new SortCommand(SortCommand.SortOrder.ASCENDING);
+
+        AssertionError error = assertThrows(AssertionError.class, () -> command.execute(model));
+        assertEquals("Displayed contacts must follow the sort order", error.getMessage());
+    }
+
+    @Test
+    public void execute_singleContact_successInBothDirections() {
+        Model model = new ModelManager();
+        model.addPerson(alice);
+        for (SortCommand.SortOrder order : SortCommand.SortOrder.values()) {
+            new SortCommand(order).execute(model);
+            assertEquals(List.of(alice), model.getFilteredPersonList());
+        }
+    }
 
     @Test
     public void execute_descendingThenAscending_changesDirectionWithoutChangingData() throws Exception {

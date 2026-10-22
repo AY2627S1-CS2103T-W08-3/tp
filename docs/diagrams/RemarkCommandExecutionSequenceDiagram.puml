@@ -1,0 +1,38 @@
+@startuml
+!include style.puml
+
+skinparam ArrowFontStyle plain
+
+mainframe sd execute RemarkCommand
+
+participant "r:RemarkCommand" as RemarkCommand LOGIC_COLOR
+participant "m:Model" as Model MODEL_COLOR
+participant "p:Person" as Person MODEL_COLOR
+participant "result:CommandResult" as CommandResult LOGIC_COLOR
+
+[-> RemarkCommand : execute(m)
+activate RemarkCommand
+
+RemarkCommand -> Model : getPersonsByShortUuid("1a2b3c4")
+activate Model
+Model --> RemarkCommand : matching persons
+deactivate Model
+
+create Person
+RemarkCommand -> Person : Person(...)
+activate Person
+Person --> RemarkCommand
+deactivate Person
+
+RemarkCommand -> Model : setPerson(old, edited)
+RemarkCommand -> Model : updateFilteredPersonList(show all)
+
+create CommandResult
+RemarkCommand -> CommandResult : CommandResult(...)
+activate CommandResult
+CommandResult --> RemarkCommand
+deactivate CommandResult
+
+[<--RemarkCommand : result
+deactivate RemarkCommand
+@enduml

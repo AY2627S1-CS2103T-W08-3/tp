@@ -2,21 +2,26 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
-import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
-import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
-import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
-import org.junit.jupiter.api.Test;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.AbstractList;
+import java.util.Collections;
+import java.util.List;
 
-import seedu.address.commons.core.index.Index;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
 import seedu.address.logic.Messages;
 import seedu.address.logic.parser.ParserUtil;
+import seedu.address.logic.parser.RemarkCommandParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
@@ -34,13 +39,77 @@ public class RemarkCommandTest {
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
+    public void constructor_invalidUuid_throwsIllegalArgumentException() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+
+        assertThrows(IllegalArgumentException.class, () -> new RemarkCommand("invalid", remark));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+        RemarkCommand command = new RemarkCommand("aaaaaaa", remark);
+
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
+
+    @Test
+    public void execute_invalidMatchCount_throwsAssertionError() throws ParseException {
+        Person person = model.getPersonsByShortUuid("aaaaaaa").get(0);
+        List<Person> unstableMatches = new AbstractList<>() {
+            private int sizeCallCount;
+
+            @Override
+            public Person get(int index) {
+                return person;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+
+            @Override
+            public int size() {
+                return sizeCallCount++ == 0 ? 1 : 2;
+            }
+        };
+        Model invalidModel = createModelReturningMatches(unstableMatches);
+        RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
+
+        assertThrows(AssertionError.class, () -> command.execute(invalidModel));
+    }
+
+    @Test
+    public void execute_nullMatch_throwsAssertionError() throws ParseException {
+        Model invalidModel = createModelReturningMatches(Collections.singletonList(null));
+        RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
+
+        assertThrows(AssertionError.class, () -> command.execute(invalidModel));
+    }
+
+    @Test
+    public void generateSuccessMessage_nullPerson_throwsAssertionError()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ParseException {
+        RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
+        Method generateSuccessMessage = RemarkCommand.class
+                .getDeclaredMethod("generateSuccessMessage", Person.class);
+        generateSuccessMessage.setAccessible(true);
+
+        Executable generateMessage = () -> generateSuccessMessage.invoke(command, new Object[] {null});
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, generateMessage);
+
+        assertTrue(exception.getCause() instanceof AssertionError);
+    }
+
+    @Test
     public void execute_nonEmptyRemark_success() throws ParseException {
         final Remark remark = ParserUtil.parseRemark("Some remark");
-        RemarkCommand command = new RemarkCommand(INDEX_FIRST_PERSON, remark);
-        PersonBuilder personBuilder = new PersonBuilder(model.getFilteredPersonList()
-                .get(INDEX_FIRST_PERSON.getZeroBased()));
+        String targetUuid = "aaaaaaa";
+        RemarkCommand command = new RemarkCommand(targetUuid, remark);
+        PersonBuilder personBuilder = new PersonBuilder(model.getPersonsByShortUuid(targetUuid).get(0));
         PersonBuilder editedPersonBuilder = personBuilder.withRemark(remark.value);
-        Person originalPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person originalPerson = model.getPersonsByShortUuid(targetUuid).get(0);
         Person editedPerson = editedPersonBuilder.build();
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         expectedModel.setPerson(originalPerson, editedPerson);
@@ -50,13 +119,23 @@ public class RemarkCommandTest {
                         Messages.format(editedPerson)), expectedModel);
     }
 
+    private static Model createModelReturningMatches(List<Person> matches) {
+        return new ModelManager(getTypicalAddressBook(), new UserPrefs()) {
+            @Override
+            public List<Person> getPersonsByShortUuid(String shortUuid) {
+                return matches;
+            }
+        };
+    }
+
     @Test
     public void execute_filteredList_success() throws ParseException {
-        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+        model.updateFilteredPersonList(person -> false);
 
-        Person originalPerson = model.getFilteredPersonList().get(0);
+        String targetUuid = "aaaaaaa";
+        Person originalPerson = model.getPersonsByShortUuid(targetUuid).get(0);
         Remark remark = ParserUtil.parseRemark("Updated remark");
-        RemarkCommand command = new RemarkCommand(INDEX_FIRST_PERSON, remark);
+        RemarkCommand command = new RemarkCommand(targetUuid, remark);
         Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(originalPerson, editedPerson);
@@ -71,8 +150,9 @@ public class RemarkCommandTest {
     @Test
     public void execute_emptyRemark_success() throws ParseException {
         final Remark remark = ParserUtil.parseRemark("");
-        RemarkCommand command = new RemarkCommand(INDEX_FIRST_PERSON, remark);
-        Person originalPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        String targetUuid = "aaaaaaa";
+        RemarkCommand command = new RemarkCommand(targetUuid, remark);
+        Person originalPerson = model.getPersonsByShortUuid(targetUuid).get(0);
         Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         expectedModel.setPerson(originalPerson, editedPerson);
@@ -83,20 +163,44 @@ public class RemarkCommandTest {
     }
 
     @Test
-    public void execute_invalidIndex_failure() throws ParseException {
-        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
-        RemarkCommand command = new RemarkCommand(outOfBoundIndex, ParserUtil.parseRemark("Some remark"));
+    public void execute_invalidUuid_failure() throws ParseException {
+        RemarkCommand command = new RemarkCommand("9999999", ParserUtil.parseRemark("Some remark"));
 
-        assertCommandFailure(command, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        assertCommandFailure(command, model,
+                String.format(RemarkCommand.MESSAGE_NO_PERSON_WITH_UUID, "9999999"));
+    }
+
+    @Test
+    public void execute_ambiguousUuid_failure() throws ParseException {
+        Model ambiguousModel = new ModelManager(new AddressBook(), new UserPrefs());
+        ambiguousModel.addPerson(new PersonBuilder()
+                .withName("Alice")
+                .withUuid("1a2b3c4d-0000-0000-0000-000000000001").build());
+        ambiguousModel.addPerson(new PersonBuilder()
+                .withName("Bob")
+                .withUuid("1a2b3c4d-0000-0000-0000-000000000002").build());
+        RemarkCommand command = new RemarkCommand("1a2b3c4", ParserUtil.parseRemark("Some remark"));
+
+        assertCommandFailure(command, ambiguousModel,
+                String.format(RemarkCommand.MESSAGE_AMBIGUOUS_UUID, "1a2b3c4"));
+    }
+
+    @Test
+    public void equals_mixedCaseUuidInput_normalisedToLowercase() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+        RemarkCommand parsedCommand = new RemarkCommandParser().parse("1A2b3C4 r/Some remark");
+        RemarkCommand expectedCommand = new RemarkCommand("1a2b3c4", remark);
+
+        assertTrue(parsedCommand.equals(expectedCommand));
     }
 
     @Test
     public void equals() throws ParseException {
         final Remark remark = ParserUtil.parseRemark(VALID_REMARK_AMY);
-        final RemarkCommand standardCommand = new RemarkCommand(INDEX_FIRST_PERSON, remark);
+        final RemarkCommand standardCommand = new RemarkCommand("aaaaaaa", remark);
 
         // same values -> returns true
-        RemarkCommand commandWithSameValues = new RemarkCommand(INDEX_FIRST_PERSON, remark);
+        RemarkCommand commandWithSameValues = new RemarkCommand("aaaaaaa", remark);
         assertTrue(standardCommand.equals(commandWithSameValues));
 
         // same object -> returns true
@@ -108,11 +212,11 @@ public class RemarkCommandTest {
         // different types -> returns false
         assertFalse(standardCommand.equals(new ClearCommand()));
 
-        // different index -> returns false
-        assertFalse(standardCommand.equals(new RemarkCommand(INDEX_SECOND_PERSON, remark)));
+        // different UUID -> returns false
+        assertFalse(standardCommand.equals(new RemarkCommand("bbbbbbb", remark)));
 
         // different remark -> returns false
         final Remark remarkSecond = ParserUtil.parseRemark(VALID_REMARK_BOB);
-        assertFalse(standardCommand.equals(new RemarkCommand(INDEX_FIRST_PERSON, remarkSecond)));
+        assertFalse(standardCommand.equals(new RemarkCommand("aaaaaaa", remarkSecond)));
     }
 }

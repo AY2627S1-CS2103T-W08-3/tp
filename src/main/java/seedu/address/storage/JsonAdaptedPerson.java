@@ -5,11 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -25,6 +27,14 @@ import seedu.address.model.tag.Tag;
 class JsonAdaptedPerson {
 
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Person's %s field is missing!";
+    public static final String MESSAGE_INVALID_UUID =
+            "Person's uuid field must be 32 hexadecimal digits in the form xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx";
+
+    /** {@code UUID.fromString} accepts shortened groups such as "1-1-1-1-1", so the canonical form is checked first. */
+    private static final String UUID_VALIDATION_REGEX =
+            "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
+
+    private static final Logger logger = LogsCenter.getLogger(JsonAdaptedPerson.class);
 
     private final String uuid;
     private final String name;
@@ -79,8 +89,7 @@ class JsonAdaptedPerson {
             personTags.add(tag.toModelType());
         }
 
-        // A legacy save (written before UUIDs existed) has no uuid field; mint one so old data still loads.
-        final UUID modelUuid = (uuid == null || uuid.isEmpty()) ? UUID.randomUUID() : UUID.fromString(uuid);
+        final UUID modelUuid = toModelUuid();
 
         if (name == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Name.class.getSimpleName()));
@@ -122,6 +131,26 @@ class JsonAdaptedPerson {
         final Set<Tag> modelTags = new HashSet<>(personTags);
 
         return new Person(modelUuid, modelName, modelPhone, modelEmail, modelAddress, modelRemark, modelTags);
+    }
+
+    /**
+     * Converts the stored uuid into a {@code UUID}, generating a new one for a legacy save with no uuid field.
+     *
+     * @throws IllegalValueException if the stored uuid is not in canonical UUID form.
+     */
+    private UUID toModelUuid() throws IllegalValueException {
+        if (uuid == null || uuid.isEmpty()) {
+            logger.info("Person " + name + " has no saved uuid; generating a new one");
+            return UUID.randomUUID();
+        }
+        if (!isValidUuid(uuid)) {
+            throw new IllegalValueException(MESSAGE_INVALID_UUID);
+        }
+        return UUID.fromString(uuid);
+    }
+
+    private static boolean isValidUuid(String test) {
+        return test.matches(UUID_VALIDATION_REGEX);
     }
 
 }

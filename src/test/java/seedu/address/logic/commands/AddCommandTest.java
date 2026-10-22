@@ -133,7 +133,7 @@ public class AddCommandTest {
         }
 
         @Override
-        public List<Person> getPersonsByShortUuid(String shortUuid) {
+        public List<Person> getPersonsByUuidPrefix(String uuidPrefix) {
             throw new AssertionError("This method should not be called.");
         }
 

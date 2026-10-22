@@ -9,7 +9,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -97,12 +96,11 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public List<Person> getPersonsByShortUuid(String shortUuid) {
-        requireNonNull(shortUuid);
-        String normalised = shortUuid.toLowerCase();
+    public List<Person> getPersonsByUuidPrefix(String uuidPrefix) {
+        requireNonNull(uuidPrefix);
         return addressBook.getPersonList().stream()
-                .filter(person -> person.getUuid().toString().toLowerCase().startsWith(normalised))
-                .collect(Collectors.toList());
+                .filter(person -> person.hasUuidPrefix(uuidPrefix))
+                .toList();
     }
 
     @Override

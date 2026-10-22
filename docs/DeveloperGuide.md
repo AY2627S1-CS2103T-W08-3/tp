@@ -114,6 +114,26 @@ How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
+The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteCommand`. Its parser accepts a
+case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
+person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
+
+The following focused class diagrams document the two parts of the feature that are easy to miss in the generic
+`XYZCommand` diagrams above:
+
+<img src="images/ParserClass.png" width="600"/>
+
+The `RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It lowercases
+the UUID before constructing the command, so UUID input is case-insensitive. Invalid UUIDs and duplicate prefixes are
+reported as parse errors before a command reaches the model.
+
+<img src="images/RemarkClass.png" width="600"/>
+
+`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It first checks that exactly
+one person matches the short UUID, creates an edited `Person` carrying over the unchanged fields, and asks the model
+to replace the old value. An empty remark is therefore represented by the same command path and removes the existing
+remark.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -156,6 +176,138 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 This section describes some noteworthy details on how certain features are implemented.
 
 ### Undelete feature
+### Find command
+
+The `find` command filters the displayed client list by name keywords and/or tags. The following sequence diagram shows a successful search using `find Alice t/friends`.
+
+![Sequence diagram for finding clients by name or tag](images/FindSequenceDiagram.png)
+
+1. `LogicManager` passes the command text to `AddressBookParser`, which delegates the arguments to `FindCommandParser`.
+2. `FindCommandParser` trims and normalizes whitespace, then uses `ArgumentTokenizer` to separate name keywords in the preamble from `t/` tag values. It validates each tag using `ParserUtil.parseTag()`.
+3. The parser creates a `NameContainsKeywordsPredicate` for a name-only search, or a `NameOrTagContainsKeywordsPredicate` when tags are supplied, and passes that predicate to a new `FindCommand`. Tag-only searches use the latter predicate with an empty name-keyword list.
+4. `FindCommand.execute(model)` calls `Model.updateFilteredPersonList(predicate)`. `ModelManager` sets the predicate on its internal `FilteredList`, applying the search to the full client list. Names match any keyword as a case-insensitive substring; tags match any complete tag value, also ignoring case. These conditions are combined with **OR**, so the example matches clients whose names contain `Alice` or whose tags include `friends`.
+5. The command reads the size of `Model.getFilteredPersonList()` and returns a `CommandResult` containing the number of matches, including zero when no clients match. The UI observes the filtered and sorted list and displays the matching clients.
+
+Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
+
+### Remark command
+
+The high-level sequence diagram below shows the parsing path for `remark 1a2b3c4 r/Likes to swim.`. The parser creates
+a command from the user's text and delegates the command's execution to a reference frame. The reference frame
+abstracts the detailed model interaction shown in the second diagram.
+
+![Remark command sequence diagram](images/RemarkSequenceDiagram.png)
+
+The following diagram expands the `execute RemarkCommand` reference frame. The command obtains the target from the
+complete address book, creates a replacement `Person`, updates the model's filtered list, and returns a
+`CommandResult`.
+
+![Remark command execution sequence diagram](images/RemarkCommandExecutionSequenceDiagram.png)
+
+If the UUID matches no person or more than one person, `RemarkCommand` throws a `CommandException` and does not
+replace any data. If the `r/` value is empty, the same successful path stores an empty `Remark`, which removes the
+displayed remark without requiring a separate command.
+### Add command
+
+#### Implementation
+
+The `add` command creates a new `Person` and stores it in the address book. It requires a name,
+phone number, email address, and postal address, while tags are optional and may be supplied more
+than once.
+
+The main classes involved in the implementation are shown in the following class diagram:
+
+<img src="images/AddCommandClassDiagram.png" width="650" />
+
+The `add` command flow is split into the following sequence diagrams:
+
+Parsing and validation:
+
+<img src="images/AddCommandParsingSequenceDiagram.png" width="800" />
+
+Execution and duplicate detection:
+
+<img src="images/AddCommandDuplicateSequenceDiagram.png" width="800" />
+
+Successful person addition:
+
+<img src="images/AddCommandSuccessSequenceDiagram.png" width="800" />
+
+How the `add` command works:
+
+1. `LogicManager` passes the user input to `AddressBookParser`, which creates an
+   `AddCommandParser` for the `add` command.
+2. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
+   that there is no non-empty preamble, and that non-tag prefixes are not repeated.
+3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
+   classes validate their respective constraints. The parser also creates an empty `Remark`
+   because a newly added person has no remark, then creates an `AddCommand` containing the
+   new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
+   in a `ParseException` instead.
+4. During execution, `AddCommand` asks the `Model` whether a person with the same identity
+   already exists. If so, it throws a `CommandException` and does not modify the address book.
+5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
+   `Model`, and returns a `CommandResult` containing the success message and any warning.
+
+### Sort command
+
+The `sort` command displays all contacts alphabetically by name, ignoring capitalization.
+It requires exactly one direction: `sort A-Z` selects ascending order, while `sort Z-A`
+selects descending order. Missing directions, unsupported values, and extra arguments
+produce a `ParseException` with usage instructions before the displayed list is changed.
+
+#### Implementation
+
+`AddressBookParser#parseCommand()` delegates sort arguments to `SortCommandParser#parse()`.
+The parser trims surrounding whitespace and creates a `SortCommand` with the corresponding
+`SortOrder` value, either `ASCENDING` or `DESCENDING`. The command stores this required,
+non-null direction in a final field.
+
+When `LogicManager` calls `SortCommand#execute(model)`, the command selects a comparator
+using `Person#getName().fullName` and `String.CASE_INSENSITIVE_ORDER`. Descending order
+uses the reversed comparator. The command then calls these model operations in order:
+
+1. `Model#updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)` removes any existing filter
+   so that all contacts are displayed.
+2. `Model#updatePersonListComparator(comparator)` applies the requested alphabetical order.
+
+`ModelManager` maintains a `FilteredList<Person>` over the address book's person list and
+a `SortedList<Person>` over that filtered list. `ModelManager#getFilteredPersonList()`
+exposes the sorted view to the UI. Updating its comparator notifies the observing
+`PersonListPanel`, so the command does not call the UI directly.
+
+Sorting changes the displayed order without rearranging the underlying address book.
+The comparator remains active during subsequent additions, edits, and searches in the
+same session. `list` shows all contacts while retaining the comparator. Restarting the
+application restores the saved order because the comparator is not persisted.
+
+#### Sequence diagram
+
+The following diagram illustrates the successful execution of `sort A-Z`.
+The object named `s` is the created `SortCommand`, `r` is its `CommandResult`, and `m`
+is the `ModelManager` supplied through the `Model` interface.
+
+![Sequence diagram for the successful sort A-Z command](images/SortSequenceDiagram.png)
+
+The editable PlantUML source is [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
+It uses the shared [diagram style](diagrams/style.puml).
+
+The diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
+Null checks, contact-count retrieval, assertions, logging, and subsequent storage
+interactions are omitted to keep the diagram focused on parsing and sorting.
+`sort Z-A` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
+
+#### Defensive checks
+
+`SortCommand` rejects a null sort order during construction
+and a null model before execution. Invalid user arguments are handled by `ParseException`,
+while assertions check internal postconditions: sorting preserves the contact count,
+displays all contacts, and produces the requested order. Assertions require `-ea` when
+running the application manually; normal input validation does not depend on assertions.
+Diagnostic messages at `FINE` level record the sort direction, contact count, completion,
+and rejected input format.
+
+### \[Proposed\] Undo/redo feature
 
 #### Implementation
 
@@ -374,27 +526,28 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 2a. The short UUID is not 7 hexadecimal characters (e.g. missing, too short, too long or contains non-hex characters).
+* 2a. The identifier is not 7 to 32 hexadecimal characters once dashes are removed (e.g. missing, too short, too long or contains non-hex characters).
 
     * 2a1. ClientConnect shows an invalid command format error with the correct usage.
-    * 2a2. User re-enters the command with a valid short UUID.
+    * 2a2. User re-enters the command with a valid identifier.
 
-      Steps 2a1-2a2 are repeated until the short UUID is valid.
+      Steps 2a1-2a2 are repeated until the identifier is valid.
       Use case resumes at step 3.
 
-* 2b. No client has the given short UUID.
+* 2b. No client's UUID starts with the given identifier.
 
-    * 2b1. ClientConnect shows "No person with UUID: &lt;short UUID&gt;".
-    * 2b2. User re-enters the command with a short UUID that exists.
+    * 2b1. ClientConnect shows "No person with UUID: &lt;identifier&gt;".
+    * 2b2. User re-enters the command with an identifier that exists.
 
       Steps 2b1-2b2 are repeated until a matching client is found.
       Use case resumes at step 3.
 
-* 2c. More than one client matches the given short UUID.
+* 2c. More than one client's UUID starts with the given identifier.
 
-    * 2c1. ClientConnect shows an ambiguity error asking the user to use a more specific identifier.
+    * 2c1. ClientConnect shows an ambiguity error listing the full UUID and name of each matching client.
+    * 2c2. User re-enters the command with enough characters of the intended client's UUID to tell the clients apart.
 
-      Use case resumes at step 2.
+      Use case resumes at step 3.
 
 **Use case: UC4 - Update an existing client's details**
 
@@ -507,10 +660,23 @@ testers are expected to do more *exploratory* testing.
       Expected: No person is deleted. The status message shows `No person with UUID: 9999999`.
 
    1. Test case: `delete 1`<br>
-      Expected: No person is deleted. The status message shows an invalid command format error, as a short UUID must be 7 hexadecimal characters.
+      Expected: No person is deleted. The status message shows an invalid command format error, as the identifier must be 7 to 32 hexadecimal characters.
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `delete 123456g` (contains a non-hex character)<br>
+   1. Other incorrect delete commands to try: `delete`, `delete x`, `delete 123456g` (contains a non-hex character), `delete 1a2b3c4 abc` (extra argument)<br>
       Expected: Similar to previous — an invalid command format error.
+
+1. Deleting one of two persons that share a short UUID
+
+   1. Prerequisites: Close the app. In `data/addressbook.json`, change the `uuid` of two persons so that both start with the same 7 characters but differ afterwards, e.g. `1a2b3c4d-1000-0000-0000-000000000000` and `1a2b3c4d-2000-0000-0000-000000000000`. Relaunch the app.
+
+   1. Test case: `delete 1a2b3c4`<br>
+      Expected: No person is deleted. The status message lists both persons' full UUIDs and names.
+
+   1. Test case: `delete 1a2b3c4d1`<br>
+      Expected: Only the first person is deleted.
+
+   1. Test case: `delete 1a2b3c4d-2000-0000-0000-000000000000` (the full UUID, with dashes)<br>
+      Expected: The second person is deleted.
 
 1. _{ more test cases …​ }_
 
@@ -549,6 +715,9 @@ testers are expected to do more *exploratory* testing.
 
 1. Dealing with missing/corrupted data files
 
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
+   1. Test case: Close the app. In `data/addressbook.json`, change one person's `uuid` to `not-a-uuid`. Relaunch the app.<br>
+      Expected: The app starts with an empty address book instead of crashing. The log shows that the data file could not be loaded.
+
+   1. _{Explain how to simulate other missing or corrupted data files and state the expected behavior.}_
 
 1. _{ more test cases …​ }_
