@@ -1,0 +1,79 @@
+@startuml
+!include style.puml
+
+skinparam ArrowFontStyle plain
+skinparam sequenceMessageAlign center
+hide footbox
+
+title Sorting contacts: sort A-Z
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":SortCommandParser" as SortCommandParser LOGIC_COLOR
+participant "s:SortCommand" as SortCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:ModelManager" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("sort A-Z")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("sort A-Z")
+activate AddressBookParser
+
+create SortCommandParser
+AddressBookParser -> SortCommandParser : SortCommandParser()
+activate SortCommandParser
+SortCommandParser --> AddressBookParser
+deactivate SortCommandParser
+
+AddressBookParser -> SortCommandParser : parse(" A-Z")
+activate SortCommandParser
+
+create SortCommand
+SortCommandParser -> SortCommand : SortCommand(ASCENDING)
+activate SortCommand
+SortCommand --> SortCommandParser
+deactivate SortCommand
+
+SortCommandParser --> AddressBookParser : s
+deactivate SortCommandParser
+
+AddressBookParser --> LogicManager : s
+deactivate AddressBookParser
+
+LogicManager -> SortCommand : execute(m)
+activate SortCommand
+
+SortCommand -> SortCommand : getComparator()
+activate SortCommand
+SortCommand --> SortCommand : comparator
+deactivate SortCommand
+
+SortCommand -> Model : updateFilteredPersonList(\nPREDICATE_SHOW_ALL_PERSONS)
+activate Model
+Model --> SortCommand
+deactivate Model
+
+SortCommand -> Model : updatePersonListComparator(\ncomparator)
+activate Model
+Model --> SortCommand
+deactivate Model
+
+create CommandResult
+SortCommand -> CommandResult : CommandResult(MESSAGE_SUCCESS)
+activate CommandResult
+CommandResult --> SortCommand
+deactivate CommandResult
+
+SortCommand --> LogicManager : r
+deactivate SortCommand
+
+[<-- LogicManager : r
+deactivate LogicManager
+
+@enduml

@@ -104,7 +104,27 @@ public class PersonTest {
     public void getShortUuid_returnsFirstSevenCharactersOfUuid() {
         // ALICE's UUID is "aaaaaaaa-0000-0000-0000-000000000000"
         assertEquals("aaaaaaa", ALICE.getShortUuid());
-        assertEquals(ALICE.getUuid().toString().substring(0, 7), ALICE.getShortUuid());
+        assertEquals(ALICE.getUuid().toString().substring(0, Person.SHORT_UUID_LENGTH), ALICE.getShortUuid());
+    }
+
+    @Test
+    public void hasUuidPrefix() {
+        // ALICE's UUID is "aaaaaaaa-0000-0000-0000-000000000000"
+
+        // short UUID -> returns true
+        assertTrue(ALICE.hasUuidPrefix("aaaaaaa"));
+
+        // prefix that crosses a dash in the UUID -> returns true
+        assertTrue(ALICE.hasUuidPrefix("aaaaaaaa0000"));
+
+        // full UUID without dashes -> returns true
+        assertTrue(ALICE.hasUuidPrefix("aaaaaaaa" + "0".repeat(24)));
+
+        // different prefix -> returns false
+        assertFalse(ALICE.hasUuidPrefix("bbbbbbb"));
+
+        // null -> throws NullPointerException
+        assertThrows(NullPointerException.class, () -> ALICE.hasUuidPrefix(null));
     }
 
     @Test

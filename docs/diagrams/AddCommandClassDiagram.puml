@@ -1,0 +1,37 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+package Logic {
+    Class "{abstract}\nCommand" as Command {
+        +execute(Model): CommandResult
+    }
+    Class AddCommand {
+        +COMMAND_WORD: String
+        +MESSAGE_USAGE: String
+        +execute(Model): CommandResult
+    }
+    Class AddCommandParser {
+        +parse(String): AddCommand
+    }
+    Class "<<interface>>\nParser" as Parser {
+        +parse(String): AddCommand
+    }
+    Class CommandResult
+    Class CommandException
+}
+
+package Model {
+    Class Person
+    Class "<<interface>>\nModel" as Model
+}
+
+AddCommand -up-|> Command
+AddCommandParser .up.|> Parser
+AddCommandParser ..> Person : <<create>>
+AddCommandParser ..> AddCommand : <<create>>
+AddCommand --> Person : stores >
+AddCommand .right.> Model : executes against >
+AddCommand ..> CommandResult : <<create>>
+AddCommand ..> CommandException : throws >
+@enduml

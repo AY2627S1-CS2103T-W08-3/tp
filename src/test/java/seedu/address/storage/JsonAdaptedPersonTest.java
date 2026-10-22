@@ -58,6 +58,25 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_invalidUuid_throwsIllegalValueException() {
+        // not a uuid at all
+        assertInvalidUuid("not-a-uuid");
+
+        // shortened groups, which UUID.fromString would otherwise accept
+        assertInvalidUuid("1-1-1-1-1");
+
+        // non-hexadecimal digit
+        assertInvalidUuid("1a2b3c4d-0000-0000-0000-00000000000g");
+    }
+
+    private static void assertInvalidUuid(String invalidUuid) {
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(invalidUuid, VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                                      VALID_ADDRESS, VALID_REMARK, VALID_TAGS);
+        assertThrows(IllegalValueException.class, JsonAdaptedPerson.MESSAGE_INVALID_UUID, person::toModelType);
+    }
+
+    @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedPerson person =
                 new JsonAdaptedPerson(VALID_UUID, INVALID_NAME, VALID_PHONE, VALID_EMAIL,
