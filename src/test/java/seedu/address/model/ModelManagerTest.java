@@ -69,6 +69,32 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void getPersonsByUuidPrefix_nullPrefix_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.getPersonsByUuidPrefix(null));
+    }
+
+    @Test
+    public void getPersonsByUuidPrefix_matchingPrefix_returnsOnlyMatchingPersons() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        assertEquals(List.of(ALICE), modelManager.getPersonsByUuidPrefix("aaaaaaa"));
+    }
+
+    @Test
+    public void getPersonsByUuidPrefix_personHiddenByFilter_returnsPerson() {
+        modelManager.addPerson(ALICE);
+        modelManager.updateFilteredPersonList(person -> false);
+        assertEquals(List.of(ALICE), modelManager.getPersonsByUuidPrefix("aaaaaaa"));
+    }
+
+    @Test
+    public void getPersonsByUuidPrefix_modifyList_throwsUnsupportedOperationException() {
+        modelManager.addPerson(ALICE);
+        assertThrows(UnsupportedOperationException.class, () -> modelManager.getPersonsByUuidPrefix("aaaaaaa")
+                .clear());
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
     }

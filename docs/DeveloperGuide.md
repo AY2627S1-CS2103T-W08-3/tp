@@ -538,27 +538,28 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 2a. The short UUID is not 7 hexadecimal characters (e.g. missing, too short, too long or contains non-hex characters).
+* 2a. The identifier is not 7 to 32 hexadecimal characters once dashes are removed (e.g. missing, too short, too long or contains non-hex characters).
 
     * 2a1. ClientConnect shows an invalid command format error with the correct usage.
-    * 2a2. User re-enters the command with a valid short UUID.
+    * 2a2. User re-enters the command with a valid identifier.
 
-      Steps 2a1-2a2 are repeated until the short UUID is valid.
+      Steps 2a1-2a2 are repeated until the identifier is valid.
       Use case resumes at step 3.
 
-* 2b. No client has the given short UUID.
+* 2b. No client's UUID starts with the given identifier.
 
-    * 2b1. ClientConnect shows "No person with UUID: &lt;short UUID&gt;".
-    * 2b2. User re-enters the command with a short UUID that exists.
+    * 2b1. ClientConnect shows "No person with UUID: &lt;identifier&gt;".
+    * 2b2. User re-enters the command with an identifier that exists.
 
       Steps 2b1-2b2 are repeated until a matching client is found.
       Use case resumes at step 3.
 
-* 2c. More than one client matches the given short UUID.
+* 2c. More than one client's UUID starts with the given identifier.
 
-    * 2c1. ClientConnect shows an ambiguity error asking the user to use a more specific identifier.
+    * 2c1. ClientConnect shows an ambiguity error listing the full UUID and name of each matching client.
+    * 2c2. User re-enters the command with enough characters of the intended client's UUID to tell the clients apart.
 
-      Use case resumes at step 2.
+      Use case resumes at step 3.
 
 **Use case: UC4 - Update an existing client's details**
 
@@ -671,10 +672,23 @@ testers are expected to do more *exploratory* testing.
       Expected: No person is deleted. The status message shows `No person with UUID: 9999999`.
 
    1. Test case: `delete 1`<br>
-      Expected: No person is deleted. The status message shows an invalid command format error, as a short UUID must be 7 hexadecimal characters.
+      Expected: No person is deleted. The status message shows an invalid command format error, as the identifier must be 7 to 32 hexadecimal characters.
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `delete 123456g` (contains a non-hex character)<br>
+   1. Other incorrect delete commands to try: `delete`, `delete x`, `delete 123456g` (contains a non-hex character), `delete 1a2b3c4 abc` (extra argument)<br>
       Expected: Similar to previous — an invalid command format error.
+
+1. Deleting one of two persons that share a short UUID
+
+   1. Prerequisites: Close the app. In `data/addressbook.json`, change the `uuid` of two persons so that both start with the same 7 characters but differ afterwards, e.g. `1a2b3c4d-1000-0000-0000-000000000000` and `1a2b3c4d-2000-0000-0000-000000000000`. Relaunch the app.
+
+   1. Test case: `delete 1a2b3c4`<br>
+      Expected: No person is deleted. The status message lists both persons' full UUIDs and names.
+
+   1. Test case: `delete 1a2b3c4d1`<br>
+      Expected: Only the first person is deleted.
+
+   1. Test case: `delete 1a2b3c4d-2000-0000-0000-000000000000` (the full UUID, with dashes)<br>
+      Expected: The second person is deleted.
 
 1. _{ more test cases …​ }_
 
@@ -682,6 +696,9 @@ testers are expected to do more *exploratory* testing.
 
 1. Dealing with missing/corrupted data files
 
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
+   1. Test case: Close the app. In `data/addressbook.json`, change one person's `uuid` to `not-a-uuid`. Relaunch the app.<br>
+      Expected: The app starts with an empty address book instead of crashing. The log shows that the data file could not be loaded.
+
+   1. _{Explain how to simulate other missing or corrupted data files and state the expected behavior.}_
 
 1. _{ more test cases …​ }_
