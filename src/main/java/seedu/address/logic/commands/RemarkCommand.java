@@ -62,7 +62,7 @@ public class RemarkCommand extends Command {
         requireNonNull(model);
         logger.info("Executing remark command for UUID: " + targetUuid);
 
-        List<Person> matches = requireNonNull(model.getPersonsByShortUuid(targetUuid));
+        List<Person> matches = requireNonNull(model.getPersonsByUuidPrefix(targetUuid));
         if (matches.isEmpty()) {
             logger.warning("No person found for remark command UUID: " + targetUuid);
             throw new CommandException(String.format(MESSAGE_NO_PERSON_WITH_UUID, targetUuid));

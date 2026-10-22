@@ -55,7 +55,7 @@ public class RemarkCommandTest {
 
     @Test
     public void execute_invalidMatchCount_throwsAssertionError() throws ParseException {
-        Person person = model.getPersonsByShortUuid("aaaaaaa").get(0);
+        Person person = model.getPersonsByUuidPrefix("aaaaaaa").get(0);
         List<Person> unstableMatches = new AbstractList<>() {
             private int sizeCallCount;
 
@@ -107,9 +107,9 @@ public class RemarkCommandTest {
         final Remark remark = ParserUtil.parseRemark("Some remark");
         String targetUuid = "aaaaaaa";
         RemarkCommand command = new RemarkCommand(targetUuid, remark);
-        PersonBuilder personBuilder = new PersonBuilder(model.getPersonsByShortUuid(targetUuid).get(0));
+        PersonBuilder personBuilder = new PersonBuilder(model.getPersonsByUuidPrefix(targetUuid).get(0));
         PersonBuilder editedPersonBuilder = personBuilder.withRemark(remark.value);
-        Person originalPerson = model.getPersonsByShortUuid(targetUuid).get(0);
+        Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
         Person editedPerson = editedPersonBuilder.build();
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         expectedModel.setPerson(originalPerson, editedPerson);
@@ -122,7 +122,7 @@ public class RemarkCommandTest {
     private static Model createModelReturningMatches(List<Person> matches) {
         return new ModelManager(getTypicalAddressBook(), new UserPrefs()) {
             @Override
-            public List<Person> getPersonsByShortUuid(String shortUuid) {
+            public List<Person> getPersonsByUuidPrefix(String uuidPrefix) {
                 return matches;
             }
         };
@@ -133,7 +133,7 @@ public class RemarkCommandTest {
         model.updateFilteredPersonList(person -> false);
 
         String targetUuid = "aaaaaaa";
-        Person originalPerson = model.getPersonsByShortUuid(targetUuid).get(0);
+        Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
         Remark remark = ParserUtil.parseRemark("Updated remark");
         RemarkCommand command = new RemarkCommand(targetUuid, remark);
         Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
@@ -152,7 +152,7 @@ public class RemarkCommandTest {
         final Remark remark = ParserUtil.parseRemark("");
         String targetUuid = "aaaaaaa";
         RemarkCommand command = new RemarkCommand(targetUuid, remark);
-        Person originalPerson = model.getPersonsByShortUuid(targetUuid).get(0);
+        Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
         Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         expectedModel.setPerson(originalPerson, editedPerson);
