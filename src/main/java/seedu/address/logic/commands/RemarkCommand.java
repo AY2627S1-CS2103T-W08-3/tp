@@ -5,7 +5,9 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.List;
+import java.util.logging.Logger;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -34,15 +36,22 @@ public class RemarkCommand extends Command {
     public static final String MESSAGE_AMBIGUOUS_UUID =
             "Multiple persons match UUID: %s. Please use a more specific identifier.";
 
+    private static final String SHORT_UUID_REGEX = "[0-9a-fA-F]{7}";
+    private static final Logger logger = LogsCenter.getLogger(RemarkCommand.class);
+
     private final String targetUuid;
     private final Remark remark;
 
     /**
      * @param targetUuid short UUID of the person to edit the remark
      * @param remark of the person to be updated to
+     * @throws IllegalArgumentException if {@code targetUuid} is not 7 hexadecimal characters
      */
     public RemarkCommand(String targetUuid, Remark remark) {
         requireAllNonNull(targetUuid, remark);
+        if (!targetUuid.matches(SHORT_UUID_REGEX)) {
+            throw new IllegalArgumentException("Target UUID must contain exactly 7 hexadecimal characters.");
+        }
 
         this.targetUuid = targetUuid;
         this.remark = remark;
@@ -51,15 +60,21 @@ public class RemarkCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> matches = model.getPersonsByShortUuid(targetUuid);
+        logger.info("Executing remark command for UUID: " + targetUuid);
+
+        List<Person> matches = requireNonNull(model.getPersonsByShortUuid(targetUuid));
         if (matches.isEmpty()) {
+            logger.warning("No person found for remark command UUID: " + targetUuid);
             throw new CommandException(String.format(MESSAGE_NO_PERSON_WITH_UUID, targetUuid));
         }
         if (matches.size() > 1) {
+            logger.warning("Ambiguous UUID for remark command: " + targetUuid);
             throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuid));
         }
 
+        assert matches.size() == 1 : "A valid UUID must resolve to exactly one person";
         Person personToEdit = matches.get(0);
+        assert personToEdit != null : "The matching person must not be null";
         Person editedPerson = new Person(
                 personToEdit.getUuid(), personToEdit.getName(), personToEdit.getPhone(),
                 personToEdit.getEmail(), personToEdit.getAddress(), remark,
@@ -68,6 +83,7 @@ public class RemarkCommand extends Command {
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
+        logger.info("Updated remark for person with UUID: " + targetUuid);
         return new CommandResult(generateSuccessMessage(editedPerson));
     }
 
@@ -77,6 +93,8 @@ public class RemarkCommand extends Command {
      * {@code personToEdit}.
      */
     private String generateSuccessMessage(Person personToEdit) {
+        assert personToEdit != null : "The person used to generate a success message must not be null";
+
         String message = !remark.value.isEmpty() ? MESSAGE_ADD_REMARK_SUCCESS : MESSAGE_DELETE_REMARK_SUCCESS;
         return String.format(message, Messages.format(personToEdit));
     }

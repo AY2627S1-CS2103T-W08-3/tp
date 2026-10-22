@@ -118,6 +118,22 @@ The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteC
 case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
 person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
 
+The following focused class diagrams document the two parts of the feature that are easy to miss in the generic
+`XYZCommand` diagrams above:
+
+<img src="images/ParserClass.png" width="600"/>
+
+The `RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It lowercases
+the UUID before constructing the command, so UUID input is case-insensitive. Invalid UUIDs and duplicate prefixes are
+reported as parse errors before a command reaches the model.
+
+<img src="images/RemarkClass.png" width="600"/>
+
+`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It first checks that exactly
+one person matches the short UUID, creates an edited `Person` carrying over the unchanged fields, and asks the model
+to replace the old value. An empty remark is therefore represented by the same command path and removes the existing
+remark.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -173,6 +189,23 @@ The `find` command filters the displayed client list by name keywords and/or tag
 
 Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
 
+### Remark command
+
+The high-level sequence diagram below shows the parsing path for `remark 1a2b3c4 r/Likes to swim.`. The parser creates
+a command from the user's text and delegates the command's execution to a reference frame. The reference frame
+abstracts the detailed model interaction shown in the second diagram.
+
+![Remark command sequence diagram](images/RemarkSequenceDiagram.png)
+
+The following diagram expands the `execute RemarkCommand` reference frame. The command obtains the target from the
+complete address book, creates a replacement `Person`, updates the model's filtered list, and returns a
+`CommandResult`.
+
+![Remark command execution sequence diagram](images/RemarkCommandExecutionSequenceDiagram.png)
+
+If the UUID matches no person or more than one person, `RemarkCommand` throws a `CommandException` and does not
+replace any data. If the `r/` value is empty, the same successful path stores an empty `Remark`, which removes the
+displayed remark without requiring a separate command.
 ### Add command
 
 #### Implementation
@@ -214,6 +247,64 @@ How the `add` command works:
    already exists. If so, it throws a `CommandException` and does not modify the address book.
 5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
    `Model`, and returns a `CommandResult` containing the success message and any warning.
+
+### Sort feature
+
+The `sort` command displays all contacts alphabetically by name, ignoring capitalization.
+It requires exactly one direction: `sort A-Z` selects ascending order, while `sort Z-A`
+selects descending order. Missing directions, unsupported values, and extra arguments
+produce a `ParseException` with usage instructions before the displayed list is changed.
+
+#### Implementation
+
+`AddressBookParser#parseCommand()` delegates sort arguments to `SortCommandParser#parse()`.
+The parser trims surrounding whitespace and creates a `SortCommand` with the corresponding
+`SortOrder` value, either `ASCENDING` or `DESCENDING`. The command stores this required,
+non-null direction in a final field.
+
+When `LogicManager` calls `SortCommand#execute(model)`, the command selects a comparator
+using `Person#getName().fullName` and `String.CASE_INSENSITIVE_ORDER`. Descending order
+uses the reversed comparator. The command then calls these model operations in order:
+
+1. `Model#updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)` removes any existing filter
+   so that all contacts are displayed.
+2. `Model#updatePersonListComparator(comparator)` applies the requested alphabetical order.
+
+`ModelManager` maintains a `FilteredList<Person>` over the address book's person list and
+a `SortedList<Person>` over that filtered list. `ModelManager#getFilteredPersonList()`
+exposes the sorted view to the UI. Updating its comparator notifies the observing
+`PersonListPanel`, so the command does not call the UI directly.
+
+Sorting changes the displayed order without rearranging the underlying address book.
+The comparator remains active during subsequent additions, edits, and searches in the
+same session. `list` shows all contacts while retaining the comparator. Restarting the
+application restores the saved order because the comparator is not persisted.
+
+#### Sequence diagram
+
+The following diagram illustrates the successful execution of `sort A-Z`.
+The object named `s` is the created `SortCommand`, `r` is its `CommandResult`, and `m`
+is the `ModelManager` supplied through the `Model` interface.
+
+![Sequence diagram for the successful sort A-Z command](images/SortSequenceDiagram.png)
+
+The editable PlantUML source is [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
+It uses the shared [diagram style](diagrams/style.puml).
+
+The diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
+Null checks, contact-count retrieval, assertions, logging, and subsequent storage
+interactions are omitted to keep the diagram focused on parsing and sorting.
+`sort Z-A` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
+
+#### Defensive checks
+
+`SortCommand` rejects a null sort order during construction
+and a null model before execution. Invalid user arguments are handled by `ParseException`,
+while assertions check internal postconditions: sorting preserves the contact count,
+displays all contacts, and produces the requested order. Assertions require `-ea` when
+running the application manually; normal input validation does not depend on assertions.
+Diagnostic messages at `FINE` level record the sort direction, contact count, completion,
+and rejected input format.
 
 ### \[Proposed\] Undo/redo feature
 
