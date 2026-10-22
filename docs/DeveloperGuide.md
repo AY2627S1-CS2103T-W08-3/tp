@@ -175,6 +175,20 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Find command
+
+The `find` command filters the displayed client list by name keywords and/or tags. The following sequence diagram shows a successful search using `find Alice t/friends`.
+
+![Sequence diagram for finding clients by name or tag](images/FindSequenceDiagram.png)
+
+1. `LogicManager` passes the command text to `AddressBookParser`, which delegates the arguments to `FindCommandParser`.
+2. `FindCommandParser` trims and normalizes whitespace, then uses `ArgumentTokenizer` to separate name keywords in the preamble from `t/` tag values. It validates each tag using `ParserUtil.parseTag()`.
+3. The parser creates a `NameContainsKeywordsPredicate` for a name-only search, or a `NameOrTagContainsKeywordsPredicate` when tags are supplied, and passes that predicate to a new `FindCommand`. Tag-only searches use the latter predicate with an empty name-keyword list.
+4. `FindCommand.execute(model)` calls `Model.updateFilteredPersonList(predicate)`. `ModelManager` sets the predicate on its internal `FilteredList`, applying the search to the full client list. Names match any keyword as a case-insensitive substring; tags match any complete tag value, also ignoring case. These conditions are combined with **OR**, so the example matches clients whose names contain `Alice` or whose tags include `friends`.
+5. The command reads the size of `Model.getFilteredPersonList()` and returns a `CommandResult` containing the number of matches, including zero when no clients match. The UI observes the filtered and sorted list and displays the matching clients.
+
+Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
+
 ### Remark command
 
 The high-level sequence diagram below shows the parsing path for `remark 1a2b3c4 r/Likes to swim.`. The parser creates

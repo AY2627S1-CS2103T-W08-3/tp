@@ -1,0 +1,76 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam DefaultFontSize 22
+skinparam TitleFontSize 24
+skinparam Sequence {
+    ArrowFontSize 22
+    ParticipantFontSize 22
+    BoxFontSize 22
+    MessageAlign left
+}
+skinparam NoteFontSize 22
+skinparam ParticipantPadding 0
+
+title Find clients by name or tag\ninput = "find Alice t/friends"
+
+box Logic LOGIC_COLOR_T1
+participant ":Logic\nManager" as LogicManager LOGIC_COLOR
+participant ":AddressBook\nParser" as AddressBookParser LOGIC_COLOR
+participant ":FindCommand\nParser" as FindCommandParser LOGIC_COLOR
+participant "f:Find\nCommand" as FindCommand LOGIC_COLOR
+participant "r:Command\nResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model\nManager" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute(input)
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand(\ninput)
+activate AddressBookParser
+
+create FindCommandParser
+AddressBookParser -> FindCommandParser : new
+AddressBookParser -> FindCommandParser : parse(\n" Alice t/friends")
+activate FindCommandParser
+
+create FindCommand
+FindCommandParser -> FindCommand : new\nFindCommand(p)
+activate FindCommand
+FindCommand --> FindCommandParser : f
+deactivate FindCommand
+
+FindCommandParser --> AddressBookParser : f
+deactivate FindCommandParser
+
+AddressBookParser --> LogicManager : f
+deactivate AddressBookParser
+
+LogicManager -> FindCommand : execute(m)
+activate FindCommand
+
+FindCommand -> Model : updateFiltered\nPersonList(p)
+activate Model
+Model --> FindCommand
+deactivate Model
+
+FindCommand -> Model : getFiltered\nPersonList()
+activate Model
+Model --> FindCommand : clients\n(N matches)
+deactivate Model
+
+create CommandResult
+FindCommand -> CommandResult : new CommandResult(\n"N person(s)\nlisted!")
+activate CommandResult
+CommandResult --> FindCommand : r
+deactivate CommandResult
+
+FindCommand --> LogicManager : r
+deactivate FindCommand
+
+[<-- LogicManager : r
+deactivate LogicManager
+@enduml
