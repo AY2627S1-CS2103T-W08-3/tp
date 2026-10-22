@@ -177,11 +177,17 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Remark command
 
-The sequence diagram below shows the successful execution path for `remark 1a2b3c4 r/Likes to swim.`. The parser
-creates a command from the user's text; the command then obtains the target from the complete address book, creates a
-replacement `Person`, and updates the model's filtered list so the UI reflects the new remark.
+The high-level sequence diagram below shows the parsing path for `remark 1a2b3c4 r/Likes to swim.`. The parser creates
+a command from the user's text and delegates the command's execution to a reference frame. The reference frame
+abstracts the detailed model interaction shown in the second diagram.
 
 ![Remark command sequence diagram](images/RemarkSequenceDiagram.png)
+
+The following diagram expands the `execute RemarkCommand` reference frame. The command obtains the target from the
+complete address book, creates a replacement `Person`, updates the model's filtered list, and returns a
+`CommandResult`.
+
+![Remark command execution sequence diagram](images/RemarkCommandExecutionSequenceDiagram.png)
 
 If the UUID matches no person or more than one person, `RemarkCommand` throws a `CommandException` and does not
 replace any data. If the `r/` value is empty, the same successful path stores an empty `Remark`, which removes the
