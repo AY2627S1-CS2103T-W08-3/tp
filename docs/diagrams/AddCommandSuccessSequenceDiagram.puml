@@ -1,0 +1,52 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontSize 22
+skinparam SequenceMessageFontSize 20
+skinparam SequenceBoxFontSize 21
+skinparam ParticipantPadding 2
+skinparam Padding 0
+skinparam Participant {
+    Padding 8
+}
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant "a:AddCommand" as AddCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+participant ":Messages" as Messages LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("add ...")
+activate LogicManager
+LogicManager -> AddCommand : execute(m)
+activate AddCommand
+AddCommand -> Model : getAddressBook().getPersonList()
+activate Model
+Model --> AddCommand : existing persons
+deactivate Model
+AddCommand -> Messages : getSimilarNameWarning(...)
+activate Messages
+Messages --> AddCommand : warning or empty string
+deactivate Messages
+AddCommand -> Model : addPerson(toAdd)
+activate Model
+Model --> AddCommand : added
+deactivate Model
+AddCommand -> Messages : format(toAdd)
+activate Messages
+Messages --> AddCommand : formatted person
+deactivate Messages
+AddCommand -> CommandResult : create success result
+activate CommandResult
+CommandResult --> AddCommand : result
+deactivate CommandResult
+AddCommand --> LogicManager : success result
+deactivate AddCommand
+[<--LogicManager
+deactivate LogicManager
+@enduml

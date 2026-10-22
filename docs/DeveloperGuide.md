@@ -114,6 +114,10 @@ How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
+The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteCommand`. Its parser accepts a
+case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
+person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
+
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -168,6 +172,48 @@ The `find` command filters the displayed client list by name keywords and/or tag
 5. The command reads the size of `Model.getFilteredPersonList()` and returns a `CommandResult` containing the number of matches, including zero when no clients match. The UI observes the filtered and sorted list and displays the matching clients.
 
 Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
+
+### Add command
+
+#### Implementation
+
+The `add` command creates a new `Person` and stores it in the address book. It requires a name,
+phone number, email address, and postal address, while tags are optional and may be supplied more
+than once.
+
+The main classes involved in the implementation are shown in the following class diagram:
+
+<img src="images/AddCommandClassDiagram.png" width="650" />
+
+The `add` command flow is split into the following sequence diagrams:
+
+Parsing and validation:
+
+<img src="images/AddCommandParsingSequenceDiagram.png" width="800" />
+
+Execution and duplicate detection:
+
+<img src="images/AddCommandDuplicateSequenceDiagram.png" width="800" />
+
+Successful person addition:
+
+<img src="images/AddCommandSuccessSequenceDiagram.png" width="800" />
+
+How the `add` command works:
+
+1. `LogicManager` passes the user input to `AddressBookParser`, which creates an
+   `AddCommandParser` for the `add` command.
+2. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
+   that there is no non-empty preamble, and that non-tag prefixes are not repeated.
+3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
+   classes validate their respective constraints. The parser also creates an empty `Remark`
+   because a newly added person has no remark, then creates an `AddCommand` containing the
+   new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
+   in a `ParseException` instead.
+4. During execution, `AddCommand` asks the `Model` whether a person with the same identity
+   already exists. If so, it throws a `CommandException` and does not modify the address book.
+5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
+   `Model`, and returns a `CommandResult` containing the success message and any warning.
 
 ### \[Proposed\] Undo/redo feature
 
