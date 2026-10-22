@@ -1,0 +1,34 @@
+@startuml
+!include style.puml
+
+skinparam arrowThickness 1.1
+skinparam arrowColor LOGIC_COLOR_T4
+skinparam classBackgroundColor LOGIC_COLOR
+
+Class "{abstract}\nCommand" as Command {
+  +execute(model: Model): CommandResult
+}
+Class RemarkCommand {
+  -targetUuid: String
+  -remark: Remark
+  +RemarkCommand(targetUuid: String, remark: Remark)
+  +execute(model: Model): CommandResult
+}
+Class "<<interface>>\nModel" as Model {
+  +getPersonsByShortUuid(shortUuid: String): List<Person>
+  +setPerson(target: Person, editedPerson: Person): void
+  +updateFilteredPersonList(predicate: Predicate<Person>): void
+}
+Class Person
+Class Remark
+Class CommandResult
+Class CommandException
+
+RemarkCommand -up-|> Command
+RemarkCommand ..> Model : <<use>>
+RemarkCommand ..> Person : <<create>>
+RemarkCommand --> "1" Remark : remark
+RemarkCommand ..> CommandResult : <<create>>
+RemarkCommand ..> CommandException : throws >
+Command ..> Model : <<use>>
+@enduml
