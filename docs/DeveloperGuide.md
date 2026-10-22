@@ -201,7 +201,7 @@ How the `add` command works:
 5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
    `Model`, and returns a `CommandResult` containing the success message and any warning.
 
-### Sort feature
+### Sort command
 
 The `sort` command displays all contacts alphabetically by name, ignoring capitalization.
 It requires exactly one direction: `sort A-Z` selects ascending order, while `sort Z-A`
