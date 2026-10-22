@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_REMARK_BOB;
@@ -9,7 +10,14 @@ import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.AbstractList;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import seedu.address.logic.Messages;
 import seedu.address.logic.parser.ParserUtil;
@@ -31,6 +39,70 @@ public class RemarkCommandTest {
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
+    public void constructor_invalidUuid_throwsIllegalArgumentException() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+
+        assertThrows(IllegalArgumentException.class, () -> new RemarkCommand("invalid", remark));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() throws ParseException {
+        Remark remark = ParserUtil.parseRemark("Some remark");
+        RemarkCommand command = new RemarkCommand("aaaaaaa", remark);
+
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
+
+    @Test
+    public void execute_invalidMatchCount_throwsAssertionError() throws ParseException {
+        Person person = model.getPersonsByShortUuid("aaaaaaa").get(0);
+        List<Person> unstableMatches = new AbstractList<>() {
+            private int sizeCallCount;
+
+            @Override
+            public Person get(int index) {
+                return person;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+
+            @Override
+            public int size() {
+                return sizeCallCount++ == 0 ? 1 : 2;
+            }
+        };
+        Model invalidModel = createModelReturningMatches(unstableMatches);
+        RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
+
+        assertThrows(AssertionError.class, () -> command.execute(invalidModel));
+    }
+
+    @Test
+    public void execute_nullMatch_throwsAssertionError() throws ParseException {
+        Model invalidModel = createModelReturningMatches(Collections.singletonList(null));
+        RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
+
+        assertThrows(AssertionError.class, () -> command.execute(invalidModel));
+    }
+
+    @Test
+    public void generateSuccessMessage_nullPerson_throwsAssertionError()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ParseException {
+        RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
+        Method generateSuccessMessage = RemarkCommand.class
+                .getDeclaredMethod("generateSuccessMessage", Person.class);
+        generateSuccessMessage.setAccessible(true);
+
+        Executable generateMessage = () -> generateSuccessMessage.invoke(command, new Object[] {null});
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, generateMessage);
+
+        assertTrue(exception.getCause() instanceof AssertionError);
+    }
+
+    @Test
     public void execute_nonEmptyRemark_success() throws ParseException {
         final Remark remark = ParserUtil.parseRemark("Some remark");
         String targetUuid = "aaaaaaa";
@@ -45,6 +117,15 @@ public class RemarkCommandTest {
         assertCommandSuccess(command, model,
                 String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
                         Messages.format(editedPerson)), expectedModel);
+    }
+
+    private static Model createModelReturningMatches(List<Person> matches) {
+        return new ModelManager(getTypicalAddressBook(), new UserPrefs()) {
+            @Override
+            public List<Person> getPersonsByShortUuid(String shortUuid) {
+                return matches;
+            }
+        };
     }
 
     @Test
