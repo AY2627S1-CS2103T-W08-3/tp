@@ -1,0 +1,308 @@
+/*
+ * ClientConnect theme: red and white, flat, light.
+ * Colour tokens are defined once on .root and looked up everywhere else.
+ */
+.root {
+    -cc-red: #d31145;
+    -cc-red-dark: #a50e37;
+    -cc-red-tint: #fdecef;
+    -cc-white: #ffffff;
+    -cc-page: #f6f6f7;
+    -cc-border: #e3e3e6;
+    -cc-text: #1f1f23;
+    -cc-text-muted: #5f6368;
+
+    -fx-accent: -cc-red;
+    -fx-focus-color: -cc-red;
+    -fx-faint-focus-color: #d3114522;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 10pt;
+}
+
+.background {
+    -fx-background-color: -cc-page;
+}
+
+.label {
+    -fx-font-size: 11pt;
+    -fx-text-fill: -cc-text;
+}
+
+.text-field {
+    -fx-font-size: 12pt;
+}
+
+/* ---------- Menu bar ---------- */
+
+.menu-bar {
+    -fx-background-color: -cc-white;
+    -fx-border-color: transparent transparent -cc-border transparent;
+}
+
+.menu-bar .label {
+    -fx-font-size: 10pt;
+    -fx-text-fill: -cc-text;
+}
+
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:showing {
+    -fx-background-color: -cc-red-tint;
+}
+
+.context-menu {
+    -fx-background-color: -cc-white;
+    -fx-border-color: -cc-border;
+}
+
+.context-menu .label {
+    -fx-text-fill: -cc-text;
+}
+
+.menu-item:focused {
+    -fx-background-color: -cc-red;
+}
+
+.menu-item:focused .label {
+    -fx-text-fill: -cc-white;
+}
+
+/* ---------- Brand header ---------- */
+
+.app-header {
+    -fx-background-color: -cc-red;
+    -fx-padding: 12 16 12 16;
+}
+
+.app-title {
+    -fx-font-size: 18pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cc-white;
+}
+
+.app-subtitle {
+    -fx-font-size: 10pt;
+    -fx-text-fill: #ffe3ea;
+}
+
+/* ---------- Panes ---------- */
+
+.stack-pane {
+    -fx-background-color: transparent;
+}
+
+.pane-with-border {
+    -fx-background-color: -cc-page;
+}
+
+/* ---------- Command box ---------- */
+
+#commandTextField {
+    -fx-background-color: -cc-white;
+    -fx-background-radius: 6;
+    -fx-border-color: -cc-border;
+    -fx-border-radius: 6;
+    -fx-border-width: 1.5;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13pt;
+    -fx-text-fill: -cc-text;
+    -fx-prompt-text-fill: -cc-text-muted;
+}
+
+#commandTextField:focused {
+    -fx-border-color: -cc-red;
+}
+
+#commandTextField.error {
+    -fx-border-color: -cc-red;
+    -fx-background-color: -cc-red-tint;
+}
+
+/* ---------- Result display ---------- */
+
+.result-card {
+    -fx-background-color: -cc-white;
+    -fx-background-radius: 6;
+    -fx-border-color: -cc-border -cc-border -cc-border -cc-red;
+    -fx-border-width: 1 1 1 4;
+    -fx-border-radius: 6;
+    -fx-padding: 6 10 6 10;
+}
+
+.result-display {
+    -fx-background-color: transparent;
+    -fx-font-size: 11pt;
+    -fx-text-fill: -cc-text;
+}
+
+.result-display .content {
+    -fx-background-color: -cc-white;
+    -fx-background-radius: 0;
+}
+
+/* ---------- Client list ---------- */
+
+.list-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 8 0;
+}
+
+.list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+#cardPane {
+    -fx-background-color: -cc-white;
+    -fx-background-radius: 8;
+    -fx-border-color: -cc-border;
+    -fx-border-radius: 8;
+    -fx-border-width: 1 1 1 4;
+    -fx-padding: 12 14 12 12;
+}
+
+.list-cell:filled:hover #cardPane {
+    -fx-border-color: -cc-border -cc-border -cc-border #e98aa2;
+}
+
+.list-cell:filled:selected #cardPane {
+    -fx-background-color: -cc-red-tint;
+    -fx-border-color: -cc-red;
+}
+
+.cell_big_label {
+    -fx-font-size: 14pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cc-text;
+}
+
+.cell_uuid_label {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 9.5pt;
+    -fx-text-fill: -cc-red;
+    -fx-background-color: -cc-white;
+    -fx-border-color: -cc-red;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 1 8 1 8;
+}
+
+.cell_small_label {
+    -fx-font-size: 10.5pt;
+    -fx-text-fill: -cc-text;
+}
+
+#tags {
+    -fx-hgap: 6;
+    -fx-vgap: 4;
+}
+
+#tags .label {
+    -fx-text-fill: -cc-red-dark;
+    -fx-background-color: -cc-red-tint;
+    -fx-background-radius: 10;
+    -fx-padding: 1 8 1 8;
+    -fx-font-size: 9pt;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Status bar ---------- */
+
+.status-bar {
+    -fx-background-color: -cc-white;
+    -fx-border-color: -cc-border transparent transparent transparent;
+}
+
+.status-bar .label {
+    -fx-font-size: 9pt;
+    -fx-text-fill: -cc-text-muted;
+    -fx-padding: 4 10 4 10;
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+    -fx-padding: 6 18 6 18;
+    -fx-background-color: -cc-red;
+    -fx-background-radius: 6;
+    -fx-text-fill: -cc-white;
+    -fx-font-size: 10.5pt;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -cc-red-dark;
+}
+
+.button:pressed {
+    -fx-background-color: derive(-cc-red-dark, -15%);
+}
+
+.button:focused {
+    -fx-border-color: -cc-red-dark;
+    -fx-border-width: 2;
+    -fx-border-radius: 6;
+    -fx-border-insets: -2;
+}
+
+/* ---------- Dialogs ---------- */
+
+.dialog-pane {
+    -fx-background-color: -cc-white;
+}
+
+.dialog-pane > *.button-bar > *.container {
+    -fx-background-color: -cc-white;
+}
+
+.dialog-pane > *.label.content {
+    -fx-font-size: 11pt;
+    -fx-text-fill: -cc-text;
+}
+
+.dialog-pane:header *.header-panel {
+    -fx-background-color: -cc-red;
+}
+
+.dialog-pane:header *.header-panel *.label {
+    -fx-font-size: 14pt;
+    -fx-font-weight: bold;
+    -fx-text-fill: -cc-white;
+}
+
+/* ---------- Scroll bars ---------- */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #c9c9ce;
+    -fx-background-radius: 4;
+    -fx-background-insets: 2;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -cc-red;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+.tooltip {
+    -fx-background-color: -cc-text;
+    -fx-text-fill: -cc-white;
+    -fx-font-size: 9pt;
+}
