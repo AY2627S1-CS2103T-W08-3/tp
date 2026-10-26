@@ -3,27 +3,28 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <fx:root type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-         title="Address App" minWidth="450" minHeight="600" onCloseRequest="#handleExit">
+         title="ClientConnect" minWidth="450" minHeight="600" onCloseRequest="#handleExit">
   <icons>
     <Image url="@/images/address_book_32.png" />
   </icons>
   <scene>
     <Scene>
       <stylesheets>
-        <URL value="@DarkTheme.css" />
+        <URL value="@ClientConnectTheme.css" />
         <URL value="@Extensions.css" />
       </stylesheets>
 
-      <VBox>
+      <VBox styleClass="background">
         <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
           <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
@@ -33,22 +34,29 @@
           </Menu>
         </MenuBar>
 
+        <HBox styleClass="app-header" alignment="CENTER_LEFT" spacing="12" VBox.vgrow="NEVER">
+          <VBox>
+            <Label text="ClientConnect" styleClass="app-title" />
+            <Label text="Client portfolio manager for insurance agents" styleClass="app-subtitle" />
+          </VBox>
+        </HBox>
+
         <StackPane VBox.vgrow="NEVER" fx:id="commandBoxPlaceholder" styleClass="pane-with-border">
           <padding>
-            <Insets top="5" right="10" bottom="5" left="10" />
+            <Insets top="12" right="16" bottom="6" left="16" />
           </padding>
         </StackPane>
 
         <StackPane VBox.vgrow="NEVER" fx:id="resultDisplayPlaceholder" styleClass="pane-with-border"
                    minHeight="100" prefHeight="100" maxHeight="100">
           <padding>
-            <Insets top="5" right="10" bottom="5" left="10" />
+            <Insets top="6" right="16" bottom="6" left="16" />
           </padding>
         </StackPane>
 
         <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" VBox.vgrow="ALWAYS">
           <padding>
-            <Insets top="10" right="10" bottom="10" left="10" />
+            <Insets top="6" right="16" bottom="10" left="16" />
           </padding>
           <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
         </VBox>
