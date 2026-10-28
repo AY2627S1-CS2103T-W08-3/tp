@@ -7,6 +7,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
+import seedu.address.commons.util.StringUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -17,6 +18,13 @@ import seedu.address.model.person.Person;
  * Adds a person to the address book.
  */
 public class AddCommand extends Command {
+    public static final String MESSAGE_INVALID_NAME_FIELD = "Invalid name field";
+    public static final String MESSAGE_INVALID_PHONE_NUMBER = "Invalid phone number";
+    public static final String MESSAGE_INVALID_EMAIL_ADDRESS = "Invalid email address";
+    public static final String MESSAGE_INVALID_ADDRESS_FIELD = "Invalid address field";
+    public static final String MESSAGE_INVALID_TAG = "Invalid tag";
+    public static final String MESSAGE_UNKNOWN_INFORMATION =
+            "If information currently unknown, feel free to type UNKNOWN into the field";
 
     public static final String COMMAND_WORD = "add";
 
@@ -27,10 +35,10 @@ public class AddCommand extends Command {
             + PREFIX_EMAIL + "EMAIL "
             + PREFIX_ADDRESS + "ADDRESS "
             + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Names may contain alphanumeric characters, spaces, parentheses, and slashes.\n"
-            + "Phone numbers must contain at least one letter or digit and may include "
-            + "spaces, parentheses, and hyphens.\n"
-            + "Email addresses may be separated or annotated with spaces and parentheses.\n"
+            + "Name, phone, email, and address values may contain punctuation, but must not be blank, contain control "
+            + "characters, or exceed " + StringUtil.MAX_FIELD_LENGTH + " characters.\n"
+            + "Names and phone numbers need a letter or digit; emails need @ or UNKNOWN.\n"
+            + "Use double quotes around a value containing a field prefix after a space.\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "John Doe "
             + PREFIX_PHONE + "1234 5678 (HP) 1111-3333 (Office) "

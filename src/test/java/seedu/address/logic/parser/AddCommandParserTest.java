@@ -38,12 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.AddCommand;
-import seedu.address.model.person.Address;
-import seedu.address.model.person.Email;
-import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
-import seedu.address.model.person.Phone;
-import seedu.address.model.tag.Tag;
 import seedu.address.testutil.PersonBuilder;
 
 public class AddCommandParserTest {
@@ -182,6 +177,15 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_unknownEmail_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withEmail("UNKNOWN").withTags().build();
+        String emailDescription = " " + PREFIX_EMAIL + "UNKNOWN";
+
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + emailDescription + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_unknownPhone_success() {
         Person expectedPerson = new PersonBuilder(BOB).withPhone("Unknown").withTags().build();
         String phoneDescription = " " + PREFIX_PHONE + "Unknown";
@@ -201,59 +205,98 @@ public class AddCommandParserTest {
     }
 
     @Test
-    public void parse_compulsoryFieldMissing_failure() {
-        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
+    public void parse_punctuationInFields_success() {
+        String name = "ACME p/Research";
+        String phone = "+65 (123)#45";
+        String email = "person+tag@example.com?backup";
+        String address = "10, Main St. #2/3";
+        Person expectedPerson = new PersonBuilder(BOB).withName(name).withPhone(phone).withEmail(email)
+                .withAddress(address).withTags().build();
+        String userInput = " " + PREFIX_NAME + "\"" + name + "\" " + PREFIX_PHONE + "\"" + phone + "\" "
+                + PREFIX_EMAIL + email + " " + PREFIX_ADDRESS + "\"" + address + "\"";
 
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_compulsoryFieldMissing_failure() {
         // missing name prefix
         assertParseFailure(parser, VALID_NAME_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, true));
 
         // missing phone prefix
         assertParseFailure(parser, NAME_DESC_BOB + VALID_PHONE_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, true));
 
         // missing email prefix
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + VALID_EMAIL_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, true));
 
         // missing address prefix
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + VALID_ADDRESS_BOB,
-                expectedMessage);
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, true));
 
         // all prefixes missing
         assertParseFailure(parser, VALID_NAME_BOB + VALID_PHONE_BOB + VALID_EMAIL_BOB + VALID_ADDRESS_BOB,
-                expectedMessage);
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, true));
+    }
+
+    @Test
+    public void parse_emptyField_failure() {
+        assertParseFailure(parser, " " + PREFIX_NAME + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, true));
+        assertParseFailure(parser, NAME_DESC_BOB + " " + PREFIX_PHONE + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, true));
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + " " + PREFIX_EMAIL + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, true));
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " " + PREFIX_ADDRESS,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, true));
     }
 
     @Test
     public void parse_invalidValue_failure() {
         // invalid name
         assertParseFailure(parser, INVALID_NAME_DESC + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND, Name.MESSAGE_CONSTRAINTS);
+                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, false));
 
         // invalid phone
         assertParseFailure(parser, NAME_DESC_BOB + INVALID_PHONE_DESC + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND, Phone.MESSAGE_CONSTRAINTS);
+                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, false));
 
         // invalid email
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + INVALID_EMAIL_DESC + ADDRESS_DESC_BOB
-                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND, Email.MESSAGE_CONSTRAINTS);
+                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
 
         // invalid address
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + INVALID_ADDRESS_DESC
-                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND, Address.MESSAGE_CONSTRAINTS);
+                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, false));
 
         // invalid tag
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + INVALID_TAG_DESC + VALID_TAG_FRIEND, Tag.MESSAGE_CONSTRAINTS);
+                + INVALID_TAG_DESC + VALID_TAG_FRIEND,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_TAG, false));
 
         // two invalid values, only first invalid value reported
         assertParseFailure(parser, INVALID_NAME_DESC + PHONE_DESC_BOB + EMAIL_DESC_BOB + INVALID_ADDRESS_DESC,
-                Name.MESSAGE_CONSTRAINTS);
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, false));
 
         // non-empty preamble
         assertParseFailure(parser, PREAMBLE_NON_EMPTY + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
+    }
+
+    private static String expectedInvalidFieldMessage(String fieldMessage, boolean hasEmptyValue) {
+        String usage = AddCommand.MESSAGE_USAGE;
+        if (hasEmptyValue) {
+            int firstLineEnd = usage.indexOf('\n');
+            usage = usage.substring(0, firstLineEnd + 1) + AddCommand.MESSAGE_UNKNOWN_INFORMATION + "\n"
+                    + usage.substring(firstLineEnd + 1);
+        }
+        return fieldMessage + "\n" + usage;
     }
 }
