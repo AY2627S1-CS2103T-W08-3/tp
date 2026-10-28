@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_BOB;
@@ -34,6 +35,16 @@ import seedu.address.testutil.PersonBuilder;
 public class EditCommandTest {
 
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+
+    @Test
+    public void constructor_invalidUuid_failure() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+
+        assertThrows(IllegalArgumentException.class, () -> new EditCommand("123456", descriptor));
+        assertThrows(IllegalArgumentException.class, () -> new EditCommand("123456g", descriptor));
+        assertThrows(IllegalArgumentException.class, () -> new EditCommand(
+                "1234567890abcdef1234567890abcdef0", descriptor));
+    }
 
     @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
@@ -223,6 +234,16 @@ public class EditCommandTest {
 
         // different descriptor -> returns false
         assertFalse(standardCommand.equals(new EditCommand("aaaaaaa", DESC_BOB)));
+    }
+
+    @Test
+    public void descriptorEquals_differentRemark_returnsFalse() {
+        EditPersonDescriptor firstDescriptor = new EditPersonDescriptorBuilder()
+                .withRemark("First remark").build();
+        EditPersonDescriptor secondDescriptor = new EditPersonDescriptorBuilder()
+                .withRemark("Second remark").build();
+
+        assertFalse(firstDescriptor.equals(secondDescriptor));
     }
 
     @Test
