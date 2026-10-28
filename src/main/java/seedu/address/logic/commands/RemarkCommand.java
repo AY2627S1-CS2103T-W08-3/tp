@@ -28,7 +28,8 @@ public class RemarkCommand extends Command {
             + ": Edits the remark of the person identified "
             + "by the short UUID shown on the person's card. "
             + "Existing remark will be overwritten by the input.\n"
-            + "Parameters: SHORT_UUID (7 hexadecimal characters, without the # prefix) "
+            + "Parameters: UUID_PREFIX (7 to 32 hexadecimal characters; dashes are ignored; "
+            + "without the # prefix) "
             + "r/ [REMARK]\n"
             + "Example: " + COMMAND_WORD + " 1a2b3c4 "
             + "r/ Likes to swim.";
@@ -37,7 +38,8 @@ public class RemarkCommand extends Command {
     public static final String MESSAGE_AMBIGUOUS_UUID =
             "Multiple persons match UUID: %s. Enter more characters of the UUID to pick one:\n%s";
 
-    private static final String SHORT_UUID_REGEX = "[0-9a-fA-F]{7}";
+    private static final String UUID_PREFIX_REGEX =
+            "[0-9a-fA-F]{" + Person.SHORT_UUID_LENGTH + "," + Person.UUID_HEX_LENGTH + "}";
     private static final Logger logger = LogsCenter.getLogger(RemarkCommand.class);
 
     private final String targetUuid;
@@ -46,12 +48,12 @@ public class RemarkCommand extends Command {
     /**
      * @param targetUuid short UUID of the person to edit the remark
      * @param remark of the person to be updated to
-     * @throws IllegalArgumentException if {@code targetUuid} is not 7 hexadecimal characters
+     * @throws IllegalArgumentException if {@code targetUuid} is not a normalized UUID prefix
      */
     public RemarkCommand(String targetUuid, Remark remark) {
         requireAllNonNull(targetUuid, remark);
-        if (!targetUuid.matches(SHORT_UUID_REGEX)) {
-            throw new IllegalArgumentException("Target UUID must contain exactly 7 hexadecimal characters.");
+        if (!targetUuid.matches(UUID_PREFIX_REGEX)) {
+            throw new IllegalArgumentException("Target UUID must contain 7 to 32 hexadecimal characters.");
         }
 
         this.targetUuid = targetUuid;

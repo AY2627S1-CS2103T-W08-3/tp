@@ -43,6 +43,12 @@ public class RemarkCommandParserTest {
     }
 
     @Test
+    public void parse_longerUuidPrefixWithDashes_normalisedToLowercase() {
+        assertParseSuccess(parser, "AAAAAAAa-0000 " + PREFIX_REMARK + nonEmptyRemark,
+                new RemarkCommand("aaaaaaaa0000", new Remark("A remark.")));
+    }
+
+    @Test
     public void parse_missingCompulsoryField_failure() {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE);
 
@@ -53,8 +59,11 @@ public class RemarkCommandParserTest {
         assertParseFailure(parser, RemarkCommand.COMMAND_WORD + " " + nonEmptyRemark, expectedMessage);
 
         assertParseFailure(parser, "1 " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
+        assertParseFailure(parser, "123456 " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
         assertParseFailure(parser, "123456g " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
         assertParseFailure(parser, "#aaaaaaa " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
+        assertParseFailure(parser, "123456789012345678901234567890123 " + PREFIX_REMARK + nonEmptyRemark,
+                expectedMessage);
     }
 
     @Test

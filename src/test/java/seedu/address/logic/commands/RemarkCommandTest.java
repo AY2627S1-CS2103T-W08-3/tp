@@ -119,6 +119,21 @@ public class RemarkCommandTest {
                         Messages.format(editedPerson)), expectedModel);
     }
 
+    @Test
+    public void execute_longerUuidPrefix_success() throws ParseException {
+        String targetUuid = "aaaaaaaa0";
+        Remark remark = ParserUtil.parseRemark("Updated remark");
+        RemarkCommand command = new RemarkCommand(targetUuid, remark);
+        Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
+        Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
+        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        expectedModel.setPerson(originalPerson, editedPerson);
+
+        assertCommandSuccess(command, model,
+                String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
+                        Messages.format(editedPerson)), expectedModel);
+    }
+
     private static Model createModelReturningMatches(List<Person> matches) {
         return new ModelManager(getTypicalAddressBook(), new UserPrefs()) {
             @Override
