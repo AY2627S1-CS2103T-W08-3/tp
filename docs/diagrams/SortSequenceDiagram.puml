@@ -42,6 +42,9 @@ deactivate SortCommand
 
 SortCommandParser --> AddressBookParser : s
 deactivate SortCommandParser
+'The temporary parser is no longer referenced after parsing.
+SortCommandParser -[hidden]-> AddressBookParser
+destroy SortCommandParser
 
 AddressBookParser --> LogicManager : s
 deactivate AddressBookParser
@@ -75,5 +78,9 @@ deactivate SortCommand
 
 [<-- LogicManager : r
 deactivate LogicManager
+'The local command reference is released when LogicManager.execute returns.
+LogicManager -[hidden]-> SortCommand
+destroy SortCommand
+'CommandResult remains referenced by the caller, so its lifeline continues.
 
 @enduml
