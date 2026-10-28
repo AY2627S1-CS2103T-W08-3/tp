@@ -1,7 +1,6 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -32,7 +31,7 @@ public class SortCommandParser implements Parser<SortCommand> {
             case "desc" -> new SortCommand(SortOrder.DESCENDING);
             default -> {
                 logger.fine("Rejected sort command: expected exactly asc or desc");
-                throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
+                throw new ParseException(SortCommand.MESSAGE_INVALID_ARGUMENTS);
             }
         };
     }

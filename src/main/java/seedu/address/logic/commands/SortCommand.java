@@ -17,6 +17,9 @@ import seedu.address.model.person.Person;
 public class SortCommand extends Command {
 
     public static final String COMMAND_WORD = "sort";
+    public static final String MESSAGE_INVALID_ARGUMENTS = "Invalid sort arguments. Use one of these commands:\n"
+            + "sort asc  - Sort names in ascending text order\n"
+            + "sort desc - Sort names in descending text order";
     public static final String MESSAGE_SUCCESS = "Listed all persons lexicographically by name.";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Lists all persons lexicographically by name, ignoring capitalization.\n"

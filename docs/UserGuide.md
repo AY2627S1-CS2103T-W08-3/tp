@@ -117,6 +117,16 @@ Missing or invalid parameters produce an error without changing the displayed li
 
 Format: `sort asc` or `sort desc`
 
+Missing directions, unsupported values, and extra arguments show the same error:
+
+```text
+Invalid sort arguments. Use one of these commands:
+sort asc  - Sort names in ascending text order
+sort desc - Sort names in descending text order
+```
+
+The displayed list remains unchanged when the command is rejected.
+
 ### Editing a person: `edit`
 
 Edits an existing person in the address book.

@@ -253,7 +253,9 @@ How the `add` command works:
 The `sort` command displays all contacts lexicographically by name, ignoring capitalization.
 It requires exactly one direction: `sort asc` selects ascending order, while `sort desc`
 selects descending order. Missing directions, unsupported values, and extra arguments
-produce a `ParseException` with usage instructions before the displayed list is changed.
+produce a `ParseException` using `SortCommand.MESSAGE_INVALID_ARGUMENTS` before the displayed
+list is changed. This standardized error lists both valid commands, `sort asc` and `sort desc`,
+with their text-order directions.
 
 #### Implementation
 
