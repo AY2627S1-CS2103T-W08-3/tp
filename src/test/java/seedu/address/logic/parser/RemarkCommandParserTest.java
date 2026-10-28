@@ -54,6 +54,7 @@ public class RemarkCommandParserTest {
 
         assertParseFailure(parser, "1 " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
         assertParseFailure(parser, "123456g " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
+        assertParseFailure(parser, "#aaaaaaa " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
     }
 
     @Test

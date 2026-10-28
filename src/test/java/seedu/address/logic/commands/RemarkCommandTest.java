@@ -172,17 +172,21 @@ public class RemarkCommandTest {
 
     @Test
     public void execute_ambiguousUuid_failure() throws ParseException {
-        Model ambiguousModel = new ModelManager(new AddressBook(), new UserPrefs());
-        ambiguousModel.addPerson(new PersonBuilder()
+        Person alice = new PersonBuilder()
                 .withName("Alice")
-                .withUuid("1a2b3c4d-0000-0000-0000-000000000001").build());
-        ambiguousModel.addPerson(new PersonBuilder()
+                .withUuid("1a2b3c4d-0000-0000-0000-000000000001").build();
+        Person bob = new PersonBuilder()
                 .withName("Bob")
-                .withUuid("1a2b3c4d-0000-0000-0000-000000000002").build());
+                .withUuid("1a2b3c4d-0000-0000-0000-000000000002").build();
+        Model ambiguousModel = new ModelManager(new AddressBook(), new UserPrefs());
+        ambiguousModel.addPerson(alice);
+        ambiguousModel.addPerson(bob);
         RemarkCommand command = new RemarkCommand("1a2b3c4", ParserUtil.parseRemark("Some remark"));
+        String expectedMatches = alice.getUuid() + " " + alice.getName() + "\n"
+                + bob.getUuid() + " " + bob.getName();
 
         assertCommandFailure(command, ambiguousModel,
-                String.format(RemarkCommand.MESSAGE_AMBIGUOUS_UUID, "1a2b3c4"));
+                String.format(RemarkCommand.MESSAGE_AMBIGUOUS_UUID, "1a2b3c4", expectedMatches));
     }
 
     @Test
