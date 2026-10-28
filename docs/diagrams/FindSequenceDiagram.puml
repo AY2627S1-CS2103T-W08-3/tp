@@ -33,18 +33,23 @@ LogicManager -> AddressBookParser : parseCommand(\ninput)
 activate AddressBookParser
 
 create FindCommandParser
-AddressBookParser -> FindCommandParser : new
+AddressBookParser -> FindCommandParser : FindCommandParser()
+activate FindCommandParser
+FindCommandParser --> AddressBookParser
+deactivate FindCommandParser
+
 AddressBookParser -> FindCommandParser : parse(\n" Alice t/friends")
 activate FindCommandParser
 
 create FindCommand
-FindCommandParser -> FindCommand : new\nFindCommand(p)
+FindCommandParser -> FindCommand : FindCommand(p)
 activate FindCommand
 FindCommand --> FindCommandParser : f
 deactivate FindCommand
 
 FindCommandParser --> AddressBookParser : f
 deactivate FindCommandParser
+destroy FindCommandParser
 
 AddressBookParser --> LogicManager : f
 deactivate AddressBookParser
@@ -63,8 +68,7 @@ Model --> FindCommand : clients\n(N matches)
 deactivate Model
 
 create CommandResult
-FindCommand -> CommandResult : new CommandResult(\n"N person(s)\nlisted!")
-activate CommandResult
+FindCommand -> CommandResult ++ : CommandResult(\n"N person(s) listed!")
 CommandResult --> FindCommand : r
 deactivate CommandResult
 
@@ -73,4 +77,10 @@ deactivate FindCommand
 
 [<-- LogicManager : r
 deactivate LogicManager
+destroy FindCommand
+
+note right of CommandResult
+    r is returned to the caller;
+    its lifetime continues beyond this interaction.
+end note
 @enduml
