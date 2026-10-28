@@ -25,7 +25,11 @@ public class FindCommandParserTest {
 
     @Test
     public void parse_emptyArg_throwsParseException() {
-        assertParseFailure(parser, "     ", String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                FindCommand.MESSAGE_MISSING_SEARCH_TERMS + "\n" + FindCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "", expectedMessage);
+        assertParseFailure(parser, "     ", expectedMessage);
+        assertParseFailure(parser, " \t\n ", expectedMessage);
     }
 
     @Test
@@ -56,10 +60,26 @@ public class FindCommandParserTest {
     }
 
     @Test
+    public void parse_emptyTag_throwsParseException() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                FindCommand.MESSAGE_MISSING_TAG + "\n" + FindCommand.MESSAGE_USAGE);
+        assertParseFailure(parser, "t/", expectedMessage);
+        assertParseFailure(parser, "t/ \t\n ", expectedMessage);
+        assertParseFailure(parser, "Alice t/", expectedMessage);
+        assertParseFailure(parser, "t/friends t/", expectedMessage);
+        assertParseFailure(parser, "t/ t/friends", expectedMessage);
+    }
+
+    @Test
+    public void parse_nameContainingTagPrefix_returnsFindCommand() {
+        assertParseSuccess(parser, "agent/0",
+                new FindCommand(new NameContainsKeywordsPredicate(List.of("agent/0"))));
+        assertParseSuccess(parser, "/0",
+                new FindCommand(new NameContainsKeywordsPredicate(List.of("/0"))));
+    }
+
+    @Test
     public void parse_invalidTag_throwsParseException() {
-        assertParseFailure(parser, "t/", Tag.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "Alice t/", Tag.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, "t/friends t/", Tag.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "t/friends!", Tag.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "t/friends colleagues", Tag.MESSAGE_CONSTRAINTS);
     }
