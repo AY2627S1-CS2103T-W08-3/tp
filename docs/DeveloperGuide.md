@@ -334,7 +334,7 @@ The following sequence diagram shows how the `undelete` command in step 4 goes t
 
 Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so the address book is back in its original order, and `deletedPersons` is empty again.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same identity has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`. The entry stays on the stack, so the user can rename the clashing person and run `undelete` again.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same name has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`, as restoring the deleted person would leave two persons with the same name. The entry stays on the stack, and the error message tells the user to rename the clashing person with `edit` and run `undelete` again.
 
 </div>
 
@@ -705,7 +705,7 @@ testers are expected to do more *exploratory* testing.
    1. Prerequisites: Delete a person, e.g. `John Doe`, then add a new person with the same name.
 
    1. Test case: `undelete`<br>
-      Expected: Nothing is restored. The status message shows `Cannot undelete: a person identical to John Doe already exists.`
+      Expected: Nothing is restored. The status message shows `Cannot undelete John Doe: a person with the same name already exists.`, followed by a prompt to rename that person with `edit`.
 
    1. Test case: Rename the new `John Doe` with `edit`, then `undelete`<br>
       Expected: The original `John Doe` is restored, with their original short UUID.

@@ -24,7 +24,8 @@ public class UndeleteCommand extends Command {
     public static final String MESSAGE_SUCCESS = "Restored person: %1$s";
     public static final String MESSAGE_NO_DELETED_PERSONS = "No deleted persons to restore.";
     public static final String MESSAGE_DUPLICATE_PERSON =
-            "Cannot undelete: a person identical to %1$s already exists.";
+            "Cannot undelete %1$s: a person with the same name already exists.\n"
+            + "Rename that person with edit, then run undelete again.";
 
     private static final Logger logger = LogsCenter.getLogger(UndeleteCommand.class);
 

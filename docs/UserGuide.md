@@ -242,7 +242,7 @@ Examples:
 
 Errors:
 * If there is no deleted person to restore, the command fails with `No deleted persons to restore.`
-* If a person with the same name has been added since the delete, the command fails and nothing is restored. Rename that person with `edit`, then run `undelete` again.
+* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name. Rename that person with `edit`, then run `undelete` again.
 
 ### Exiting the program: `exit`
 
