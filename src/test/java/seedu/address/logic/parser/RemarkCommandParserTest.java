@@ -54,24 +54,40 @@ public class RemarkCommandParserTest {
 
     @Test
     public void parse_missingCompulsoryField_failure() {
-        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE);
+        String missingIdentifierMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                "Missing person UUID. Enter the 7-character hexadecimal UUID shown on the contact card.\n"
+                        + RemarkCommand.MESSAGE_USAGE);
+        String missingRemarkPrefixMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                "Missing remark prefix. Add r/ before the remark, or use r/ to remove the existing remark.\n"
+                        + RemarkCommand.MESSAGE_USAGE);
 
         // no parameters
-        assertParseFailure(parser, RemarkCommand.COMMAND_WORD, expectedMessage);
+        assertParseFailure(parser, "", missingIdentifierMessage);
 
         // no UUID
-        assertParseFailure(parser, RemarkCommand.COMMAND_WORD + " " + nonEmptyRemark, expectedMessage);
+        assertParseFailure(parser, " " + PREFIX_REMARK + nonEmptyRemark, missingIdentifierMessage);
 
         // no remark prefix
-        assertParseFailure(parser, "aaaaaaa", expectedMessage);
-        assertParseFailure(parser, "aaaaaaa " + nonEmptyRemark, expectedMessage);
+        assertParseFailure(parser, "aaaaaaa", missingRemarkPrefixMessage);
+        assertParseFailure(parser, "aaaaaaa " + nonEmptyRemark,
+                invalidUuidMessage("aaaaaaa " + nonEmptyRemark));
 
-        assertParseFailure(parser, "1 " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
-        assertParseFailure(parser, "123456 " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
-        assertParseFailure(parser, "123456g " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
-        assertParseFailure(parser, "#aaaaaaa " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
+        assertParseFailure(parser, "1 " + PREFIX_REMARK + nonEmptyRemark,
+                invalidUuidMessage("1"));
+        assertParseFailure(parser, "123456 " + PREFIX_REMARK + nonEmptyRemark,
+                invalidUuidMessage("123456"));
+        assertParseFailure(parser, "123456g " + PREFIX_REMARK + nonEmptyRemark,
+                invalidUuidMessage("123456g"));
+        assertParseFailure(parser, "#aaaaaaa " + PREFIX_REMARK + nonEmptyRemark,
+                invalidUuidMessage("#aaaaaaa"));
         assertParseFailure(parser, "123456789012345678901234567890123 " + PREFIX_REMARK + nonEmptyRemark,
-                expectedMessage);
+                invalidUuidMessage("123456789012345678901234567890123"));
+    }
+
+    private String invalidUuidMessage(String uuid) {
+        return String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                String.format("Invalid person UUID '%s': it must be 7 to 32 hexadecimal characters "
+                        + "(0-9 or a-f), without the # prefix.\n%s", uuid, RemarkCommand.MESSAGE_USAGE));
     }
 
     @Test

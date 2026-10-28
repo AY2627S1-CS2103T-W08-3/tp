@@ -28,14 +28,9 @@ public class RemarkCommand extends Command {
             + ": Edits the remark of the person identified "
             + "by the short UUID shown on the person's card. "
             + "Existing remark will be overwritten by the input.\n"
-<<<<<<< HEAD
-            + "Parameters: SHORT_UUID (7 hexadecimal characters) "
-            + "r/[REMARK]\n"
-=======
             + "Parameters: UUID_PREFIX (7 to 32 hexadecimal characters; dashes are ignored; "
             + "without the # prefix) "
             + "r/ [REMARK]\n"
->>>>>>> branch-A-Remark-UUID-Format
             + "Example: " + COMMAND_WORD + " 1a2b3c4 "
             + "r/ Likes to swim.";
 
@@ -58,7 +53,8 @@ public class RemarkCommand extends Command {
     public RemarkCommand(String targetUuid, Remark remark) {
         requireAllNonNull(targetUuid, remark);
         if (!targetUuid.matches(UUID_PREFIX_REGEX)) {
-            throw new IllegalArgumentException("Target UUID must contain 7 to 32 hexadecimal characters.");
+            throw new IllegalArgumentException(
+                    "Target UUID must contain 7 to 32 hexadecimal characters without the # prefix.");
         }
 
         this.targetUuid = targetUuid;
