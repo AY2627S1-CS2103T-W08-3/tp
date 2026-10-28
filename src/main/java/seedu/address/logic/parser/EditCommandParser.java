@@ -16,6 +16,7 @@ import java.util.Set;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.Remark;
 import seedu.address.model.tag.Tag;
 
@@ -24,7 +25,9 @@ import seedu.address.model.tag.Tag;
  */
 public class EditCommandParser implements Parser<EditCommand> {
 
-    private static final String SHORT_UUID_REGEX = "[0-9a-fA-F]{7}";
+    /** A UUID prefix is between the displayed short UUID and a full UUID in length, ignoring dashes. */
+    private static final String UUID_PREFIX_REGEX =
+            "\\p{XDigit}{" + Person.SHORT_UUID_LENGTH + "," + Person.UUID_HEX_LENGTH + "}";
 
     /**
      * Parses the given {@code String} of arguments in the context of the EditCommand
@@ -37,8 +40,8 @@ public class EditCommandParser implements Parser<EditCommand> {
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_TAG,
                         PREFIX_REMARK);
 
-        String targetUuid = argMultimap.getPreamble().trim();
-        if (!targetUuid.matches(SHORT_UUID_REGEX)) {
+        String targetUuid = normalise(argMultimap.getPreamble());
+        if (!isValidUuidPrefix(targetUuid)) {
             String message = targetUuid.isEmpty()
                     ? EditCommand.MESSAGE_MISSING_UUID
                     : EditCommand.MESSAGE_INVALID_UUID;
@@ -72,7 +75,16 @@ public class EditCommandParser implements Parser<EditCommand> {
             throw new ParseException(EditCommand.MESSAGE_NOT_EDITED);
         }
 
-        return new EditCommand(targetUuid.toLowerCase(), editPersonDescriptor);
+        return new EditCommand(targetUuid, editPersonDescriptor);
+    }
+
+    /** Removes whitespace and dashes and normalises the UUID prefix for matching. */
+    private static String normalise(String args) {
+        return args.trim().replace("-", "").toLowerCase();
+    }
+
+    private static boolean isValidUuidPrefix(String uuidPrefix) {
+        return uuidPrefix.matches(UUID_PREFIX_REGEX);
     }
 
     /**

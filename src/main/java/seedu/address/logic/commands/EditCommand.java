@@ -37,9 +37,9 @@ public class EditCommand extends Command {
     public static final String COMMAND_WORD = "edit";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the person identified "
-            + "by the short UUID shown on the person's card. "
+            + "by the UUID prefix shown on the person's card or copied from the data file. "
             + "Existing values will be overwritten by the input values.\n"
-            + "Parameters: SHORT_UUID (7 hexadecimal characters) "
+            + "Parameters: UUID_PREFIX (7 to 32 hexadecimal characters; dashes are ignored) "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
@@ -60,28 +60,32 @@ public class EditCommand extends Command {
     public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
     public static final String MESSAGE_MISSING_UUID = "Missing short UUID.";
     public static final String MESSAGE_INVALID_UUID =
-            "Invalid short UUID. It must contain exactly 7 hexadecimal characters.";
+            "Invalid UUID prefix. It must contain 7 to 32 hexadecimal characters, ignoring dashes.";
     public static final String MESSAGE_NO_PERSON_WITH_UUID = "No person with UUID: %s";
     public static final String MESSAGE_AMBIGUOUS_UUID =
             "Multiple persons match UUID: %s. Please use a more specific identifier.";
 
-    private static final String SHORT_UUID_REGEX = "[0-9a-fA-F]{7}";
+    private static final String UUID_PREFIX_REGEX =
+            "\\p{XDigit}{" + Person.SHORT_UUID_LENGTH + "," + Person.UUID_HEX_LENGTH + "}";
     private final String targetUuid;
     private final EditPersonDescriptor editPersonDescriptor;
 
     /**
-     * @param targetUuid short UUID of the person to edit
+     * @param targetUuid UUID prefix of the person to edit
      * @param editPersonDescriptor details to edit the person with
-     * @throws IllegalArgumentException if {@code targetUuid} is not 7 hexadecimal characters
+     * @throws IllegalArgumentException if {@code targetUuid} is not between 7 and 32 hexadecimal characters,
+     *         ignoring dashes
      */
     public EditCommand(String targetUuid, EditPersonDescriptor editPersonDescriptor) {
         requireNonNull(targetUuid);
         requireNonNull(editPersonDescriptor);
-        if (!targetUuid.matches(SHORT_UUID_REGEX)) {
-            throw new IllegalArgumentException("Target UUID must contain exactly 7 hexadecimal characters.");
+        String normalisedTargetUuid = targetUuid.trim().replace("-", "").toLowerCase();
+        if (!normalisedTargetUuid.matches(UUID_PREFIX_REGEX)) {
+            throw new IllegalArgumentException(
+                    "Target UUID must contain between 7 and 32 hexadecimal characters, ignoring dashes.");
         }
 
-        this.targetUuid = targetUuid.toLowerCase();
+        this.targetUuid = normalisedTargetUuid;
         this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
     }
 

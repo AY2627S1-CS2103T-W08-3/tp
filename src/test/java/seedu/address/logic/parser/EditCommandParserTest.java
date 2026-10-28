@@ -72,6 +72,19 @@ public class EditCommandParserTest {
 
         // invalid prefix being parsed as preamble
         assertParseFailure(parser, "1 i/ string", expectedUuidError(EditCommand.MESSAGE_INVALID_UUID));
+
+        // UUID prefix that is too long after dashes are removed
+        assertParseFailure(parser, "1234567890abcdef1234567890abcdef0" + NAME_DESC_AMY,
+                expectedUuidError(EditCommand.MESSAGE_INVALID_UUID));
+    }
+
+    @Test
+    public void parse_dashedFullUuid_success() {
+        String dashedUuid = "ABCDEF12-3456-7890-abcd-ef1234567890";
+        String normalizedUuid = "abcdef1234567890abcdef1234567890";
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build();
+
+        assertParseSuccess(parser, dashedUuid + NAME_DESC_AMY, new EditCommand(normalizedUuid, descriptor));
     }
 
     @Test
