@@ -24,6 +24,7 @@ public class SortCommandParserTest {
 
     @Test
     public void parse_nullArgs_throwsNullPointerException() {
+        // EP: null argument reference (invalid API input).
         assertThrows(NullPointerException.class, () -> parser.parse(null));
     }
 
@@ -38,7 +39,8 @@ public class SortCommandParserTest {
         new SortCommand(SortOrder.DESCENDING).execute(expectedModel);
         expectedModel.updateFilteredPersonList(person -> person.getName().fullName.equals("Zoe"));
 
-        for (String input : new String[] {"sort", "sort A-Z extra", "sort Z-A extra", "sort invalid"}) {
+        // EPs: missing direction, extra arguments, and unsupported direction preserve existing state.
+        for (String input : new String[] {"sort", "sort asc extra", "sort desc extra", "sort invalid"}) {
             ParseException error = assertThrows(
                     ParseException.class, () -> new AddressBookParser().parseCommand(input).execute(model));
             assertEquals(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE), error.getMessage());
@@ -48,21 +50,29 @@ public class SortCommandParserTest {
 
     @Test
     public void parse_validDirection_returnsSortCommand() {
-        assertParseSuccess(parser, " A-Z ", new SortCommand(SortOrder.ASCENDING));
-        assertParseSuccess(parser, " Z-A ", new SortCommand(SortOrder.DESCENDING));
+        // EP: supported lowercase directions with surrounding whitespace.
+        assertParseSuccess(parser, " asc ", new SortCommand(SortOrder.ASCENDING));
+        assertParseSuccess(parser, " desc ", new SortCommand(SortOrder.DESCENDING));
+
+        // EP: supported directions with uppercase or mixed-case letters.
+        assertParseSuccess(parser, " ASC ", new SortCommand(SortOrder.ASCENDING));
+        assertParseSuccess(parser, "DeSc", new SortCommand(SortOrder.DESCENDING));
     }
 
     @Test
     public void parse_missingDirection_throwsParseException() {
         String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
+        // EP: missing direction; boundary value: zero input characters.
         assertParseFailure(parser, "", message);
+        // EP: whitespace-only direction.
         assertParseFailure(parser, "   ", message);
     }
 
     @Test
     public void parse_unsupportedDirection_throwsParseException() {
         String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
-        for (String input : new String[] {"a-z", "z-a", "ascending", "descending", "123", "A Z"}) {
+        // EP: unsupported direction values, including legacy parameters, words, and numbers.
+        for (String input : new String[] {"A-Z", "Z-A", "ascending", "descending", "123", "A Z"}) {
             assertParseFailure(parser, input, message);
         }
     }
@@ -70,7 +80,8 @@ public class SortCommandParserTest {
     @Test
     public void parse_extraArguments_throwsParseException() {
         String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
-        for (String input : new String[] {"A-Z Z-A", "A-Z extra", "Z-A extra"}) {
+        // EP: multiple arguments; boundary value: two tokens exceed the one-token limit.
+        for (String input : new String[] {"asc desc", "asc extra", "desc extra"}) {
             assertParseFailure(parser, input, message);
         }
     }

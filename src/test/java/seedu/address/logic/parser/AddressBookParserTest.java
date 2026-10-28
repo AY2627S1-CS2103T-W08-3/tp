@@ -37,8 +37,10 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_sort() throws Exception {
-        assertEquals(new SortCommand(SortCommand.SortOrder.ASCENDING), parser.parseCommand("sort A-Z"));
-        assertEquals(new SortCommand(SortCommand.SortOrder.DESCENDING), parser.parseCommand("sort Z-A"));
+        // EP: supported sort directions are routed to the sort parser.
+        assertEquals(new SortCommand(SortCommand.SortOrder.ASCENDING), parser.parseCommand("sort asc"));
+        assertEquals(new SortCommand(SortCommand.SortOrder.DESCENDING), parser.parseCommand("sort desc"));
+        // EPs: missing direction and unsupported direction are rejected.
         assertThrows(ParseException.class, () -> parser.parseCommand("sort"));
         assertThrows(ParseException.class, () -> parser.parseCommand("sort extra"));
     }
