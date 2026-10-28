@@ -192,8 +192,8 @@ Examples:
 * `find t/friends` returns persons tagged `friends`.
 * `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
 * `find Alice t/friends` returns persons whose names contain `Alice` or who have the `friends` tag.
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find irfan` returns `Irfan Ibrahim`, `Irfan Mohammed`<br>
+  ![result for 'find irfan'](images/findIrfanResult.png)
 
 ### Deleting a person: `delete`
 
