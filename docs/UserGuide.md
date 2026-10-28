@@ -81,17 +81,17 @@ Adds a person to the address book.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
 
-Names may contain alphanumeric characters, spaces, parentheses, and slashes. For example, `John s/o Peter`.
-
 If a name contains `/`, avoid placing a recognized field prefix such as `p/`, `e/`, or `a/` after a space within
 the name. The parser may interpret it as a separate field instead of part of the name. For example, `s/o` is safe,
 but `p/` within a name may be interpreted as the phone field.
 
-Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens. For example:
+For example, a phone number can be entered as:
 `1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
 
-Email addresses may be separated or annotated with spaces and parentheses. For example:
+For example, email addresses can be entered as:
 `peter@example.com (Work) jane@example.com (Personal)`.
+
+If information currently unknown, feel free to type `UNKNOWN` into the field.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.
