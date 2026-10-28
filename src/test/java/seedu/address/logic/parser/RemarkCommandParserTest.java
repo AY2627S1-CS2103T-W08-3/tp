@@ -46,6 +46,10 @@ public class RemarkCommandParserTest {
     public void parse_longerUuidPrefixWithDashes_normalisedToLowercase() {
         assertParseSuccess(parser, "AAAAAAAa-0000 " + PREFIX_REMARK + nonEmptyRemark,
                 new RemarkCommand("aaaaaaaa0000", new Remark("A remark.")));
+
+        assertParseSuccess(parser, "AAAAAAAa-0000-0000-0000-000000000000 "
+                        + PREFIX_REMARK + nonEmptyRemark,
+                new RemarkCommand("aaaaaaaa000000000000000000000000", new Remark("A remark.")));
     }
 
     @Test
