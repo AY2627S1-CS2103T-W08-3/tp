@@ -52,6 +52,10 @@ public class RemarkCommandParserTest {
         // no UUID
         assertParseFailure(parser, RemarkCommand.COMMAND_WORD + " " + nonEmptyRemark, expectedMessage);
 
+        // no remark prefix
+        assertParseFailure(parser, "aaaaaaa", expectedMessage);
+        assertParseFailure(parser, "aaaaaaa " + nonEmptyRemark, expectedMessage);
+
         assertParseFailure(parser, "1 " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
         assertParseFailure(parser, "123456g " + PREFIX_REMARK + nonEmptyRemark, expectedMessage);
     }

@@ -28,7 +28,7 @@ public class RemarkCommand extends Command {
             + "by the short UUID shown on the person's card. "
             + "Existing remark will be overwritten by the input.\n"
             + "Parameters: SHORT_UUID (7 hexadecimal characters) "
-            + "r/ [REMARK]\n"
+            + "r/[REMARK]\n"
             + "Example: " + COMMAND_WORD + " 1a2b3c4 "
             + "r/ Likes to swim.";
 
