@@ -25,7 +25,7 @@
             <Region fx:constant="USE_PREF_SIZE" />
           </minWidth>
         </Label>
-        <Label fx:id="name" text="\$first" styleClass="cell_big_label" />
+        <Label fx:id="name" text="\$first" styleClass="cell_big_label" wrapText="true" />
         <Label fx:id="uuid" styleClass="cell_uuid_label">
           <HBox.margin>
             <Insets left="6" />
@@ -33,10 +33,10 @@
         </Label>
       </HBox>
       <FlowPane fx:id="tags" />
-      <Label fx:id="phone" styleClass="cell_small_label" text="\$phone" />
-      <Label fx:id="address" styleClass="cell_small_label" text="\$address" />
-      <Label fx:id="email" styleClass="cell_small_label" text="\$email" />
-      <Label fx:id="remark" styleClass="cell_small_label" text="\$remark" />
+      <Label fx:id="phone" styleClass="cell_small_label" text="\$phone" wrapText="true" />
+      <Label fx:id="address" styleClass="cell_small_label" text="\$address" wrapText="true" />
+      <Label fx:id="email" styleClass="cell_small_label" text="\$email" wrapText="true" />
+      <Label fx:id="remark" styleClass="cell_small_label" text="\$remark" wrapText="true" />
     </VBox>
   </GridPane>
 </HBox>

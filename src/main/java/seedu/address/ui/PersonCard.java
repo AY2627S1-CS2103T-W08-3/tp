@@ -4,9 +4,12 @@ import java.util.Comparator;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.util.Duration;
 import seedu.address.model.person.Person;
 
 /**
@@ -15,6 +18,8 @@ import seedu.address.model.person.Person;
 public class PersonCard extends UiPart<Region> {
 
     private static final String FXML = "PersonListCard.fxml";
+    private static final double TOOLTIP_MAX_WIDTH = 480;
+    private static final Duration TOOLTIP_SHOW_DELAY = Duration.millis(300);
 
     /**
      * Note: Certain keywords such as "location" and "resources" are reserved keywords in JavaFX.
@@ -52,14 +57,35 @@ public class PersonCard extends UiPart<Region> {
         super(FXML);
         this.person = person;
         id.setText(displayedIndex + ". ");
-        name.setText(person.getName().fullName);
+        configureValueLabel(name, person.getName().fullName);
+        name.setMinWidth(0);
+        HBox.setHgrow(name, Priority.ALWAYS);
         uuid.setText("#" + person.getShortUuid());
-        phone.setText(person.getPhone().value);
-        address.setText(person.getAddress().value);
-        email.setText(person.getEmail().value);
-        remark.setText(person.getRemark().value);
+        uuid.setMinWidth(Region.USE_PREF_SIZE);
+        uuid.setMaxWidth(Region.USE_PREF_SIZE);
+        configureValueLabel(phone, person.getPhone().value);
+        configureValueLabel(address, person.getAddress().value);
+        configureValueLabel(email, person.getEmail().value);
+        configureValueLabel(remark, person.getRemark().value);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+    }
+
+    /**
+     * Configures a field label to display its complete value across multiple lines and on hover.
+     */
+    private static void configureValueLabel(Label label, String value) {
+        label.setText(value);
+        label.setWrapText(true);
+        label.setMaxWidth(Double.MAX_VALUE);
+
+        if (!value.isEmpty()) {
+            Tooltip tooltip = new Tooltip(value);
+            tooltip.setWrapText(true);
+            tooltip.setMaxWidth(TOOLTIP_MAX_WIDTH);
+            tooltip.setShowDelay(TOOLTIP_SHOW_DELAY);
+            label.setTooltip(tooltip);
+        }
     }
 }
