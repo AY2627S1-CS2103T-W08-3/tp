@@ -142,22 +142,31 @@ public class ArgumentTokenizer {
         boolean isEscaped = false;
         for (char character : value.toCharArray()) {
             if (isEscaped) {
-                if (character == '"' || character == '\\') {
-                    unescapedValue.append(character);
-                } else {
-                    unescapedValue.append('\\').append(character);
-                }
+                appendUnescapedCharacter(unescapedValue, character);
                 isEscaped = false;
-            } else if (character == '\\') {
-                isEscaped = true;
-            } else {
-                unescapedValue.append(character);
+                continue;
             }
+            if (character == '\\') {
+                isEscaped = true;
+                continue;
+            }
+            unescapedValue.append(character);
         }
         if (isEscaped) {
             unescapedValue.append('\\');
         }
         return unescapedValue.toString();
+    }
+
+    /**
+     * Appends a character after an escape marker, preserving unsupported escape sequences literally.
+     */
+    private static void appendUnescapedCharacter(StringBuilder unescapedValue, char character) {
+        if (character == '"' || character == '\\') {
+            unescapedValue.append(character);
+            return;
+        }
+        unescapedValue.append('\\').append(character);
     }
 
     /**
