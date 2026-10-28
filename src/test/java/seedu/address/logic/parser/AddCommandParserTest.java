@@ -28,6 +28,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -67,6 +68,25 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_remark_success() {
+        String remark = "Likes to swim.";
+        Person expectedPerson = new PersonBuilder(BOB).withRemark(remark).withTags().build();
+        String userInput = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " " + PREFIX_REMARK + remark;
+
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_emptyRemark_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withRemark("").withTags().build();
+        String userInput = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " " + PREFIX_REMARK;
+
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_repeatedNonTagValue_failure() {
         String validExpectedPersonString = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_FRIEND;
@@ -86,6 +106,11 @@ public class AddCommandParserTest {
         // multiple addresses
         assertParseFailure(parser, ADDRESS_DESC_AMY + validExpectedPersonString,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
+
+        // multiple remarks
+        assertParseFailure(parser, " " + PREFIX_REMARK + "First" + validExpectedPersonString
+                        + " " + PREFIX_REMARK + "Second",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_REMARK));
 
         // multiple fields repeated
         assertParseFailure(parser,
@@ -183,6 +208,13 @@ public class AddCommandParserTest {
 
         assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + emailDescription + ADDRESS_DESC_BOB,
                 new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_invalidEmail_messageExplainsAtRequirement() {
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + " " + PREFIX_EMAIL + "invalid-email"
+                + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
     }
 
     @Test
@@ -290,13 +322,18 @@ public class AddCommandParserTest {
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
     }
 
-    private static String expectedInvalidFieldMessage(String fieldMessage, boolean hasEmptyValue) {
-        String usage = AddCommand.MESSAGE_USAGE;
-        if (hasEmptyValue) {
-            int firstLineEnd = usage.indexOf('\n');
-            usage = usage.substring(0, firstLineEnd + 1) + AddCommand.MESSAGE_UNKNOWN_INFORMATION + "\n"
-                    + usage.substring(firstLineEnd + 1);
-        }
-        return fieldMessage + "\n" + usage;
+    @Test
+    public void parse_semanticInvalidValue_failure() {
+        assertParseFailure(parser, " " + PREFIX_NAME + "!!!" + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, false));
+        assertParseFailure(parser, NAME_DESC_BOB + " " + PREFIX_PHONE + "+++" + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, false));
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + " " + PREFIX_EMAIL + "not-an-email"
+                + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
+    }
+
+    private static String expectedInvalidFieldMessage(String fieldMessage, boolean ignored) {
+        return fieldMessage + "\n" + AddCommand.MESSAGE_USAGE;
     }
 }

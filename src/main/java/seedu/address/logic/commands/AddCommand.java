@@ -5,9 +5,9 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
-import seedu.address.commons.util.StringUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -20,12 +20,12 @@ import seedu.address.model.person.Person;
 public class AddCommand extends Command {
     public static final String MESSAGE_INVALID_NAME_FIELD = "Invalid name field";
     public static final String MESSAGE_INVALID_PHONE_NUMBER = "Invalid phone number";
-    public static final String MESSAGE_INVALID_EMAIL_ADDRESS = "Invalid email address";
+    public static final String MESSAGE_INVALID_EMAIL_ADDRESS =
+            "Invalid email address: @ is required unless the value is UNKNOWN";
     public static final String MESSAGE_INVALID_ADDRESS_FIELD = "Invalid address field";
     public static final String MESSAGE_INVALID_TAG = "Invalid tag";
     public static final String MESSAGE_UNKNOWN_INFORMATION =
             "If information currently unknown, feel free to type UNKNOWN into the field";
-
     public static final String COMMAND_WORD = "add";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a person to the address book. "
@@ -34,18 +34,17 @@ public class AddCommand extends Command {
             + PREFIX_PHONE + "PHONE "
             + PREFIX_EMAIL + "EMAIL "
             + PREFIX_ADDRESS + "ADDRESS "
-            + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Name, phone, email, and address values may contain punctuation, but must not be blank, contain control "
-            + "characters, or exceed " + StringUtil.MAX_FIELD_LENGTH + " characters.\n"
-            + "Names and phone numbers need a letter or digit; emails need @ or UNKNOWN.\n"
-            + "Use double quotes around a value containing a field prefix after a space.\n"
+            + "[" + PREFIX_TAG + "TAG]... "
+            + "[" + PREFIX_REMARK + "REMARK]\n"
+            + MESSAGE_UNKNOWN_INFORMATION + "\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "John Doe "
             + PREFIX_PHONE + "1234 5678 (HP) 1111-3333 (Office) "
             + PREFIX_EMAIL + "johnd@example.com (Work) jane@example.com (Personal) "
             + PREFIX_ADDRESS + "311, Clementi Ave 2, #02-25 "
             + PREFIX_TAG + "friends "
-            + PREFIX_TAG + "owesMoney";
+            + PREFIX_TAG + "owesMoney "
+            + PREFIX_REMARK + "Likes to swim.";
 
     public static final String MESSAGE_SUCCESS = "New person added: %1$s";
     public static final String MESSAGE_DUPLICATE_PERSON = "This name already exists in the address book. "

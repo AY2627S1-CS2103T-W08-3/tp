@@ -6,6 +6,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.List;
@@ -35,7 +36,8 @@ public class AddCommandParser implements Parser<AddCommand> {
     public AddCommand parse(String args) throws ParseException {
         requireNonNull(args);
         ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_TAG);
+                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_TAG,
+                        PREFIX_REMARK);
 
         String nameValue = getFieldValue(argMultimap, PREFIX_NAME, AddCommand.MESSAGE_INVALID_NAME_FIELD);
         String phoneValue = getFieldValue(argMultimap, PREFIX_PHONE, AddCommand.MESSAGE_INVALID_PHONE_NUMBER);
@@ -46,13 +48,14 @@ public class AddCommandParser implements Parser<AddCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
         }
 
-        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS);
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
+                PREFIX_REMARK);
         Name name = parseName(nameValue);
         Phone phone = parsePhone(phoneValue);
         Email email = parseEmail(emailValue);
         Address address = parseAddress(addressValue);
         Set<Tag> tagList = parseTags(argMultimap.getAllValues(PREFIX_TAG));
-        Remark remark = new Remark("");
+        Remark remark = ParserUtil.parseRemark(argMultimap.getValue(PREFIX_REMARK).orElse(""));
 
         Person person = new Person(name, phone, email, address, remark, tagList);
 
@@ -63,7 +66,7 @@ public class AddCommandParser implements Parser<AddCommand> {
             throws ParseException {
         Optional<String> fieldValue = argumentMultimap.getValue(prefix);
         if (!fieldValue.isPresent()) {
-            throw createInvalidFieldException(fieldMessage, true, null);
+            throw createInvalidFieldException(fieldMessage, null);
         }
         return fieldValue.get();
     }
@@ -72,7 +75,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseName(value);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_NAME_FIELD, value.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_NAME_FIELD, exception);
         }
     }
 
@@ -80,7 +83,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parsePhone(value);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, value.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, exception);
         }
     }
 
@@ -88,7 +91,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseEmail(value);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, value.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, exception);
         }
     }
 
@@ -96,7 +99,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseAddress(value);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, value.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, exception);
         }
     }
 
@@ -104,23 +107,12 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseTags(values);
         } catch (ParseException exception) {
-            boolean hasEmptyTag = values.stream().anyMatch(String::isEmpty);
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, hasEmptyTag, exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, exception);
         }
     }
 
-    private static ParseException createInvalidFieldException(String fieldMessage, boolean hasEmptyValue,
-                                                               ParseException cause) {
-        String usage = AddCommand.MESSAGE_USAGE;
-        if (hasEmptyValue) {
-            int firstLineEnd = usage.indexOf('\n');
-            if (firstLineEnd >= 0) {
-                usage = usage.substring(0, firstLineEnd + 1)
-                        + AddCommand.MESSAGE_UNKNOWN_INFORMATION + "\n"
-                        + usage.substring(firstLineEnd + 1);
-            }
-        }
-        String message = fieldMessage + "\n" + usage;
+    private static ParseException createInvalidFieldException(String fieldMessage, ParseException cause) {
+        String message = fieldMessage + "\n" + AddCommand.MESSAGE_USAGE;
         return cause == null ? new ParseException(message) : new ParseException(message, cause);
     }
 

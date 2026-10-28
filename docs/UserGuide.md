@@ -79,14 +79,15 @@ Format: `help`
 
 Adds a person to the address book.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]`
 
 Names, phone numbers, email addresses, and postal addresses may contain punctuation.
 Values must not be blank, contain control characters, or exceed 255 characters.
 Names and phone numbers must contain a letter or digit; emails must contain `@` or be `UNKNOWN`.
-If a value contains a field prefix such as `p/`, `e/`, or `a/` after a space, enclose the entire value in double
-quotes. For example: `n/"ACME p/Research"`.
+If a field value contains a prefix such as `p/`, `e/`, or `a/` after a space, wrap the entire value in double quotes.
+For example: `n/"ACME p/Research"`.
 If information currently unknown, feel free to type `UNKNOWN` into the field.
+Remarks can be added with the optional `r/REMARK` field.
 
 For example, a phone number can be entered as `1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
 
@@ -99,6 +100,7 @@ A person can have any number of tags, including zero.
 Examples:
 * `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/John Doe p/12345678 e/john@example.com a/311, Clementi Ave 2 r/Likes to swim.`
 
 ### Listing all persons: `list`
 
