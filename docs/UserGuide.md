@@ -207,11 +207,12 @@ Examples:
 
 Deletes the specified person from the address book.
 
-Format: `delete UUID_PREFIX`
+Format: `delete SHORT_UUID`
 
-* Deletes the person whose UUID starts with `UUID_PREFIX`.
-* Usually, `UUID_PREFIX` is the short UUID: the 7-character code shown as `#xxxxxxx` on each person's card.
-* `UUID_PREFIX` **must be 7 to 32 hexadecimal characters** (`0`–`9`, `a`–`f`). It is case-insensitive, and dashes are ignored, so you can also paste a person's full UUID.
+* Deletes the person whose short UUID matches `SHORT_UUID`.
+* The short UUID is the 7-character code shown as `#xxxxxxx` on each person's card. Type it without the `#`.
+* `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
+* If two persons share a short UUID, type more characters of the UUID, up to all 32, to pick one. Dashes are ignored, so you can also paste a person's full UUID.
 * The match is made against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is deleted.
 
 Examples:
@@ -297,8 +298,8 @@ Action | Format, Examples
 --------|------------------
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
-**Delete** | `delete UUID_PREFIX`<br> e.g., `delete 1a2b3c4`
-**Edit** | `edit SHORT_UUID [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`<br> e.g., `edit 1a2b3c4 n/James Lee e/jameslee@example.com`
+**Delete** | `delete SHORT_UUID`<br> e.g., `delete 1a2b3c4`
+**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
 **Sort** | `sort A-Z` or `sort Z-A`
