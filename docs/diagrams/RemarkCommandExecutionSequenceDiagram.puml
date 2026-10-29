@@ -13,7 +13,7 @@ participant "result:CommandResult" as CommandResult LOGIC_COLOR
 [-> RemarkCommand : execute(m)
 activate RemarkCommand
 
-RemarkCommand -> Model : getPersonsByShortUuid("1a2b3c4")
+RemarkCommand -> Model : getPersonsByUuidPrefix("1a2b3c4")
 activate Model
 Model --> RemarkCommand : matching persons
 deactivate Model

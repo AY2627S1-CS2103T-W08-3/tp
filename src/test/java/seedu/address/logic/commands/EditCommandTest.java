@@ -1,5 +1,6 @@
 package seedu.address.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,16 +37,36 @@ public class EditCommandTest {
 
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
+    // EP: Constructor targets are null, invalid UUID prefixes, or valid 7-to-32-character prefixes.
     @Test
-    public void constructor_invalidUuid_failure() {
+    public void constructor_nullArguments_throwsNullPointerException() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+
+        assertThrows(NullPointerException.class, () -> new EditCommand(null, descriptor));
+        assertThrows(NullPointerException.class, () -> new EditCommand("1234567", null));
+    }
+
+    // Boundary value: six and 33 hexadecimal characters are invalid, while seven and 32 are valid.
+    @Test
+    public void constructor_uuidLengthBoundaries() {
         EditPersonDescriptor descriptor = new EditPersonDescriptor();
 
         assertThrows(IllegalArgumentException.class, () -> new EditCommand("123456", descriptor));
-        assertThrows(IllegalArgumentException.class, () -> new EditCommand("123456g", descriptor));
+        assertDoesNotThrow(() -> new EditCommand("1234567", descriptor));
+        assertDoesNotThrow(() -> new EditCommand("1234567890abcdef1234567890abcdef", descriptor));
         assertThrows(IllegalArgumentException.class, () -> new EditCommand(
                 "1234567890abcdef1234567890abcdef0", descriptor));
     }
 
+    // EP: Non-hexadecimal UUID prefixes are rejected.
+    @Test
+    public void constructor_invalidUuid_failure() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptor();
+
+        assertThrows(IllegalArgumentException.class, () -> new EditCommand("123456g", descriptor));
+    }
+
+    // EP: A valid target can update every field in an unfiltered list.
     @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
         Person editedPerson = new PersonBuilder()
@@ -64,6 +85,7 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    // EP: A valid target can update a non-empty subset of fields.
     @Test
     public void execute_someFieldsSpecifiedUnfilteredList_success() {
         Index indexLastPerson = Index.fromOneBased(model.getFilteredPersonList().size());
@@ -85,6 +107,7 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    // EP: Remarks can be replaced with a non-empty value.
     @Test
     public void execute_remark_success() {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
@@ -101,6 +124,22 @@ public class EditCommandTest {
         assertEquals(personToEdit.getUuid(), model.getAddressBook().getPersonList().get(0).getUuid());
     }
 
+    // Boundary value: an empty remark clears the existing remark.
+    @Test
+    public void execute_clearRemark_success() {
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(personToEdit).withRemark("").build();
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withRemark("").build();
+        EditCommand editCommand = new EditCommand(personToEdit.getShortUuid(), descriptor);
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(personToEdit, editedPerson);
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    // EP: Similar names produce warnings unless the only similar entry is the edited person itself.
     @Test
     public void execute_similarName_succeedsWithWarning() {
         Person existingPerson = new PersonBuilder().withName("Alice Paulin").build();
@@ -121,6 +160,7 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    // EP: Direct command execution accepts a no-op descriptor; the parser rejects this input earlier.
     @Test
     public void execute_nameSimilarOnlyToEditedEntry_succeedsWithoutWarning() {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
@@ -136,6 +176,7 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    // EP: UUID targeting works independently of the current filtered list.
     @Test
     public void execute_noFieldSpecifiedUnfilteredList_success() {
         Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
@@ -148,6 +189,7 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    // EP: Editing into a duplicate person is rejected for both filtered and unfiltered lists.
     @Test
     public void execute_filteredList_success() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
@@ -165,6 +207,7 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    // EP: UUID execution targets partition into no match and multiple matches.
     @Test
     public void execute_duplicatePersonUnfilteredList_failure() {
         Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
@@ -188,6 +231,7 @@ public class EditCommandTest {
         assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
+    // EP: Equality partitions cover same object, equal values, null, another type, UUID, and descriptor changes.
     @Test
     public void execute_unknownUuid_failure() {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build();
@@ -236,6 +280,7 @@ public class EditCommandTest {
         assertFalse(standardCommand.equals(new EditCommand("aaaaaaa", DESC_BOB)));
     }
 
+    // EP: Descriptor remarks participate in equality; different remarks are not equivalent.
     @Test
     public void descriptorEquals_differentRemark_returnsFalse() {
         EditPersonDescriptor firstDescriptor = new EditPersonDescriptorBuilder()
@@ -246,6 +291,7 @@ public class EditCommandTest {
         assertFalse(firstDescriptor.equals(secondDescriptor));
     }
 
+    // EP: String representation includes the UUID and descriptor state.
     @Test
     public void toStringMethod() {
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
