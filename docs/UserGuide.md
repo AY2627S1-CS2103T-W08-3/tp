@@ -120,7 +120,6 @@ Missing or invalid parameters produce an error without changing the displayed li
 
 Format: `sort A-Z` or `sort Z-A`
 
-* `A-Z` and `Z-A` must be typed in capitals; `sort a-z` is rejected.
 * Sorting clears any `find` filter, so the full list is shown.
 * Sorting only changes the order on screen. The data file is not reordered, and the list returns to its original order when you restart the app.
 * The sort order stays in effect until you restart: later `list`, `find`, `add` and `undelete` results are shown in the same order.
