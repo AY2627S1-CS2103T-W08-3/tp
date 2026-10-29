@@ -8,7 +8,7 @@ title: ClientConnect
 
 ![Ui](images/Ui.png)
 
-**ClientConnect is a desktop address book for insurance agents who manage large client portfolios.** It is optimised for fast typing: you add, edit, find, sort and delete clients by typing commands in a CLI (Command Line Interface), while a GUI shows the results.
+**ClientConnect streamlines contact management for insurance agents by providing fast, CLI-optimized access to rapidly growing client lists.** It solves the inefficiency of constant data entry, enabling agents to seamlessly add, filter, and retrieve critical client details to better manage relationships and their extensive portfolios. It is a desktop application with a GUI, while most user interactions happen through a CLI (Command Line Interface).
 
 With ClientConnect, you can:
 
@@ -18,7 +18,6 @@ With ClientConnect, you can:
 * restore a client you deleted by mistake.
 
 To download ClientConnect, go to the [latest release](https://github.com/AY2627S1-CS2103T-W08-3/tp/releases).
-
 * If you are interested in using ClientConnect, head over to the [_Quick Start_ section of the **User Guide**](UserGuide.html#quick-start).
 * If you are interested in developing ClientConnect, the [**Developer Guide**](DeveloperGuide.html) is a good place to start.
 

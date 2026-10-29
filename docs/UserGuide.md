@@ -3,9 +3,9 @@ layout: page
 title: User Guide
 ---
 
-ClientConnect is a **desktop application for insurance agents to manage their client contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI).
+ClientConnect is a **desktop application that streamlines contact management for insurance agents by providing fast, CLI-optimized access to rapidly growing client lists** while retaining the benefits of a Graphical User Interface (GUI). It solves the inefficiency of constant data entry, enabling agents to seamlessly add, filter, and retrieve critical client details to better manage relationships and their extensive portfolios.
 
-It is built for agents who handle large client portfolios and many active leads. You can record clients, tag them (for example by policy type), add remarks, and find them again by name or tag, all by typing short commands. If you type quickly, ClientConnect lets you manage your clients faster than clicking through forms or scrolling a spreadsheet.
+It is built for agents who handle large client portfolios and many active leads. You can record clients, tag them, add remarks, and find them again by name or tag, all by typing short commands. If you type quickly, ClientConnect lets you manage your clients faster than clicking through forms or scrolling a spreadsheet.
 
 * Table of Contents
 {:toc}
@@ -19,7 +19,7 @@ It is built for agents who handle large client portfolios and many active leads.
 
 1. Download the latest `.jar` file from [here](https://github.com/AY2627S1-CS2103T-W08-3/tp/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for ClientConnect.
+1. Copy the file to the folder you want to use as the _home folder_ for your ClientConnect data.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ClientConnect.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
@@ -33,7 +33,7 @@ It is built for agents who handle large client portfolios and many active leads.
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe`.
+   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to ClientConnect.
 
    * `delete 1a2b3c4` : Deletes the contact whose card shows the short UUID `#1a2b3c4`.
 
@@ -93,10 +93,11 @@ Format: `help`
 
 ### Adding a person: `add`
 
-Adds a person to the address book.
+Adds a person to ClientConnect.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]`
 
+Invalid input identifies the field that needs correction and keeps the relevant command suggestions visible.
 Names, phone numbers, email addresses, and postal addresses may contain punctuation.
 Values must not be blank, contain control characters, or exceed 255 characters.
 Names and phone numbers must contain a letter or digit; emails must contain `@` or be `UNKNOWN`.
@@ -125,6 +126,43 @@ Examples:
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 * `add n/John Doe p/12345678 e/john@example.com a/311, Clementi Ave 2 r/Likes to swim.`
 
+#### Name typo warnings
+
+When adding a person or editing a person's name, ClientConnect compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match.
+
+The comparison:
+
+* ignores leading and trailing spaces, repeated internal spaces, and letter case;
+* preserves punctuation when comparing names;
+* requires at least three characters and uses a stricter similarity requirement for short names;
+* checks only the person's name, not phone numbers, email addresses, addresses, remarks, or tags; and
+* does not warn for a case-only match, an exact duplicate, or the person currently being edited.
+
+Additional or misplaced spaces are flagged separately. For example, `John  Smith` may warn about the existing `John Smith`.
+
+The warning is advisory only. The add or edit command is still completed and the input is saved; ClientConnect does not ask for confirmation. If the warning identifies the intended existing person, review the result and correct it with another command if necessary. If the new entry is intentional, no further action is required.
+
+### Editing a person: `edit`
+
+Edits an existing person in ClientConnect.
+
+Format: `edit UUID_PREFIX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`
+
+Names, phone numbers, email addresses, and postal addresses may contain punctuation, subject to the same blank,
+control-character, 255-character, and content safeguards as `add`. Names and phone numbers must contain a letter
+or digit, and emails must contain `@` or be `UNKNOWN`. Quote values containing field prefixes after a space.
+
+* Edits the person whose UUID starts with `UUID_PREFIX`. The prefix must contain 7–32 hexadecimal characters after dashes are stripped, and is case-insensitive. The `#` display prefix is not part of the input.
+* The UUID is matched against every person in ClientConnect, not just the currently displayed list. If a prefix matches multiple people, enter more UUID characters.
+* At least one of the optional fields must be provided.
+* Existing values will be updated to the input values.
+* To update or clear a remark, provide `r/REMARK` or `r/` respectively.
+* When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
+* To remove all of a person's tags, enter `t/` without a tag after it.
+
+Examples:
+*  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
+*  `edit 1a2b3c4 n/Betsy Crower r/Likes to swim.` Updates the name and remark of that person.
 <div markdown="block" class="alert alert-info">
 
 **:information_source: Name uniqueness:**<br>
@@ -137,7 +175,7 @@ Examples:
 
 ### Listing all persons: `list`
 
-Shows a list of all persons in the address book.
+Shows a list of all persons in ClientConnect.
 
 Format: `list`
 
@@ -155,62 +193,21 @@ Format: `sort asc` or `sort desc`
 * Sorting only changes the order on screen. The data file is not reordered, and the list returns to its original order when you restart the app.
 * The sort order stays in effect until you restart: later `list`, `find`, `add` and `undelete` results are shown in the same order.
 
-### Editing a person: `edit`
-
-Edits an existing person in the address book.
-
-Format: `edit SHORT_UUID [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`
-
-Names, phone numbers, email addresses, and postal addresses may contain punctuation, subject to the same blank,
-control-character, and 255-character safeguards as `add`. Quote values containing field prefixes after a space.
-
-* Edits the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
-* At least one of the optional fields must be provided.
-* Existing values will be updated to the input values.
-* A new name must not match another person's name. See the name uniqueness note under [`add`](#adding-a-person-add).
-* To update or clear a remark, provide `r/REMARK` or `r/` respectively.
-* When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
-* To remove all of a person's tags, enter `t/` without a tag after it.
-* Tags follow the same rules as in `add`: letters and digits only, stored exactly as typed.
-
-Examples:
-*  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
-*  `edit 1a2b3c4 n/Betsy Crower r/Likes to swim.` Updates the name and remark of that person.
-
-### Name typo warnings
-
-When adding a person or editing a person's name, ClientConnect compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match. The warning is shown after the usual success message:
-
-```
-Warning: "Jon Smith" is very similar to existing entry "John Smith".
-```
-
-The comparison:
-
-* ignores leading and trailing spaces, repeated internal spaces, and letter case;
-* preserves punctuation when comparing names;
-* requires at least three characters and uses a stricter similarity requirement for short names;
-* checks only the person's name, not phone numbers, email addresses, addresses, remarks, or tags; and
-* does not warn for a case-only match, an exact duplicate, or the person currently being edited.
-
-Additional or misplaced spaces are flagged separately. For example, `John  Smith` may warn about the existing `John Smith`.
-
-The warning is advisory only. The add or edit command is still completed and the input is saved; ClientConnect does not ask for confirmation. If the warning identifies the intended existing person, review the result and correct it with another command if necessary. If the new entry is intentional, no further action is required.
-
 ### Adding or removing a remark: `remark`
 
-Adds or updates a remark for an existing person in the address book. The existing remark will be overwritten.
+Adds or updates a remark for an existing person in ClientConnect. The existing remark will be overwritten.
 
-Format: `remark SHORT_UUID r/REMARK`
+Format: `remark UUID_PREFIX r/[REMARK]`
 
-* Updates the remark of the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
+* Updates the remark of the person whose UUID starts with `UUID_PREFIX`.
+* The UUID prefix must contain 7–32 hexadecimal characters after dashes are stripped; it is case-insensitive.
+* The match is made against every person in ClientConnect, not just the currently displayed list.
 * The `r/` prefix is compulsory. Omitting it results in an invalid command.
 * To remove an existing remark, enter `r/` without any text after it.
 
 Examples:
 * `remark 1a2b3c4 r/Likes to swim.` adds a remark to the contact whose card shows `#1a2b3c4`.
 * `remark 1a2b3c4 r/` removes the remark from the contact whose card shows `#1a2b3c4`.
-
 ### Locating persons by name or tag: `find`
 
 Finds persons whose names contain any given name keyword or whose tags match any given tag.
@@ -241,11 +238,15 @@ Examples:
 
 ### Deleting a person: `delete`
 
-Deletes the specified person from the address book.
+Deletes the specified person from ClientConnect.
 
-Format: `delete SHORT_UUID`
+Format: `delete UUID_PREFIX`
 
-* Deletes the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
+* Deletes the person whose UUID starts with `UUID_PREFIX`.
+* Usually, `UUID_PREFIX` is the short UUID: the 7-character code shown as `#xxxxxxx` on each person's card.
+* `UUID_PREFIX` **must be 7 to 32 hexadecimal characters** (`0`–`9`, `a`–`f`). It is case-insensitive, and dashes are ignored, so you can also paste a person's full UUID.
+* The match is made against **every** person in ClientConnect, not just the currently displayed list, so filtering with `find` does not affect which person is deleted.
+* Type the UUID prefix without the `#` display prefix. If two persons share a short UUID, enter more characters, up to all 32, to pick one.
 
 Examples:
 * `delete 1a2b3c4` deletes the person whose card shows `#1a2b3c4`.
@@ -261,7 +262,7 @@ Two persons sharing a short UUID is very rare, so `delete` with the short UUID f
 
 ### Clearing all entries: `clear`
 
-Clears all entries from the address book.
+Clears all entries from ClientConnect.
 
 Format: `clear`
 
@@ -297,10 +298,10 @@ ClientConnect automatically saves data after every command. You do not need to s
 
 ### Editing the data file
 
-ClientConnect data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+ClientConnect data is saved automatically as a JSON file `[JAR file location]/data/ClientConnect.json`. Advanced users are welcome to update data directly by editing that data file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, ClientConnect starts with an empty address book at the next run. The invalid file remains on disk until you run a command (ClientConnect saves after every command). Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, ClientConnect starts with an empty contact list at the next run. The invalid file remains on disk until you run a command (ClientConnect saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause ClientConnect to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
@@ -310,7 +311,6 @@ Furthermore, certain edits can cause ClientConnect to behave in unexpected ways 
 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClientConnect home folder.
-
 --------------------------------------------------------------------------------------------------------------------
 
 ## Glossary
@@ -321,7 +321,7 @@ Term | Meaning
 **GUI** (Graphical User Interface) | The windows, buttons and lists you see and click on.
 **Home folder** | The folder containing the JAR file. The app stores its data and settings there.
 **Hexadecimal** | The characters `0`–`9` and `a`–`f`. UUIDs are made only of these characters.
-**JSON** | The text file format used to store your data in `data/addressbook.json`.
+**JSON** | The text file format used to store your data in `data/ClientConnect.json`.
 **Parameter** | A value you supply in a command, written in `UPPER_CASE` in the formats, such as `NAME` in `n/NAME`.
 **Prefix** | The short label before a value in a command, such as `n/` for name or `t/` for tag. It tells the app which field the value belongs to.
 **Short UUID** | The first 7 characters of a person's UUID, shown as `#xxxxxxx` on the person's card. `edit`, `remark` and `delete` use it to pick a person.
@@ -342,14 +342,14 @@ Term | Meaning
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague r/Prefers email`
 **Clear** | `clear`
-**Delete** | `delete SHORT_UUID`<br> e.g., `delete 1a2b3c4`
-**Edit** | `edit SHORT_UUID [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`<br> e.g., `edit 1a2b3c4 n/James Lee e/jameslee@example.com`
-**Exit** | `exit`
-**Find** | `find [KEYWORD [MORE_KEYWORDS]…​] [t/TAG]…​`<br> e.g., `find James t/friends`
-**Help** | `help`
+**Delete** | `delete UUID_PREFIX` (7–32 hexadecimal characters; dashes are ignored)<br> e.g., `delete 1a2b3c4`
+**Edit** | `edit UUID_PREFIX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`<br> e.g., `edit 1a2b3c4 n/James Lee e/jameslee@example.com r/Prefers email`
+**Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
 **List** | `list`
-**Remark** | `remark SHORT_UUID r/REMARK`<br> e.g., `remark 1a2b3c4 r/Likes to swim.`
 **Sort** | `sort asc` or `sort desc`
+**Remark** | `remark UUID_PREFIX r/[REMARK]` (7–32 hexadecimal characters; dashes are ignored)<br> e.g., `remark 1a2b3c4 r/Likes to swim.`
+**Help** | `help`
 **Undelete** | `undelete`
+**Exit** | `exit`
