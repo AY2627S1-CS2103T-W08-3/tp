@@ -2,6 +2,10 @@
 layout: page
 title: Developer Guide
 ---
+ClientConnect is a keyboard-driven desktop address book for insurance agents who manage large client portfolios. This
+guide explains how ClientConnect is designed and implemented, for developers who want to maintain or extend it. To
+learn how to use the app, see the [User Guide](UserGuide.html).
+
 * Table of Contents
 {:toc}
 
