@@ -17,6 +17,12 @@ public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
+    public static final String MESSAGE_MISSING_SEARCH_TERMS =
+            "Specify at least part of a name or a tag.";
+    public static final String MESSAGE_MISSING_TAG =
+            "Specify a tag description after t/. If the name contains t/, "
+            + "use a substring that does not start with t/ instead (e.g. /0 for agent/0).";
+
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons matching any name keyword or tag "
             + "(case-insensitive, partial names and complete tags, OR search) "
             + "and displays them as a list with index numbers.\n"

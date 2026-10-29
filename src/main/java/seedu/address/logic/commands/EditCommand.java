@@ -5,6 +5,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
@@ -15,8 +16,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -37,51 +38,70 @@ public class EditCommand extends Command {
     public static final String COMMAND_WORD = "edit";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the person identified "
-            + "by the index number used in the displayed person list. "
+            + "by the UUID prefix shown on the person's card or copied from the data file. "
             + "Existing values will be overwritten by the input values.\n"
-            + "Parameters: INDEX (must be a positive integer) "
+            + "Parameters: UUID_PREFIX (7 to 32 hexadecimal characters; dashes are ignored) "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
+            + "[" + PREFIX_REMARK + "REMARK] "
             + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Names may contain alphanumeric characters, spaces, parentheses, and slashes.\n"
-            + "Phone numbers must contain at least one letter or digit and may include "
-            + "spaces, parentheses, and hyphens.\n"
-            + "Email addresses may be separated or annotated with spaces and parentheses.\n"
-            + "Example: " + COMMAND_WORD + " 1 "
+            + "Name, phone, email, and address values may contain punctuation, but must not be blank, contain control "
+            + "characters, or exceed " + StringUtil.MAX_FIELD_LENGTH + " characters.\n"
+            + "Names and phone numbers need a letter or digit; emails need @ or UNKNOWN.\n"
+            + "Use double quotes around a value containing a field prefix after a space.\n"
+            + "Example: " + COMMAND_WORD + " 1a2b3c4 "
             + PREFIX_PHONE + "1234 5678 (HP) 1111-3333 (Office) "
-            + PREFIX_EMAIL + "johndoe@example.com (Work) jane@example.com (Personal)";
+            + PREFIX_EMAIL + "johndoe@example.com (Work) jane@example.com (Personal) "
+            + PREFIX_REMARK + "Likes to swim.";
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited person: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+    public static final String MESSAGE_MISSING_UUID = "Missing short UUID.";
+    public static final String MESSAGE_INVALID_UUID =
+            "Invalid UUID prefix. It must contain 7 to 32 hexadecimal characters, ignoring dashes.";
+    public static final String MESSAGE_NO_PERSON_WITH_UUID = "No person with UUID: %s";
+    public static final String MESSAGE_AMBIGUOUS_UUID =
+            "Multiple persons match UUID: %s. Please use a more specific identifier.";
 
-    private final Index index;
+    private static final String UUID_PREFIX_REGEX =
+            "\\p{XDigit}{" + Person.SHORT_UUID_LENGTH + "," + Person.UUID_HEX_LENGTH + "}";
+    private final String targetUuid;
     private final EditPersonDescriptor editPersonDescriptor;
 
     /**
-     * @param index of the person in the filtered person list to edit
+     * @param targetUuid UUID prefix of the person to edit
      * @param editPersonDescriptor details to edit the person with
+     * @throws IllegalArgumentException if {@code targetUuid} is not between 7 and 32 hexadecimal characters,
+     *         ignoring dashes
      */
-    public EditCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
-        requireNonNull(index);
+    public EditCommand(String targetUuid, EditPersonDescriptor editPersonDescriptor) {
+        requireNonNull(targetUuid);
         requireNonNull(editPersonDescriptor);
+        String normalisedTargetUuid = targetUuid.trim().replace("-", "").toLowerCase();
+        if (!normalisedTargetUuid.matches(UUID_PREFIX_REGEX)) {
+            throw new IllegalArgumentException(
+                    "Target UUID must contain between 7 and 32 hexadecimal characters, ignoring dashes.");
+        }
 
-        this.index = index;
+        this.targetUuid = normalisedTargetUuid;
         this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
-
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        List<Person> matches = requireNonNull(model.getPersonsByUuidPrefix(targetUuid));
+        if (matches.isEmpty()) {
+            throw new CommandException(String.format(MESSAGE_NO_PERSON_WITH_UUID, targetUuid));
+        }
+        if (matches.size() > 1) {
+            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuid));
         }
 
-        Person personToEdit = lastShownList.get(index.getZeroBased());
+        Person personToEdit = matches.get(0);
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
         if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
@@ -107,9 +127,10 @@ public class EditCommand extends Command {
         Email updatedEmail = editPersonDescriptor.getEmail().orElse(personToEdit.getEmail());
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
-        Remark updatedRemark = personToEdit.getRemark();
+        Remark updatedRemark = editPersonDescriptor.getRemark().orElse(personToEdit.getRemark());
 
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedRemark, updatedTags);
+        return new Person(personToEdit.getUuid(), updatedName, updatedPhone, updatedEmail, updatedAddress,
+                updatedRemark, updatedTags);
     }
 
     @Override
@@ -123,14 +144,14 @@ public class EditCommand extends Command {
             return false;
         }
 
-        return index.equals(otherEditCommand.index)
+        return targetUuid.equals(otherEditCommand.targetUuid)
                 && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("index", index)
+                .add("targetUuid", targetUuid)
                 .add("editPersonDescriptor", editPersonDescriptor)
                 .toString();
     }
@@ -144,6 +165,7 @@ public class EditCommand extends Command {
         private Phone phone;
         private Email email;
         private Address address;
+        private Remark remark;
         private Set<Tag> tags;
 
         public EditPersonDescriptor() {}
@@ -157,6 +179,7 @@ public class EditCommand extends Command {
             setPhone(toCopy.phone);
             setEmail(toCopy.email);
             setAddress(toCopy.address);
+            setRemark(toCopy.remark);
             setTags(toCopy.tags);
         }
 
@@ -164,7 +187,7 @@ public class EditCommand extends Command {
          * Returns true if at least one field is edited.
          */
         public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(name, phone, email, address, tags);
+            return CollectionUtil.isAnyNonNull(name, phone, email, address, remark, tags);
         }
 
         public void setName(Name name) {
@@ -199,6 +222,14 @@ public class EditCommand extends Command {
             return Optional.ofNullable(address);
         }
 
+        public void setRemark(Remark remark) {
+            this.remark = remark;
+        }
+
+        public Optional<Remark> getRemark() {
+            return Optional.ofNullable(remark);
+        }
+
         /**
          * Sets {@code tags} to this object's {@code tags}.
          * A defensive copy of {@code tags} is used internally.
@@ -231,6 +262,7 @@ public class EditCommand extends Command {
                     && Objects.equals(phone, otherEditPersonDescriptor.phone)
                     && Objects.equals(email, otherEditPersonDescriptor.email)
                     && Objects.equals(address, otherEditPersonDescriptor.address)
+                    && Objects.equals(remark, otherEditPersonDescriptor.remark)
                     && Objects.equals(tags, otherEditPersonDescriptor.tags);
         }
 
@@ -241,6 +273,7 @@ public class EditCommand extends Command {
                     .add("phone", phone)
                     .add("email", email)
                     .add("address", address)
+                    .add("remark", remark)
                     .add("tags", tags)
                     .toString();
         }

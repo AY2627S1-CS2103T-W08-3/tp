@@ -1,9 +1,9 @@
 package seedu.address.logic.parser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
  * Tokenizes arguments string of the form: {@code preamble <prefix>value <prefix>value ...}<br>
@@ -12,8 +12,11 @@ import java.util.stream.Collectors;
  * 2. Leading and trailing whitespaces of an argument value will be discarded.<br>
  * 3. An argument may be repeated and all its values will be accumulated e.g. the value of {@code t/}
  *    in the above example.<br>
+ * 4. In quoted-value mode, double quotes protect field-prefix-looking text from being interpreted as a new prefix.
  */
 public class ArgumentTokenizer {
+
+    public static final String MESSAGE_UNMATCHED_QUOTE = "Unmatched double quote in command arguments.";
 
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
@@ -23,9 +26,29 @@ public class ArgumentTokenizer {
      * @param prefixes   Prefixes to tokenize the arguments string with
      * @return           ArgumentMultimap object that maps prefixes to their arguments
      */
-    public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) {
-        List<PrefixPosition> positions = findAllPrefixPositions(argsString, prefixes);
-        return extractArguments(argsString, positions);
+    public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) throws ParseException {
+        return tokenizeInternal(argsString, false, prefixes);
+    }
+
+    /**
+     * Tokenizes arguments while treating a double-quoted value immediately after a field prefix as one value.
+     *
+     * @param argsString Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
+     * @param prefixes   Prefixes to tokenize the arguments string with
+     * @return ArgumentMultimap object that maps prefixes to their arguments
+     * @throws ParseException if a quoted value is not closed
+     */
+    public static ArgumentMultimap tokenizeWithQuotedValues(String argsString, Prefix... prefixes)
+            throws ParseException {
+        return tokenizeInternal(argsString, true, prefixes);
+    }
+
+    private static ArgumentMultimap tokenizeInternal(String argsString, boolean recognizeQuotedValues,
+            Prefix... prefixes) throws ParseException {
+        List<PrefixPosition> positions = recognizeQuotedValues
+                ? findQuotedPrefixPositions(argsString, prefixes)
+                : findAllPrefixPositions(argsString, prefixes);
+        return extractArguments(argsString, positions, recognizeQuotedValues);
     }
 
     /**
@@ -35,44 +58,81 @@ public class ArgumentTokenizer {
      * @param prefixes   Prefixes to find in the arguments string
      * @return           List of zero-based prefix positions in the given arguments string
      */
-    private static List<PrefixPosition> findAllPrefixPositions(String argsString, Prefix... prefixes) {
-        return Arrays.stream(prefixes)
-                .flatMap(prefix -> findPrefixPositions(argsString, prefix).stream())
-                .collect(Collectors.toList());
+    private static List<PrefixPosition> findAllPrefixPositions(String argsString, Prefix... prefixes)
+            throws ParseException {
+        List<PrefixPosition> positions = new ArrayList<>();
+        for (Prefix prefix : prefixes) {
+            positions.addAll(findPrefixPositions(argsString, prefix));
+        }
+        return positions;
+    }
+
+    /**
+     * Finds prefixes while ignoring prefix-looking text inside quoted values.
+     */
+    private static List<PrefixPosition> findQuotedPrefixPositions(String argsString, Prefix... prefixes)
+            throws ParseException {
+        List<PrefixPosition> positions = new ArrayList<>();
+        boolean isInsideQuotedValue = false;
+
+        for (int index = 0; index < argsString.length(); index++) {
+            if (isInsideQuotedValue) {
+                if (argsString.charAt(index) == '"' && !isEscaped(argsString, index)) {
+                    isInsideQuotedValue = false;
+                }
+                continue;
+            }
+
+            if (index == 0 || !Character.isWhitespace(argsString.charAt(index - 1))) {
+                continue;
+            }
+
+            Prefix matchingPrefix = null;
+            for (Prefix prefix : prefixes) {
+                if (argsString.startsWith(prefix.getPrefix(), index)) {
+                    positions.add(new PrefixPosition(prefix, index));
+                    matchingPrefix = prefix;
+                }
+            }
+
+            if (matchingPrefix != null) {
+                int quotePosition = skipWhitespace(argsString,
+                        index + matchingPrefix.getPrefix().length());
+                if (quotePosition < argsString.length() && argsString.charAt(quotePosition) == '"') {
+                    isInsideQuotedValue = true;
+                    index = quotePosition;
+                }
+            }
+        }
+
+        if (isInsideQuotedValue) {
+            throw new ParseException(MESSAGE_UNMATCHED_QUOTE);
+        }
+        return positions;
+    }
+
+    private static int skipWhitespace(String value, int startIndex) {
+        int index = startIndex;
+        while (index < value.length() && Character.isWhitespace(value.charAt(index))) {
+            index++;
+        }
+        return index;
     }
 
     /**
      * @see #findAllPrefixPositions(String, Prefix...)
      */
-    private static List<PrefixPosition> findPrefixPositions(String argsString, Prefix prefix) {
+    private static List<PrefixPosition> findPrefixPositions(String argsString, Prefix prefix) throws ParseException {
         List<PrefixPosition> positions = new ArrayList<>();
 
-        int prefixPosition = findPrefixPosition(argsString, prefix.getPrefix(), 0);
-        while (prefixPosition != -1) {
-            PrefixPosition extendedPrefix = new PrefixPosition(prefix, prefixPosition);
-            positions.add(extendedPrefix);
-            prefixPosition = findPrefixPosition(argsString, prefix.getPrefix(), prefixPosition);
+        for (int index = 0; index < argsString.length(); index++) {
+            if (index > 0 && Character.isWhitespace(argsString.charAt(index - 1))
+                    && argsString.startsWith(prefix.getPrefix(), index)) {
+                positions.add(new PrefixPosition(prefix, index));
+            }
         }
 
         return positions;
-    }
-
-    /**
-     * Returns the index of the first occurrence of {@code prefix} in
-     * {@code argsString} starting from index {@code fromIndex}. An occurrence
-     * is valid if there is a whitespace before {@code prefix}. Returns -1 if no
-     * such occurrence can be found.
-     *
-     * E.g if {@code argsString} = "e/hip/900", {@code prefix} = "p/" and
-     * {@code fromIndex} = 0, this method returns -1 as there are no valid
-     * occurrences of "p/" with whitespace before it. However, if
-     * {@code argsString} = "e/hi p/900", {@code prefix} = "p/" and
-     * {@code fromIndex} = 0, this method returns 5.
-     */
-    private static int findPrefixPosition(String argsString, String prefix, int fromIndex) {
-        int prefixIndex = argsString.indexOf(" " + prefix, fromIndex);
-        return prefixIndex == -1 ? -1
-                : prefixIndex + 1; // +1 as offset for whitespace
     }
 
     /**
@@ -84,7 +144,9 @@ public class ArgumentTokenizer {
      * @param prefixPositions Zero-based positions of all prefixes in {@code argsString}
      * @return                ArgumentMultimap object that maps prefixes to their arguments
      */
-    private static ArgumentMultimap extractArguments(String argsString, List<PrefixPosition> prefixPositions) {
+    private static ArgumentMultimap extractArguments(String argsString, List<PrefixPosition> prefixPositions,
+            boolean recognizeQuotedValues)
+            throws ParseException {
 
         // Sort by start position
         prefixPositions.sort((prefix1, prefix2) -> prefix1.getStartPosition() - prefix2.getStartPosition());
@@ -102,7 +164,8 @@ public class ArgumentTokenizer {
         for (int i = 0; i < prefixPositions.size() - 1; i++) {
             // Extract and store prefixes and their arguments
             Prefix argPrefix = prefixPositions.get(i).getPrefix();
-            String argValue = extractArgumentValue(argsString, prefixPositions.get(i), prefixPositions.get(i + 1));
+            String argValue = extractArgumentValue(argsString, prefixPositions.get(i), prefixPositions.get(i + 1),
+                    recognizeQuotedValues);
             argMultimap.put(argPrefix, argValue);
         }
 
@@ -113,15 +176,61 @@ public class ArgumentTokenizer {
      * Returns the trimmed value of the argument in the arguments string specified by {@code currentPrefixPosition}.
      * The end position of the value is determined by {@code nextPrefixPosition}.
      */
-    private static String extractArgumentValue(String argsString,
-                                        PrefixPosition currentPrefixPosition,
-                                        PrefixPosition nextPrefixPosition) {
+    private static String extractArgumentValue(String argsString, PrefixPosition currentPrefixPosition,
+            PrefixPosition nextPrefixPosition, boolean recognizeQuotedValues) throws ParseException {
         Prefix prefix = currentPrefixPosition.getPrefix();
 
         int valueStartPos = currentPrefixPosition.getStartPosition() + prefix.getPrefix().length();
         String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition());
 
-        return value.trim();
+        String trimmedValue = value.trim();
+        if (recognizeQuotedValues && trimmedValue.startsWith("\"") && trimmedValue.endsWith("\"")) {
+            return unescapeQuotedValue(trimmedValue.substring(1, trimmedValue.length() - 1));
+        }
+        return trimmedValue;
+    }
+
+    /**
+     * Returns whether a character is escaped by an odd number of preceding backslashes.
+     */
+    private static boolean isEscaped(String value, int index) {
+        int backslashCount = 0;
+        for (int currentIndex = index - 1; currentIndex >= 0 && value.charAt(currentIndex) == '\\'; currentIndex--) {
+            backslashCount++;
+        }
+        return backslashCount % 2 == 1;
+    }
+
+    /**
+     * Removes escape characters from a quoted field value.
+     */
+    private static String unescapeQuotedValue(String value) {
+        StringBuilder unescapedValue = new StringBuilder();
+        boolean isEscaped = false;
+        for (char character : value.toCharArray()) {
+            if (isEscaped) {
+                appendUnescapedCharacter(unescapedValue, character);
+                isEscaped = false;
+                continue;
+            }
+            if (character == '\\') {
+                isEscaped = true;
+                continue;
+            }
+            unescapedValue.append(character);
+        }
+        return unescapedValue.toString();
+    }
+
+    /**
+     * Appends a character after an escape marker, preserving unsupported escape sequences literally.
+     */
+    private static void appendUnescapedCharacter(StringBuilder unescapedValue, char character) {
+        if (character == '"' || character == '\\') {
+            unescapedValue.append(character);
+            return;
+        }
+        unescapedValue.append('\\').append(character);
     }
 
     /**
