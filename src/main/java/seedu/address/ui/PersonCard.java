@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -11,6 +12,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -73,8 +75,27 @@ public class PersonCard extends UiPart<Region> {
         configureValueLabel(remark, person.getRemark().value, true);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+                .forEach(tag -> {
+                    Label tagLabel = new Label(tag.tagName);
+                    configureClickToCopy(tagLabel, tag.tagName);
+                    tags.getChildren().add(tagLabel);
+                });
         configureCopyMenu();
+        configureClickToCopy(uuid, person.getShortUuid());
+    }
+
+    /**
+     * Copies the underlying value on a left click, without any display decoration.
+     */
+    private static void configureClickToCopy(Label label, String value) {
+        label.setCursor(Cursor.HAND);
+        label.setTooltip(new Tooltip("Click to copy: " + value));
+        label.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                copyToClipboard(value);
+                event.consume();
+            }
+        });
     }
 
     /**
@@ -106,12 +127,17 @@ public class PersonCard extends UiPart<Region> {
     private static MenuItem createCopyItem(String title, String value) {
         MenuItem item = new MenuItem(title);
         item.setDisable(value.isEmpty());
-        item.setOnAction(event -> {
-            ClipboardContent content = new ClipboardContent();
-            content.putString(value);
-            Clipboard.getSystemClipboard().setContent(content);
-        });
+        item.setOnAction(event -> copyToClipboard(value));
         return item;
+    }
+
+    /**
+     * Places plain text on the system clipboard.
+     */
+    private static void copyToClipboard(String value) {
+        ClipboardContent content = new ClipboardContent();
+        content.putString(value);
+        Clipboard.getSystemClipboard().setContent(content);
     }
 
     /**
