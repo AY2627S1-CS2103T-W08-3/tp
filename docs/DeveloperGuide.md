@@ -498,7 +498,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2b. Too many clients match to find the right one quickly.
 
-    * 2b1. User re-enters the command with a more specific keyword (e.g. a full name instead of a first name).
+    * 2b1. User re-enters the command with a single, longer name keyword (e.g. `find Alex` instead of `find Al`).
+      Adding separate keywords does not narrow the results because `find` matches any keyword (OR search).
 
       Use case resumes at step 2.
 
