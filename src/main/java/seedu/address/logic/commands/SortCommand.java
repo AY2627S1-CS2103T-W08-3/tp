@@ -12,19 +12,18 @@ import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
 /**
- * Displays all persons alphabetically by name, ignoring capitalization.
+ * Displays all persons lexicographically by name, ignoring capitalization.
  */
 public class SortCommand extends Command {
 
     public static final String COMMAND_WORD = "sort";
-    public static final String MESSAGE_SUCCESS = "Listed all persons alphabetically by name.";
-    public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Lists all persons alphabetically by name, ignoring capitalization.\n"
-            + "Parameters: A-Z (ascending) or Z-A (descending)\n"
-            + "Example: " + COMMAND_WORD + " A-Z";
+    public static final String MESSAGE_SUCCESS = "Sorted all persons by name in %1$s text order.";
+    public static final String MESSAGE_USAGE = "Use one of these commands:\n"
+            + COMMAND_WORD + " asc  - Sort names in ascending text order\n"
+            + COMMAND_WORD + " desc - Sort names in descending text order";
 
     /**
-     * The alphabetical direction of the displayed list.
+     * The lexicographical direction of the displayed list.
      */
     public enum SortOrder {
         ASCENDING, DESCENDING
@@ -37,7 +36,7 @@ public class SortCommand extends Command {
     private final SortOrder sortOrder;
 
     /**
-     * Creates a command with the specified alphabetical direction.
+     * Creates a command with the specified lexicographical direction.
      *
      * @throws NullPointerException If {@code sortOrder} is null.
      */
@@ -59,7 +58,18 @@ public class SortCommand extends Command {
         assert model.getFilteredPersonList().size() == personCount : "Sorting must display all contacts";
         assert isSorted(model.getFilteredPersonList(), comparator) : "Displayed contacts must follow the sort order";
         logger.fine("Successfully sorted contacts in " + sortOrder + " order");
-        return new CommandResult(MESSAGE_SUCCESS);
+        return new CommandResult(getSuccessMessage());
+    }
+
+    /**
+     * Returns feedback identifying the direction applied to the displayed list.
+     */
+    private String getSuccessMessage() {
+        String direction = switch (sortOrder) {
+            case ASCENDING -> "ascending";
+            case DESCENDING -> "descending";
+        };
+        return String.format(MESSAGE_SUCCESS, direction);
     }
 
     /**

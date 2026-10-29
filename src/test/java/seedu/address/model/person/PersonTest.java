@@ -45,9 +45,9 @@ public class PersonTest {
         Person editedBob = new PersonBuilder(BOB).withName(VALID_NAME_BOB.toLowerCase()).build();
         assertTrue(BOB.isSamePerson(editedBob));
 
-        // name has trailing spaces, all other attributes same -> returns false
-        String nameWithTrailingSpaces = VALID_NAME_BOB + " ";
-        editedBob = new PersonBuilder(BOB).withName(nameWithTrailingSpaces).build();
+        // punctuation changes the name, all other attributes same -> returns false
+        String nameWithPunctuation = VALID_NAME_BOB + "!";
+        editedBob = new PersonBuilder(BOB).withName(nameWithPunctuation).build();
         assertFalse(BOB.isSamePerson(editedBob));
     }
 

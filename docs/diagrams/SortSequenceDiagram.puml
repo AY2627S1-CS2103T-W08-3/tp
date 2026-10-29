@@ -5,7 +5,7 @@ skinparam ArrowFontStyle plain
 skinparam sequenceMessageAlign center
 hide footbox
 
-title Sorting contacts: sort A-Z
+title Sorting contacts: sort asc
 
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
@@ -19,10 +19,10 @@ box Model MODEL_COLOR_T1
 participant "m:ModelManager" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute("sort A-Z")
+[-> LogicManager : execute("sort asc")
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand("sort A-Z")
+LogicManager -> AddressBookParser : parseCommand("sort asc")
 activate AddressBookParser
 
 create SortCommandParser
@@ -31,7 +31,7 @@ activate SortCommandParser
 SortCommandParser --> AddressBookParser
 deactivate SortCommandParser
 
-AddressBookParser -> SortCommandParser : parse(" A-Z")
+AddressBookParser -> SortCommandParser : parse(" asc")
 activate SortCommandParser
 
 create SortCommand
@@ -42,6 +42,8 @@ deactivate SortCommand
 
 SortCommandParser --> AddressBookParser : s
 deactivate SortCommandParser
+'The temporary parser is no longer referenced after parsing.
+destroy SortCommandParser
 
 AddressBookParser --> LogicManager : s
 deactivate AddressBookParser
@@ -64,8 +66,13 @@ activate Model
 Model --> SortCommand
 deactivate Model
 
+SortCommand -> SortCommand : getSuccessMessage()
+activate SortCommand
+SortCommand --> SortCommand : message
+deactivate SortCommand
+
 create CommandResult
-SortCommand -> CommandResult : CommandResult(MESSAGE_SUCCESS)
+SortCommand -> CommandResult : CommandResult(message)
 activate CommandResult
 CommandResult --> SortCommand
 deactivate CommandResult
@@ -74,6 +81,9 @@ SortCommand --> LogicManager : r
 deactivate SortCommand
 
 [<-- LogicManager : r
+'The local command reference is released when LogicManager.execute returns.
+destroy SortCommand
 deactivate LogicManager
+'CommandResult remains referenced by the caller, so its lifeline continues.
 
 @enduml

@@ -44,7 +44,7 @@ public class ParserUtil {
      */
     public static Name parseName(String name) throws ParseException {
         requireNonNull(name);
-        String trimmedName = name.trim();
+        String trimmedName = trimFieldValue(name, Name.MESSAGE_CONSTRAINTS);
         if (!Name.isValidName(trimmedName)) {
             throw new ParseException(Name.MESSAGE_CONSTRAINTS);
         }
@@ -59,7 +59,7 @@ public class ParserUtil {
      */
     public static Phone parsePhone(String phone) throws ParseException {
         requireNonNull(phone);
-        String trimmedPhone = phone.trim();
+        String trimmedPhone = trimFieldValue(phone, Phone.MESSAGE_CONSTRAINTS);
         if (!Phone.isValidPhone(trimmedPhone)) {
             throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
         }
@@ -74,7 +74,7 @@ public class ParserUtil {
      */
     public static Address parseAddress(String address) throws ParseException {
         requireNonNull(address);
-        String trimmedAddress = address.trim();
+        String trimmedAddress = trimFieldValue(address, Address.MESSAGE_CONSTRAINTS);
         if (!Address.isValidAddress(trimmedAddress)) {
             throw new ParseException(Address.MESSAGE_CONSTRAINTS);
         }
@@ -89,7 +89,7 @@ public class ParserUtil {
      */
     public static Email parseEmail(String email) throws ParseException {
         requireNonNull(email);
-        String trimmedEmail = email.trim();
+        String trimmedEmail = trimFieldValue(email, Email.MESSAGE_CONSTRAINTS);
         if (!Email.isValidEmail(trimmedEmail)) {
             throw new ParseException(Email.MESSAGE_CONSTRAINTS);
         }
@@ -109,6 +109,16 @@ public class ParserUtil {
             throw new ParseException(Tag.MESSAGE_CONSTRAINTS);
         }
         return new Tag(trimmedTag);
+    }
+
+    /**
+     * Trims command-boundary whitespace while rejecting control characters before they can be discarded.
+     */
+    private static String trimFieldValue(String value, String constraints) throws ParseException {
+        if (StringUtil.containsControlCharacter(value)) {
+            throw new ParseException(constraints);
+        }
+        return value.trim();
     }
 
     /**
