@@ -114,26 +114,6 @@ How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
-The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteCommand`. Its parser accepts a
-case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
-person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
-
-The following focused class diagrams document the two parts of the feature that are easy to miss in the generic
-`XYZCommand` diagrams above:
-
-<img src="images/ParserClass.png" width="600"/>
-
-The `RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It lowercases
-the UUID before constructing the command, so UUID input is case-insensitive. Invalid UUIDs and duplicate prefixes are
-reported as parse errors before a command reaches the model.
-
-<img src="images/RemarkClass.png" width="600"/>
-
-`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It first checks that exactly
-one person matches the short UUID, creates an edited `Person` carrying over the unchanged fields, and asks the model
-to replace the old value. An empty remark is therefore represented by the same command path and removes the existing
-remark.
-
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
@@ -191,6 +171,9 @@ Empty arguments or invalid tags cause a `ParseException` during parsing, before 
 
 ### Remark command
 
+The `remark` command adds, replaces, or removes the remark of one client. Like `delete` and `edit`, it selects the
+client by UUID rather than by list index.
+
 The high-level sequence diagram below shows the parsing path for `remark 1a2b3c4 r/Likes to swim.`. The parser creates
 a command from the user's text and delegates the command's execution to a reference frame. The reference frame
 abstracts the detailed model interaction shown in the second diagram.
@@ -203,9 +186,28 @@ complete address book, creates a replacement `Person`, updates the model's filte
 
 ![Remark command execution sequence diagram](images/RemarkCommandExecutionSequenceDiagram.png)
 
-If the UUID matches no person or more than one person, `RemarkCommand` throws a `CommandException` and does not
-replace any data. If the `r/` value is empty, the same successful path stores an empty `Remark`, which removes the
-displayed remark without requiring a separate command.
+The following class diagrams show the classes involved in parsing and executing the command:
+
+<img src="images/ParserClass.png" width="600"/>
+
+`RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It removes dashes
+from the identifier and lowercases it, then checks that 7 to 32 hexadecimal characters remain. A short UUID typed from
+a card (e.g. `1a2b3c4`) and a full UUID copied from the data file are therefore treated alike. A missing or invalid
+identifier, a missing `r/` prefix, and a repeated `r/` prefix are reported as a `ParseException` before a command
+reaches the model.
+
+<img src="images/RemarkClass.png" width="600"/>
+
+`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It calls
+`Model#getPersonsByUuidPrefix` to find every person whose UUID starts with the identifier, searching the full address
+book rather than the displayed list. If exactly one person matches, it creates an edited `Person` carrying over the
+unchanged fields and asks the model to replace the old value.
+
+If no person matches, `RemarkCommand` throws a `CommandException` with the message `No person with UUID: <identifier>`.
+If more than one person matches, the `CommandException` lists the full UUID and name of each match, so that the user
+can enter more characters of the intended UUID. In both cases, no data is replaced. If the `r/` value is empty, the same
+successful path stores an empty `Remark`, which removes the displayed remark without requiring a separate command.
+
 ### Add command
 
 #### Implementation
