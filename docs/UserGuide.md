@@ -207,29 +207,26 @@ The warning is advisory only. The add or edit command is still completed and the
 
 Finds persons whose names contain any given name keyword or whose tags match any given tag.
 
-Format: `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`
+Format: `find [KEYWORD [MORE_KEYWORDS]…​] [t/TAG]…​`
 
 Supply at least one name keyword or tag. Put name keywords before any `t/` prefixes.
 Anything typed after a `t/` is read as part of that tag, so `find t/friends Alice` looks for the tag `friends Alice` and fails with `Tag names should be alphanumeric`. Type `find Alice t/friends` instead.
 
-* The search is case-insensitive; for example, `hans` matches `Hans`.
-* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
+* The search is case-insensitive; for example, `irfan` matches `Irfan`.
+* Keyword order does not matter; for example, `Ibrahim Irfan` matches `Irfan Ibrahim`.
 * Keywords without a prefix search only names. Each `t/TAG` searches only tags.
-* Name keywords match any part of a name; for example, `Han` matches `Hans` and `Johann`.
+* Name keywords match any part of a name; for example, `Irf` matches `Irfan Ibrahim`.
 * Tags are case-insensitive and must match completely; `t/friends` matches `Friends` but not `bestfriends`.
   Use one `t/` prefix per tag. Empty tags and tags containing spaces or punctuation are invalid.
-* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
-* OR matching is automatic when you enter multiple keywords; separate them with spaces.
+* Persons matching at least one name keyword or tag are returned (an `OR` search), and each person appears once.
   This helps when you misremember part of a name, as only one keyword needs to match.
-* Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
 Examples:
 * `find Irfan` and `find irfan` return the same results because search is case-insensitive.
   With the sample data, both return only `Irfan Ibrahim`.
   After adding a person named `Irfan Mohammed`, both return `Irfan Ibrahim` and `Irfan Mohammed`, as shown below.<br>
   ![Results for 'find irfan' after adding Irfan Mohammed](images/findIrfanResult.png)
-* `find Irfan Ibrahim` returns `Irfan Mohammed` and `Ismail Ibrahim`, if present,
-  because either `Irfan` or `Ibrahim` matches. It also returns `Irfan Ibrahim`, if present.
+* `find Irfan Roy` returns `Irfan Ibrahim` and `Roy Balakrishnan` from the sample data, because either `Irfan` or `Roy` matches.
 * `find t/friends` returns persons tagged `friends`.
 * `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
 * `find Irfan t/friends` returns persons whose names contain `Irfan` or who have the `friends` tag.
