@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
@@ -42,7 +43,7 @@ public class SortCommandParserTest {
         for (String input : new String[] {"sort", "sort asc extra", "sort desc extra", "sort invalid"}) {
             ParseException error = assertThrows(
                     ParseException.class, () -> new AddressBookParser().parseCommand(input).execute(model));
-            assertEquals(SortCommand.MESSAGE_INVALID_ARGUMENTS, error.getMessage());
+            assertEquals(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE), error.getMessage());
             assertEquals(expectedModel, model);
         }
     }
@@ -60,7 +61,7 @@ public class SortCommandParserTest {
 
     @Test
     public void parse_missingDirection_throwsParseException() {
-        String message = SortCommand.MESSAGE_INVALID_ARGUMENTS;
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
         // EP: missing direction; boundary value: zero input characters.
         assertParseFailure(parser, "", message);
         // EP: whitespace-only direction.
@@ -69,7 +70,7 @@ public class SortCommandParserTest {
 
     @Test
     public void parse_unsupportedDirection_throwsParseException() {
-        String message = SortCommand.MESSAGE_INVALID_ARGUMENTS;
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
         // EP: unsupported direction values, including legacy parameters, words, and numbers.
         for (String input : new String[] {"A-Z", "Z-A", "ascending", "descending", "123", "A Z"}) {
             assertParseFailure(parser, input, message);
@@ -78,7 +79,7 @@ public class SortCommandParserTest {
 
     @Test
     public void parse_extraArguments_throwsParseException() {
-        String message = SortCommand.MESSAGE_INVALID_ARGUMENTS;
+        String message = String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE);
         // EP: multiple arguments; boundary value: two tokens exceed the one-token limit.
         for (String input : new String[] {"asc desc", "asc extra", "desc extra"}) {
             assertParseFailure(parser, input, message);

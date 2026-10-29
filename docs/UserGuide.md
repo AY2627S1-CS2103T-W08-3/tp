@@ -117,10 +117,14 @@ Missing or invalid parameters produce an error without changing the displayed li
 
 Format: `sort asc` or `sort desc`
 
+Successful sorting confirms the direction with `Sorted all persons by name in ascending text order.`
+or `Sorted all persons by name in descending text order.`
+
 Missing directions, unsupported values, and extra arguments show the same error:
 
 ```text
-Invalid sort arguments. Use one of these commands:
+Invalid command format!
+Use one of these commands:
 sort asc  - Sort names in ascending text order
 sort desc - Sort names in descending text order
 ```

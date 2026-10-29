@@ -253,8 +253,9 @@ How the `add` command works:
 The `sort` command displays all contacts lexicographically by name, ignoring capitalization.
 It requires exactly one direction: `sort asc` selects ascending order, while `sort desc`
 selects descending order. Missing directions, unsupported values, and extra arguments
-produce a `ParseException` using `SortCommand.MESSAGE_INVALID_ARGUMENTS` before the displayed
-list is changed. This standardized error lists both valid commands, `sort asc` and `sort desc`,
+produce a `ParseException` using `Messages.MESSAGE_INVALID_COMMAND_FORMAT` and
+`SortCommand.MESSAGE_USAGE` before the displayed list is changed. This standardized error
+retains the shared format-error prefix and lists both valid commands, `sort asc` and `sort desc`,
 with their text-order directions.
 
 #### Implementation
@@ -272,6 +273,9 @@ uses the reversed comparator. The command then calls these model operations in o
 1. `Model#updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)` removes any existing filter
    so that all contacts are displayed.
 2. `Model#updatePersonListComparator(comparator)` applies the requested lexicographical order.
+
+`SortCommand#getSuccessMessage()` formats `MESSAGE_SUCCESS` with the selected direction,
+so the returned `CommandResult` confirms ascending or descending text order.
 
 `ModelManager` maintains a `FilteredList<Person>` over the address book's person list and
 a `SortedList<Person>` over that filtered list. `ModelManager#getFilteredPersonList()`
