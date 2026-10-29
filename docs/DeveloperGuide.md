@@ -83,6 +83,9 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component because it displays `Person` objects from the model.
 
+`PersonListPanel` renders each person using a `PersonCard`. The card also handles clipboard interactions
+locally in the UI; copying does not execute a command or update the model or storage.
+
 ### Logic component
 
 **API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
@@ -174,6 +177,26 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Copying client details
+
+The feature is implemented in `src/main/java/seedu/address/ui/PersonCard.java` using JavaFX clipboard and menu controls.
+
+* `configureClickToCopy(Label, String)` adds a hand cursor, a tooltip showing the copied value, and a mouse-click handler.
+  Only `MouseButton.PRIMARY` copies text, and the handled click is consumed. Regular tags use `Tag#tagName`,
+  preserving their original capitalization. The client ID badge uses `Person#getShortUuid()`, so its displayed `#` is excluded.
+* `configureCopyMenu()` attaches a `ContextMenu` to `cardPane`. A context-menu request opens the menu at the request's
+  screen coordinates and consumes the event. The menu offers name, phone, email, address, remark, short ID, full UUID,
+  and all-details actions. Right-clicking a tag or ID badge opens this menu without triggering its click-to-copy action.
+* `createCopyItem(String, String)` creates each menu action and disables it if its value is empty, such as an empty remark.
+* `copyToClipboard(String)` is shared by the click handlers and menu actions. It puts plain text in a `ClipboardContent`
+  and passes it to `Clipboard.getSystemClipboard().setContent(...)`, replacing the existing clipboard contents.
+* `formatContactDetails()` produces labelled lines in this order: name, phone, email, address, remark, tags, and client ID.
+  It uses the platform line separator, joins sorted tag names with `, `, and includes the full UUID with dashes.
+  Empty remarks and tag sets still have their labelled lines in the summary.
+
+All handlers run on the JavaFX Application Thread. The clipboard actions use the values of the `Person` represented by
+the card and leave client records, list filtering, and command feedback unchanged.
 
 ### Find command
 
@@ -654,6 +677,29 @@ testers are expected to do more *exploratory* testing.
        Expected: The most recent window size and location are retained.
 
 1. _{ more test cases …​ }_
+
+### Copying client details
+
+Prerequisites: Run `list` and choose a client with at least two tags and a nonempty remark.
+Paste into a plain-text editor after each action to inspect the clipboard contents.
+
+1. Click the client's `#xxxxxxx` badge.<br>
+   Expected: Pasting produces the 7-character ID without `#`. Hovering over the badge shows a hand cursor and a copy tooltip.
+1. Click a tag.<br>
+   Expected: Pasting produces just that tag's name with its original capitalization, without `#` or `t/`.
+   The client list is not filtered. Hovering over the tag shows a hand cursor and a copy tooltip.
+1. Right-click the tag or ID badge.<br>
+   Expected: The card's copy menu opens. Opening the menu alone does not replace the clipboard contents.
+1. Select each individual copy option in turn.<br>
+   Expected: The name, phone, email, address, and remark match their respective fields. **Copy client ID** produces
+   the short ID without `#`; **Copy full UUID** produces the full UUID with dashes.
+1. Select **Copy all details**.<br>
+   Expected: Pasting produces labelled lines for name, phone, email, address, remark, tags, and the full UUID.
+   Tags are sorted and separated by a comma and space.
+1. Repeat with a client whose remark is empty and who has no tags.<br>
+   Expected: **Copy remark** is disabled. **Copy all details** still works and includes empty `Remark:` and `Tags:` lines.
+1. After copying, inspect the list and command feedback.<br>
+   Expected: Client records, the current filter, and command feedback are unchanged by copying.
 
 ### Deleting a person
 

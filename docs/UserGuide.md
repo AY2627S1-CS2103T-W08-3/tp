@@ -66,6 +66,32 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
+### Copying client details
+
+You can copy details from a client card to the system clipboard, then paste them into the command box or another application.
+Each copy action replaces the previous clipboard contents and leaves client records unchanged.
+
+* **Click the client ID badge** (for example, `#1a2b3c4`) to copy `1a2b3c4` without the `#`.
+  You can paste this ID into commands such as `edit`, `remark`, and `delete`.
+* **Click a tag** (for example, `friends`) to copy only its name, preserving capitalization and without a `t/` prefix or `#`.
+  To reuse it in a search, type `find t/` and paste the copied name.
+* Hover over a tag or client ID badge to see a hand cursor and a tooltip showing the value that will be copied.
+
+For other details, **right-click anywhere on a client card** and select an option:
+
+| Menu option | Copied text |
+| --- | --- |
+| Copy name | The client's name |
+| Copy phone | The phone field |
+| Copy email | The email field |
+| Copy address | The address field |
+| Copy remark | The remark; this option is disabled when the remark is empty |
+| Copy client ID | The 7-character client ID without `#` |
+| Copy full UUID | The full UUID, including dashes |
+| Copy all details | A multiline summary containing the name, phone, email, address, remark, alphabetically sorted tags, and full UUID |
+
+Copying a tag does not filter the list. Use `find t/TAG` to search by tag.
+
 ### Viewing help: `help`
 
 Shows a message explaining how to access the help page.
