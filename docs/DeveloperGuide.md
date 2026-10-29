@@ -422,13 +422,15 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | Priority | As a …​      | I want to …​                                                  | So that I can…​                                                          |
 | -------- |-----------------|------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | `* * *`  | insurance agent | quickly update client information                                | maintain accurate records of life changes that impact policy coverage needs |
-| `* * *`  | insurance agent | sort clients by key parameters                                   | efficiently structure my daily outreach.                                    |
+| `* * *`  | insurance agent | sort clients alphabetically by name                              | efficiently structure my daily outreach                                     |
 | `* * *`  | insurance agent | view a complete list of all my clients                           | scan key metrics and navigate quickly to specific profiles                  |
 | `* * *`  | insurance agent | add a new client with their contact information                  | immediately capture leads and initiate the policy assessment process        |
 | `* * *`  | insurance agent | search clients by name                                           | access their profile immediately during real time client interactions       |
 | `* * *`  | insurance agent | search client by tag                                             | generate target lists for specialised policy reviews                        |
-| `* * *`  | insurance agent | delete client contact                                            | keep my active directory remains free of outdated or redundant contacts     |
+| `* * *`  | insurance agent | delete client contact                                            | keep my active directory free of outdated or redundant contacts             |
 | `* * *`  | insurance agent | assign tags to clients                                           | categorise them according to risk profile and product interest              |
+| `* *`    | insurance agent | add a remark to a client                                         | record notes from conversations, such as preferences or follow-ups          |
+| `* *`    | insurance agent | be warned when a new client's name is similar to an existing one | avoid creating duplicate records because of a typo                          |
 | `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
 | `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
 | `* *`    | insurance agent | restore a client I deleted by mistake                            | recover their details without re-entering them                              |
