@@ -68,7 +68,6 @@ public class SortCommand extends Command {
         String direction = switch (sortOrder) {
             case ASCENDING -> "ascending";
             case DESCENDING -> "descending";
-            default -> throw new AssertionError("Unhandled sort order: " + sortOrder);
         };
         return String.format(MESSAGE_SUCCESS, direction);
     }
