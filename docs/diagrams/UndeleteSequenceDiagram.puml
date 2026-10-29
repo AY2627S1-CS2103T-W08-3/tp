@@ -4,6 +4,8 @@ skinparam ArrowFontStyle plain
 
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":UndeleteCommandParser" as UndeleteCommandParser LOGIC_COLOR
 participant "u:UndeleteCommand" as UndeleteCommand LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
 end box
@@ -17,7 +19,34 @@ end box
 [-> LogicManager : execute("undelete")
 activate LogicManager
 
-note right of LogicManager : Parsing "undelete" into u\nis omitted for brevity.
+LogicManager -> AddressBookParser : parseCommand("undelete")
+activate AddressBookParser
+
+create UndeleteCommandParser
+AddressBookParser -> UndeleteCommandParser : UndeleteCommandParser()
+activate UndeleteCommandParser
+
+UndeleteCommandParser --> AddressBookParser
+deactivate UndeleteCommandParser
+
+AddressBookParser -> UndeleteCommandParser : parse("")
+activate UndeleteCommandParser
+
+create UndeleteCommand
+UndeleteCommandParser -> UndeleteCommand : UndeleteCommand()
+activate UndeleteCommand
+
+UndeleteCommand --> UndeleteCommandParser
+deactivate UndeleteCommand
+
+UndeleteCommandParser --> AddressBookParser : u
+deactivate UndeleteCommandParser
+'Hidden arrow to position the destroy marker below the end of the activation bar.
+UndeleteCommandParser -[hidden]-> AddressBookParser
+destroy UndeleteCommandParser
+
+AddressBookParser --> LogicManager : u
+deactivate AddressBookParser
 
 LogicManager -> UndeleteCommand : execute(m)
 activate UndeleteCommand
@@ -77,7 +106,7 @@ ModelManager --> UndeleteCommand
 deactivate ModelManager
 
 create CommandResult
-UndeleteCommand -> CommandResult
+UndeleteCommand -> CommandResult : CommandResult(message)
 activate CommandResult
 
 CommandResult --> UndeleteCommand
@@ -85,7 +114,9 @@ deactivate CommandResult
 
 UndeleteCommand --> LogicManager : r
 deactivate UndeleteCommand
+UndeleteCommand -[hidden]-> LogicManager
+destroy UndeleteCommand
 
-[<--LogicManager
+[<--LogicManager : r
 deactivate LogicManager
 @enduml
