@@ -185,6 +185,10 @@ Supply at least one name keyword or tag. Put name keywords before any `t/` prefi
   This helps when you misremember part of a name, as only one keyword needs to match.
 * Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
+**Note:** `t/` searches tags, even when it is part of a person's name. To find a name containing `t/`,
+use a substring that does not start with `t/`. For example, use `find /1` to find `agent/1`;
+`find t/1` searches for persons tagged `1`.
+
 Examples:
 * `find John` returns `john` and `John Doe`
 * `find Alice Richards` returns `Alice Davidson` and `Alison Richards`, if present,
