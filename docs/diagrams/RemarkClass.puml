@@ -15,7 +15,7 @@ Class RemarkCommand {
   +execute(model: Model): CommandResult
 }
 Class "<<interface>>\nModel" as Model {
-  +getPersonsByShortUuid(shortUuid: String): List<Person>
+  +getPersonsByUuidPrefix(uuidPrefix: String): List<Person>
   +setPerson(target: Person, editedPerson: Person): void
   +updateFilteredPersonList(predicate: Predicate<Person>): void
 }

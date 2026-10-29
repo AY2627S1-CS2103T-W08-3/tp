@@ -6,6 +6,8 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.util.StringUtil;
+
 public class AddressTest {
 
     @Test
@@ -32,6 +34,9 @@ public class AddressTest {
         assertTrue(Address.isValidAddress("Blk 456, Den Road, #01-355"));
         assertTrue(Address.isValidAddress("-")); // one character
         assertTrue(Address.isValidAddress("Leng Inc; 1234 Market St; San Francisco CA 2349879; USA")); // long address
+        assertTrue(Address.isValidAddress("!!!")); // punctuation is allowed
+        assertFalse(Address.isValidAddress("Main Street\u0007")); // control characters are rejected
+        assertFalse(Address.isValidAddress("a".repeat(StringUtil.MAX_FIELD_LENGTH + 1))); // overly long values rejected
     }
 
     @Test

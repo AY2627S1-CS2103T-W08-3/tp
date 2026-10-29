@@ -18,6 +18,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for
@@ -82,6 +83,30 @@ public class UndeleteCommandTest {
         assertCommandFailure(new UndeleteCommand(), model,
                 String.format(UndeleteCommand.MESSAGE_DUPLICATE_PERSON, ALICE.getName()));
         assertTrue(model.hasDeletedPersons());
+    }
+
+    @Test
+    public void execute_differentPersonWithSameNameExists_throwsCommandExceptionAndKeepsHistory() {
+        Person newAlice = new PersonBuilder().withName(ALICE.getName().fullName).withPhone("99999999").build();
+        model.deletePerson(ALICE);
+        model.addPerson(newAlice);
+
+        assertCommandFailure(new UndeleteCommand(), model,
+                String.format(UndeleteCommand.MESSAGE_DUPLICATE_PERSON, ALICE.getName()));
+        assertTrue(model.hasDeletedPersons());
+    }
+
+    @Test
+    public void execute_personWithSameNameRenamed_restoresAtOriginalIndex() {
+        Person newAlice = new PersonBuilder().withName(ALICE.getName().fullName).build();
+        Person renamedAlice = new PersonBuilder(newAlice).withName("Alice Tan").build();
+        model.deletePerson(ALICE);
+        model.addPerson(newAlice);
+        model.setPerson(newAlice, renamedAlice);
+
+        Model expectedModel = typicalModel();
+        expectedModel.addPerson(renamedAlice);
+        assertUndeleteSuccess(ALICE, expectedModel);
     }
 
     @Test

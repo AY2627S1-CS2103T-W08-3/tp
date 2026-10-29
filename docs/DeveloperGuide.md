@@ -2,6 +2,10 @@
 layout: page
 title: Developer Guide
 ---
+ClientConnect is a keyboard-driven desktop address book for insurance agents who manage large client portfolios. This
+guide explains how ClientConnect is designed and implemented, for developers who want to maintain or extend it. To
+learn how to use the app, see the [User Guide](UserGuide.html).
+
 * Table of Contents
 {:toc}
 
@@ -9,7 +13,10 @@ title: Developer Guide
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* ClientConnect is based on [AddressBook-Level3](https://github.com/se-edu/addressbook-level3) (AB3) by the [SE-EDU initiative](https://se-education.org). Its code, tests, and documentation, including this Developer Guide and the User Guide, were adapted from AB3's ([AB3 Developer Guide](https://se-education.org/addressbook-level3/DeveloperGuide.html), [AB3 User Guide](https://se-education.org/addressbook-level3/UserGuide.html)).
+* Third-party libraries used: [JavaFX](https://openjfx.io/) for the GUI, [Jackson](https://github.com/FasterXML/jackson) for reading and writing JSON data files, and [JUnit 5](https://junit.org/junit5/) for testing.
+* The UML diagrams in this guide are created with [PlantUML](https://plantuml.com/).
+* The similar-name warning compares names using the [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance), a standard edit distance algorithm.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -36,7 +43,7 @@ The following provides a quick overview of the main components and their interac
 
 **Main components of the architecture**
 
-**`Main`** (consisting of classes [`Main`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
+**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -68,13 +75,13 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/ui/Ui.java)
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -85,7 +92,7 @@ The `UI` component,
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/logic/Logic.java)
 
 Here's a (partial) class diagram of the `Logic` component:
 
@@ -95,7 +102,7 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 ![Interactions Inside the Logic Component for the `delete 1a2b3c4` Command](images/DeleteSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifelines for `DeleteCommandParser` and `DeleteCommand` should end at their destroy markers (X), but due to a limitation of PlantUML, they continue to the end of the diagram.
 </div>
 
 How the `Logic` component works:
@@ -114,36 +121,17 @@ How the parsing works:
 * When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `AddressBookParser` returns that object as a `Command` object.
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
-The `RemarkCommand` follows the UUID-based person-selection API used by `DeleteCommand`. Its parser accepts a
-case-insensitive 7-character hexadecimal short UUID and the `r/REMARK` prefix, and its command resolves the matching
-person through `Model#getPersonsByShortUuid` across the full address book rather than the filtered display list.
-
-The following focused class diagrams document the two parts of the feature that are easy to miss in the generic
-`XYZCommand` diagrams above:
-
-<img src="images/ParserClass.png" width="600"/>
-
-The `RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It lowercases
-the UUID before constructing the command, so UUID input is case-insensitive. Invalid UUIDs and duplicate prefixes are
-reported as parse errors before a command reaches the model.
-
-<img src="images/RemarkClass.png" width="600"/>
-
-`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It first checks that exactly
-one person matches the short UUID, creates an edited `Person` carrying over the unchanged fields, and asks the model
-to replace the old value. An empty remark is therefore represented by the same command path and removes the existing
-remark.
-
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/model/Model.java)
 
 <img src="images/ModelClassDiagram.png" width="450" />
 
 
 The `Model` component,
 
-* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
-* stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when the list changes.
+* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object). Each `Person` has a `UUID` that never changes, which commands such as `delete`, `edit`, and `remark` use to select a person, and an optional `Remark`.
+* stores the _displayed_ list of `Person` objects. `ModelManager` wraps the address book's list in a `FilteredList`, which keeps the persons selected by the current filter (e.g. search results), and wraps that in a `SortedList`, which applies the current sort order. `Model#getFilteredPersonList()` exposes the sorted view as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when the filter or order changes.
+* stores the persons deleted during the current session in a stack of `DeletedPerson` entries, so that `undelete` can restore them (see [Undelete feature](#undelete-feature)). The stack is kept in memory only.
 * stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
@@ -156,7 +144,7 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-W08-3/tp/tree/master/src/main/java/seedu/address/storage/Storage.java)
 
 <img src="images/StorageClassDiagram.png" width="550" />
 
@@ -187,9 +175,12 @@ The `find` command filters the displayed client list by name keywords and/or tag
 4. `FindCommand.execute(model)` calls `Model.updateFilteredPersonList(predicate)`. `ModelManager` sets the predicate on its internal `FilteredList`, applying the search to the full client list. Names match any keyword as a case-insensitive substring; tags match any complete tag value, also ignoring case. These conditions are combined with **OR**, so the example matches clients whose names contain `Alice` or whose tags include `friends`.
 5. The command reads the size of `Model.getFilteredPersonList()` and returns a `CommandResult` containing the number of matches, including zero when no clients match. The UI observes the filtered and sorted list and displays the matching clients.
 
-Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
+Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted. Destruction markers indicate when the temporary parser and command are no longer referenced in this interaction, rather than when Java garbage collection occurs. The `CommandResult` remains alive because it is returned to the caller.
 
 ### Remark command
+
+The `remark` command adds, replaces, or removes the remark of one client. Like `delete` and `edit`, it selects the
+client by UUID rather than by list index.
 
 The high-level sequence diagram below shows the parsing path for `remark 1a2b3c4 r/Likes to swim.`. The parser creates
 a command from the user's text and delegates the command's execution to a reference frame. The reference frame
@@ -203,16 +194,35 @@ complete address book, creates a replacement `Person`, updates the model's filte
 
 ![Remark command execution sequence diagram](images/RemarkCommandExecutionSequenceDiagram.png)
 
-If the UUID matches no person or more than one person, `RemarkCommand` throws a `CommandException` and does not
-replace any data. If the `r/` value is empty, the same successful path stores an empty `Remark`, which removes the
-displayed remark without requiring a separate command.
+The following class diagrams show the classes involved in parsing and executing the command:
+
+<img src="images/ParserClass.png" width="600"/>
+
+`RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It removes dashes
+from the identifier and lowercases it, then checks that 7 to 32 hexadecimal characters remain. A short UUID typed from
+a card (e.g. `1a2b3c4`) and a full UUID copied from the data file are therefore treated alike. A missing or invalid
+identifier, a missing `r/` prefix, and a repeated `r/` prefix are reported as a `ParseException` before a command
+reaches the model.
+
+<img src="images/RemarkClass.png" width="600"/>
+
+`RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It calls
+`Model#getPersonsByUuidPrefix` to find every person whose UUID starts with the identifier, searching the full address
+book rather than the displayed list. If exactly one person matches, it creates an edited `Person` carrying over the
+unchanged fields and asks the model to replace the old value.
+
+If no person matches, `RemarkCommand` throws a `CommandException` with the message `No person with UUID: <identifier>`.
+If more than one person matches, the `CommandException` lists the full UUID and name of each match, so that the user
+can enter more characters of the intended UUID. In both cases, no data is replaced. If the `r/` value is empty, the same
+successful path stores an empty `Remark`, which removes the displayed remark without requiring a separate command.
+
 ### Add command
 
 #### Implementation
 
 The `add` command creates a new `Person` and stores it in the address book. It requires a name,
-phone number, email address, and postal address, while tags are optional and may be supplied more
-than once.
+phone number, email address, and postal address. A remark (`r/`) is optional and may be supplied at
+most once, while tags are optional and may be supplied more than once.
 
 The main classes involved in the implementation are shown in the following class diagram:
 
@@ -237,14 +247,21 @@ How the `add` command works:
 1. `LogicManager` passes the user input to `AddressBookParser`, which creates an
    `AddCommandParser` for the `add` command.
 2. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
-   that there is no non-empty preamble, and that non-tag prefixes are not repeated.
+   that there is no non-empty preamble, and that non-tag prefixes are not repeated. The tokenizer
+   ignores field-looking prefixes inside double-quoted values and rejects unmatched quotes.
 3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
-   classes validate their respective constraints. The parser also creates an empty `Remark`
-   because a newly added person has no remark, then creates an `AddCommand` containing the
-   new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
-   in a `ParseException` instead.
-4. During execution, `AddCommand` asks the `Model` whether a person with the same identity
-   already exists. If so, it throws a `CommandException` and does not modify the address book.
+   classes validate their respective constraints. Name, phone, email, and address values allow
+   punctuation but must be non-blank, control-character-free, and at most 255 Unicode code points.
+   Names and phone numbers must contain a letter or digit, while emails must contain `@` or be
+   `UNKNOWN`.
+   The parser also creates a `Remark` from the trimmed `r/` value, or an empty `Remark` if `r/`
+   is not supplied, then creates an `AddCommand` containing the new `Person`. Missing prefixes,
+   repeated non-tag prefixes, and invalid field values result in a `ParseException` instead.
+4. During execution, `AddCommand` asks the `Model` whether a person with the same name, ignoring
+   letter case, already exists. If so, it throws a `CommandException` and does not modify the
+   address book. The one exception is the placeholder name `UNKNOWN`, which users can enter for
+   information they do not have yet. Persons named `UNKNOWN` are not treated as duplicates of each
+   other, so several can be added.
 5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
    `Model`, and returns a `CommandResult` containing the success message and any warning.
 
@@ -339,9 +356,12 @@ The following sequence diagram shows how the `undelete` command in step 4 goes t
 
 ![UndeleteSequenceDiagram](images/UndeleteSequenceDiagram.png)
 
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifelines for `UndeleteCommandParser` and `UndeleteCommand` should end at their destroy markers (X), but due to a limitation of PlantUML, they continue to the end of the diagram.
+</div>
+
 Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so the address book is back in its original order, and `deletedPersons` is empty again.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same identity has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`. The entry stays on the stack, so the user can rename the clashing person and run `undelete` again.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same name has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`, as restoring the deleted person would leave two persons with the same name. The entry stays on the stack, and the error message tells the user to rename the clashing person with `edit` and run `undelete` again.
 
 </div>
 
@@ -383,10 +403,6 @@ Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so 
   * Pros: Simpler.
   * Cons: The list order changes, and in a long list the restored person is harder to find.
 
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
-
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -421,19 +437,19 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | Priority | As a …​      | I want to …​                                                  | So that I can…​                                                          |
 | -------- |-----------------|------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | `* * *`  | insurance agent | quickly update client information                                | maintain accurate records of life changes that impact policy coverage needs |
-| `* * *`  | insurance agent | sort clients by key parameters                                   | efficiently structure my daily outreach.                                    |
+| `* * *`  | insurance agent | sort clients alphabetically by name                              | efficiently structure my daily outreach                                     |
 | `* * *`  | insurance agent | view a complete list of all my clients                           | scan key metrics and navigate quickly to specific profiles                  |
 | `* * *`  | insurance agent | add a new client with their contact information                  | immediately capture leads and initiate the policy assessment process        |
 | `* * *`  | insurance agent | search clients by name                                           | access their profile immediately during real time client interactions       |
 | `* * *`  | insurance agent | search client by tag                                             | generate target lists for specialised policy reviews                        |
-| `* * *`  | insurance agent | delete client contact                                            | keep my active directory remains free of outdated or redundant contacts     |
+| `* * *`  | insurance agent | delete client contact                                            | keep my active directory free of outdated or redundant contacts             |
 | `* * *`  | insurance agent | assign tags to clients                                           | categorise them according to risk profile and product interest              |
+| `* *`    | insurance agent | add a remark to a client                                         | record notes from conversations, such as preferences or follow-ups          |
+| `* *`    | insurance agent | be warned when a new client's name is similar to an existing one | avoid creating duplicate records because of a typo                          |
 | `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
 | `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
 | `* *`    | insurance agent | restore a client I deleted by mistake                            | recover their details without re-entering them                              |
 | `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
-
-*{More to be added}*
 
 ### Use cases
 
@@ -443,7 +459,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to add a client by entering the name, phone, email, address and optional tags.
+1.  User requests to add a client by entering the name, phone, email, address, an optional remark and optional tags.
 2.  ClientConnect validates the details.
 3.  ClientConnect adds the client and shows a success message with the client's details.
 
@@ -460,7 +476,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       Use case resumes at step 2.
 
 
-* 2a. One or more field values are invalid (e.g. a phone number with fewer than 8 digits, or a tag containing spaces).
+* 2a. One or more field values are invalid (e.g. an email address without `@`, or a tag containing spaces).
 
     * 2a1. ClientConnect shows the error message for the first invalid field.
     * 2a2. User re-enters the command with a corrected value.
@@ -468,9 +484,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       Steps 2a1-2a2 are repeated until all values are valid.
       Use case resumes at step 3.
 
-* 2b. A client with the same name already exists (case-insensitive, ignoring leading and trailing spaces).
+* 2b. A client with the same name already exists (case-insensitive, ignoring leading and trailing spaces), and the name is not the placeholder `UNKNOWN`.
 
-    * 2b1. ClientConnect rejects the entry and shows "This client already exists in the address book."
+    * 2b1. ClientConnect rejects the entry and shows "This name already exists in the address book. Add more details to the name."
     * 2b2. User decides to update the existing client instead (see UC4).
 
       Use case ends.
@@ -479,7 +495,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to find clients by entering one or more keywords (a name or a tag).
+1.  User requests to find clients by entering one or more name keywords and/or tags (each tag with the `t/` prefix).
 2.  ClientConnect shows the matching clients in the list and the number of clients listed.
 3.  User reads the required details from the client's card.
 
@@ -497,7 +513,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2a. No clients match the keywords.
 
-    * 2a1. ClientConnect shows "0 persons listed!" and an empty list.
+    * 2a1. ClientConnect shows "0 person(s) listed!" and an empty list.
     * 2a2. User re-enters the command with different keywords (e.g. an alternative spelling).
 
       Steps 2a1-2a2 are repeated until at least one client matches.
@@ -505,7 +521,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2b. Too many clients match to find the right one quickly.
 
-    * 2b1. User re-enters the command with a more specific keyword (e.g. a full name instead of a first name).
+    * 2b1. User re-enters the command with a single, longer name keyword (e.g. `find Alex` instead of `find Al`).
+      Adding separate keywords does not narrow the results because `find` matches any keyword (OR search).
 
       Use case resumes at step 2.
 
@@ -560,7 +577,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User searches for the client to update (UC2).
-2.  User requests to edit a specific client in the displayed list by its index, providing the fields to change (e.g. a new phone number or additional tags).
+2.  User requests to edit a specific client by its short UUID, providing the fields to change (e.g. a new phone number, remark, or additional tags).
 3.  ClientConnect validates the new values.
 4.  ClientConnect updates the client and shows a success message with the updated details.
 
@@ -572,12 +589,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 2a. The index is invalid.
+* 2a. The short UUID is invalid, unknown, or ambiguous.
 
     * 2a1. ClientConnect shows an error message.
-    * 2a2. User re-enters the command with a valid index.
+    * 2a2. User re-enters the command with a valid, sufficiently specific short UUID.
 
-      Steps 2a1-2a2 are repeated until the index is valid.
+      Steps 2a1-2a2 are repeated until the short UUID identifies exactly one client.
       Use case resumes at step 3.
 
 * 2b. No fields to edit are provided.
@@ -598,13 +615,11 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 3b. The new name matches another existing client's name (case-insensitive).
 
-    * 3b1. ClientConnect rejects the edit and shows a duplicate client error.
+    * 3b1. ClientConnect rejects the edit and shows "This person already exists in the address book."
     * 3b2. User re-enters the command with a different name.
 
       Steps 3b1-3b2 are repeated until the name is unique.
       Use case resumes at step 4.
-
-*{More to be added}*
 
 ### Non-Functional Requirements
 
@@ -618,11 +633,18 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **CLI (Command Line Interface)**: A way of using an application by typing text commands, as in ClientConnect's command box
+* **GUI (Graphical User Interface)**: A way of using an application through visual elements such as windows, lists, and cards
+* **Hexadecimal**: Using the digits `0`–`9` and the letters `a`–`f`. UUIDs are written in hexadecimal
 * **Insurance Agent**: Point of contact for insurance products, manages a list of insurance clients' information
 * **Insurance Client**: Consumer of insurance products, with an associated insurance agent who has the client's contact information
-* **Policyholder**: Insurance client of a specific insurance product, in particular with a purchased policy with an associated policynumber
+* **Mainstream OS**: Windows, Linux, Unix, or macOS
+* **MSS (Main Success Scenario)**: The steps of a use case in which everything goes as expected. Extensions describe what happens otherwise
+* **Remark**: An optional free-text note stored with a client, e.g. `Likes to swim.`
+* **Short UUID**: The first 7 hexadecimal characters of a client's UUID, shown as `#xxxxxxx` on the client's card
+* **Tag**: An alphanumeric label attached to a client, e.g. `friends`. A client can have any number of tags
+* **UUID (Universally Unique Identifier)**: A 32-character hexadecimal identifier given to each client when they are added, e.g. `1a2b3c4d-1000-0000-0000-000000000000`. It does not change when the client is edited
+* **UUID prefix**: The first 7 to 32 hexadecimal characters of a UUID, ignoring dashes. Commands such as `delete`, `edit`, and `remark` use it to select a client
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -641,8 +663,8 @@ testers are expected to do more *exploratory* testing.
 
    1. Download the JAR file and copy it into an empty folder.
 
-   1. Double-click the JAR file.<br>
-      Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.
+   1. Double-click the JAR file. If double-clicking does not open the app (e.g. on some macOS or Linux setups), open a terminal in that folder and run `java -jar ClientConnect.jar` instead.<br>
+      Expected: The GUI opens with six sample contacts (Alex Yeoh, Bernice Yu, Charlotte Oliveiro, David Li, Irfan Ibrahim and Roy Balakrishnan). The window size may not be optimal.
 
 1. Saving window preferences
 
@@ -651,7 +673,146 @@ testers are expected to do more *exploratory* testing.
    1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
 
-1. _{ more test cases …​ }_
+1. Shutting down
+
+   1. Test case: `exit`<br>
+      Expected: The window closes and the app shuts down.
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The test cases below assume the app starts with the sample contacts. To reset to the sample contacts, close the app and delete the `data` folder next to the JAR file. Short UUIDs are generated randomly, so read them from the `#xxxxxxx` label on each contact's card.
+
+</div>
+
+### Adding a person
+
+1. Adding a person with valid details
+
+   1. Test case: `add n/John Doe p/98765432 e/johnd@example.com a/311, Clementi Ave 2, #02-25 t/friends`<br>
+      Expected: John Doe is added to the end of the list. The status message starts with `New person added: John Doe; Phone: 98765432; ...`.
+
+   1. Test case: `add n/Mary Tan p/93333333 e/mary@example.com a/Blk 1 r/Prefers email`<br>
+      Expected: Mary Tan is added, and her card shows the remark `Prefers email`.
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com a/"Blk 3 t/b"`<br>
+      Expected: Kim Lee is added with the address `Blk 3 t/b`. The double quotes stop `t/` in the address from being read as a tag.
+
+1. Adding a person whose name is already taken or similar to an existing name
+
+   1. Prerequisites: John Doe has been added as above.
+
+   1. Test case: `add n/john doe p/91111111 e/x@example.com a/Somewhere`<br>
+      Expected: No person is added, as names are compared ignoring case. The status message shows `This name already exists in the address book. Add more details to the name.`
+
+   1. Test case: `add n/Jon Doe p/92222222 e/jon@example.com a/Elsewhere`<br>
+      Expected: Jon Doe is added. The status message also shows `Warning: "Jon Doe" is very similar to existing entry "John Doe".`
+
+   1. Test case: `add n/UNKNOWN p/UNKNOWN e/UNKNOWN a/UNKNOWN`, entered twice<br>
+      Expected: Both entries are added. `UNKNOWN` is a placeholder for missing information, so it is not treated as a duplicate name.
+
+1. Adding a person with invalid details
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kimlee.example.com a/Blk 2`<br>
+      Expected: No person is added. The status message shows `Invalid email address: @ is required unless the value is UNKNOWN`, followed by the command usage.
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com a/Blk 2 t/high risk`<br>
+      Expected: No person is added. The status message shows `Invalid tag`, followed by the command usage. Tags must be alphanumeric.
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com e/kim2@example.com a/Blk 2`<br>
+      Expected: No person is added. The status message shows `Multiple values specified for the following single-valued field(s): e/`.
+
+   1. Other incorrect add commands to try: `add`, `add n/Kim Lee p/94444444 a/Blk 2` (missing email)<br>
+      Expected: No person is added, and an error message with the command usage is shown.
+
+### Editing a person
+
+1. Editing a person by short UUID
+
+   1. Prerequisites: Note the short UUIDs of Alex Yeoh and Bernice Yu.
+
+   1. Test case: `edit <Alex's short UUID> p/91234567 e/alex.new@example.com`<br>
+      Expected: Alex's phone and email are updated, and the other fields are unchanged. The status message starts with `Edited person: Alex Yeoh; Phone: 91234567; Email: alex.new@example.com; ...`.
+
+   1. Test case: `edit <Alex's short UUID> t/`<br>
+      Expected: All of Alex's tags are removed.
+
+   1. Test case: `edit <Alex's short UUID> r/Renewal due in March`<br>
+      Expected: Alex's card shows the remark `Renewal due in March`.
+
+   1. Test case: `edit <Alex's short UUID> n/Bernice Yu`<br>
+      Expected: Alex is not edited. The status message shows `This person already exists in the address book.`
+
+   1. Test case: `edit <Alex's short UUID>`<br>
+      Expected: Alex is not edited. The status message shows `At least one field to edit must be provided.`
+
+   1. Test case: `edit 9999999 p/91234567`<br>
+      Expected: No person is edited. The status message shows `No person with UUID: 9999999`.
+
+   1. Test case: `edit 1 p/91234567`<br>
+      Expected: No person is edited. The status message shows `Invalid UUID prefix. It must contain 7 to 32 hexadecimal characters, ignoring dashes.`, followed by the command usage.
+
+### Finding persons
+
+1. Finding persons by name or tag
+
+   1. Test case: `find alex`<br>
+      Expected: Only Alex Yeoh is listed. The status message shows `1 person(s) listed!`.
+
+   1. Test case: `find ber yu`<br>
+      Expected: Only Bernice Yu is listed, as names match partial keywords.
+
+   1. Test case: `find t/colleagues`<br>
+      Expected: Bernice Yu and Roy Balakrishnan are listed. The status message shows `2 person(s) listed!`.
+
+   1. Test case: `find alex t/family`<br>
+      Expected: Alex Yeoh and David Li are listed, as name keywords and tags are combined with OR.
+
+   1. Test case: `find zzz`<br>
+      Expected: No persons are listed. The status message shows `0 person(s) listed!`.
+
+   1. Test case: `find`<br>
+      Expected: The list is unchanged. The status message shows an invalid command format error with `Specify at least part of a name or a tag.`
+
+   1. Other incorrect find commands to try: `find t/` (empty tag), `find t/high risk` (tag with a space)<br>
+      Expected: The list is unchanged, and an error message is shown.
+
+### Sorting persons
+
+1. Sorting the list by name
+
+   1. Test case: `sort desc`<br>
+      Expected: All persons are listed in reverse alphabetical order, ignoring case (with only the sample contacts, Roy Balakrishnan first and Alex Yeoh last). The status message shows `Listed all persons lexicographically by name.`
+
+   1. Test case: `sort asc`<br>
+      Expected: All persons are listed in alphabetical order (Alex Yeoh first).
+
+   1. Test case: `sort desc`, then `find t/colleagues`<br>
+      Expected: Roy Balakrishnan is listed before Bernice Yu, as the sort order still applies to search results.
+
+   1. Test case: `sort desc`, then `exit`, then relaunch the app<br>
+      Expected: The list is back in its original order, as the sort order is not saved.
+
+   1. Incorrect sort commands to try: `sort`, `sort A-Z`, `sort asc extra`<br>
+      Expected: The list order is unchanged. The status message shows an invalid command format error with the sort usage.
+
+### Adding or removing a remark
+
+1. Changing a remark by short UUID
+
+   1. Prerequisites: Note the short UUID of Bernice Yu.
+
+   1. Test case: `remark <Bernice's short UUID> r/Likes to swim.`<br>
+      Expected: Bernice's card shows the remark `Likes to swim.` The status message starts with `Added remark to Person: Bernice Yu; ...`.
+
+   1. Test case: `remark <Bernice's short UUID> r/`<br>
+      Expected: Bernice's remark is removed. The status message starts with `Removed remark from Person: Bernice Yu; ...`.
+
+   1. Test case: `remark <Bernice's short UUID>` (no `r/`)<br>
+      Expected: The remark is unchanged. The status message shows `Missing remark prefix. Add r/ before the remark, or use r/ to remove the existing remark.`, followed by the command usage.
+
+   1. Test case: `remark 9999999 r/Hello`<br>
+      Expected: No remark is changed. The status message shows `No person with UUID: 9999999`.
+
+   1. Test case: `remark #<Bernice's short UUID> r/Hello` (with the `#` from the card)<br>
+      Expected: No remark is changed. The status message shows that the UUID must be 7 to 32 hexadecimal characters, without the `#` prefix.
 
 ### Deleting a person
 
@@ -684,8 +845,6 @@ testers are expected to do more *exploratory* testing.
    1. Test case: `delete 1a2b3c4d-2000-0000-0000-000000000000` (the full UUID, with dashes)<br>
       Expected: The second person is deleted.
 
-1. _{ more test cases …​ }_
-
 ### Restoring a deleted person
 
 1. Restoring persons after deleting them
@@ -712,7 +871,7 @@ testers are expected to do more *exploratory* testing.
    1. Prerequisites: Delete a person, e.g. `John Doe`, then add a new person with the same name.
 
    1. Test case: `undelete`<br>
-      Expected: Nothing is restored. The status message shows `Cannot undelete: a person identical to John Doe already exists.`
+      Expected: Nothing is restored. The status message shows `Cannot undelete John Doe: a person with the same name already exists.`, followed by a prompt to rename that person with `edit`.
 
    1. Test case: Rename the new `John Doe` with `edit`, then `undelete`<br>
       Expected: The original `John Doe` is restored, with their original short UUID.
@@ -724,6 +883,10 @@ testers are expected to do more *exploratory* testing.
    1. Test case: Close the app. In `data/addressbook.json`, change one person's `uuid` to `not-a-uuid`. Relaunch the app.<br>
       Expected: The app starts with an empty address book instead of crashing. The log shows that the data file could not be loaded.
 
-   1. _{Explain how to simulate other missing or corrupted data files and state the expected behavior.}_
+   1. Test case: Close the app. Delete `data/addressbook.json`. Relaunch the app.<br>
+      Expected: The app starts with the six sample contacts, and creates a new data file when the data is next saved.
 
-1. _{ more test cases …​ }_
+1. Saving changes automatically
+
+   1. Test case: `add n/Save Test p/90000000 e/save@example.com a/Blk 9`, then `exit`, then relaunch the app.<br>
+      Expected: Save Test is still in the list.

@@ -21,11 +21,12 @@ public class DeleteCommand extends Command {
     public static final String COMMAND_WORD = "delete";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Deletes the person whose UUID starts with the given prefix, "
-            + "such as the short UUID shown on the person's card.\n"
-            + "Parameters: UUID_PREFIX (" + Person.SHORT_UUID_LENGTH + " to " + Person.UUID_HEX_LENGTH
-            + " hexadecimal characters; dashes are ignored)\n"
-            + "Example: " + COMMAND_WORD + " 1a2b3c4";
+            + ": Deletes the person with the given short UUID, the code shown as #xxxxxxx on the person's card.\n"
+            + "Parameters: SHORT_UUID (" + Person.SHORT_UUID_LENGTH
+            + " hexadecimal characters, typed without the #)\n"
+            + "If two persons share a short UUID, type more of the UUID, up to all " + Person.UUID_HEX_LENGTH
+            + " characters. Dashes are ignored.\n"
+            + "Example: " + COMMAND_WORD + " 1a2b3c4 (deletes the person whose card shows #1a2b3c4)";
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted person: %1$s";
     public static final String MESSAGE_NO_PERSON_WITH_UUID = "No person with UUID: %s";
