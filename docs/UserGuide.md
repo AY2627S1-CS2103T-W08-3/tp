@@ -101,7 +101,7 @@ If a field value contains a prefix such as `p/`, `e/`, or `a/` after a space, wr
 For example: `n/"ACME p/Research"`.
 If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
 indicator for unknown values and does not have any special properties in the stored details. The `add` command
-allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
+allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique (see the name uniqueness note below).
 Remarks can be added with the optional `r/REMARK` field.
 
 For example, a phone number can be entered as:
@@ -118,6 +118,16 @@ Examples:
 * `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 * `add n/John Doe p/12345678 e/john@example.com a/311, Clementi Ave 2 r/Likes to swim.`
+
+<div markdown="block" class="alert alert-info">
+
+**:information_source: Name uniqueness:**<br>
+
+* Two persons cannot have the same name. Names are compared ignoring case, so `john tan` counts as the same name as `John Tan`, and `add n/john tan ...` is rejected if `John Tan` exists.
+* The only exception is the exact name `UNKNOWN`, in capitals, which `add` accepts more than once.
+* `edit` and `undelete` do not have this exception. Renaming a person to `UNKNOWN` while another `UNKNOWN` exists fails, and so does undeleting a second `UNKNOWN`.
+
+</div>
 
 ### Listing all persons: `list`
 
@@ -147,6 +157,7 @@ control-character, and 255-character safeguards as `add`. Quote values containin
 * Edits the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
+* A new name must not match another person's name. See the name uniqueness note under [`add`](#adding-a-person-add).
 * To update or clear a remark, provide `r/REMARK` or `r/` respectively.
 * When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
 * To remove all of a person's tags, enter `t/` without a tag after it.
@@ -259,7 +270,7 @@ Examples:
 
 Errors:
 * If there is no deleted person to restore, the command fails with `No deleted persons to restore.`
-* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name. Rename that person with `edit`, then run `undelete` again.
+* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name (ignoring case). Rename that person with `edit`, then run `undelete` again.
 
 ### Exiting the program: `exit`
 
