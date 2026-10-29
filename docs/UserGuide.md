@@ -86,12 +86,14 @@ the name. The parser may interpret it as a separate field instead of part of the
 but `p/` within a name may be interpreted as the phone field.
 
 For example, a phone number can be entered as:
-`1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
+`1234 5678 (HP) 1111-3333 (Office)` or `UNKNOWN`.
 
 For example, email addresses can be entered as:
 `peter@example.com (Work) jane@example.com (Personal)`.
 
-If information currently unknown, feel free to type `UNKNOWN` into the field.
+If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
+indicator for unknown values and does not have any special properties in the stored details. The `add` command
+allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.

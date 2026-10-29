@@ -46,6 +46,7 @@ public class AddCommand extends Command {
     public static final String MESSAGE_UNKNOWN_INFORMATION =
             "If information currently unknown, feel free to type UNKNOWN into the field";
 
+    private static final String UNKNOWN_NAME = "UNKNOWN";
 
     private final Person toAdd;
 
@@ -61,7 +62,7 @@ public class AddCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        if (model.hasPerson(toAdd)) {
+        if (model.hasPerson(toAdd) && !UNKNOWN_NAME.equals(toAdd.getName().fullName)) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
