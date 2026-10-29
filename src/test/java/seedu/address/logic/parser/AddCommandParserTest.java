@@ -192,6 +192,16 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_addressWithQuote_success() {
+        String address = "Blk 5 \"Tower";
+        Person expectedPerson = new PersonBuilder(BOB).withAddress(address).withTags().build();
+        String addressDescription = " " + PREFIX_ADDRESS + address;
+
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + addressDescription,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_phoneWithLettersSpacesParenthesesAndHyphens_success() {
         String phoneWithLabels = "1234 5678 (HP) 1111-3333 (Office)";
         Person expectedPerson = new PersonBuilder(BOB).withPhone(phoneWithLabels).withTags().build();

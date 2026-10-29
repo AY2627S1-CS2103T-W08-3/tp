@@ -143,7 +143,7 @@ public class ArgumentTokenizerTest {
     public void tokenize_quotedValue_preservesPrefixesInsideValue() throws ParseException {
         Prefix namePrefix = new Prefix("n/");
         Prefix phonePrefix = new Prefix("p/");
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenizeWithQuotedValues(
                 " n/\"ACME p/Research\" p/\"+65 (123)\"", namePrefix, phonePrefix);
 
         assertArgumentPresent(argMultimap, namePrefix, "ACME p/Research");
@@ -154,7 +154,25 @@ public class ArgumentTokenizerTest {
     public void tokenize_unmatchedQuote_throwsParseException() {
         Prefix namePrefix = new Prefix("n/");
 
-        assertThrows(ParseException.class, () -> ArgumentTokenizer.tokenize(" n/\"Unclosed value", namePrefix));
+        assertThrows(ParseException.class, () ->
+                ArgumentTokenizer.tokenizeWithQuotedValues(" n/\"Unclosed value", namePrefix));
+    }
+
+    @Test
+    public void tokenize_unquotedValueWithQuote_preservesQuote() throws ParseException {
+        Prefix remarkPrefix = new Prefix("r/");
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(" r/Wants a 27\" monitor", remarkPrefix);
+
+        assertArgumentPresent(argMultimap, remarkPrefix, "Wants a 27\" monitor");
+    }
+
+    @Test
+    public void tokenize_quotedValue_unescapesEscapedCharacters() throws ParseException {
+        Prefix addressPrefix = new Prefix("a/");
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenizeWithQuotedValues(
+                " a/\"Say \\\"hi\\\" \\\\path \\q\"", addressPrefix);
+
+        assertArgumentPresent(argMultimap, addressPrefix, "Say \"hi\" \\path \\q");
     }
 
     @Test
