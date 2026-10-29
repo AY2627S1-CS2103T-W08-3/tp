@@ -71,7 +71,8 @@ public class SortCommandTest {
     public void execute_descendingThenAscending_changesDirectionWithoutChangingData() throws Exception {
         // State transition: descending order followed by ascending order after deletion.
         Model model = createModel();
-        new SortCommand(SortCommand.SortOrder.DESCENDING).execute(model);
+        CommandResult result = new SortCommand(SortCommand.SortOrder.DESCENDING).execute(model);
+        assertEquals("Sorted all persons by name in descending text order.", result.getFeedbackToUser());
         assertEquals(List.of(zoe, bob, alice), model.getFilteredPersonList());
         assertEquals(List.of(zoe, alice, bob), model.getAddressBook().getPersonList());
         new DeleteCommand(zoe.getShortUuid()).execute(model);
@@ -84,7 +85,7 @@ public class SortCommandTest {
     public void execute_unsortedContacts_displaysAlphabeticallyWithoutChangingData() {
         // EP: multiple unsorted contacts, including mixed-case names.
         Model model = createModel();
-        assertEquals(SortCommand.MESSAGE_SUCCESS,
+        assertEquals("Sorted all persons by name in ascending text order.",
                 new SortCommand(SortCommand.SortOrder.ASCENDING).execute(model).getFeedbackToUser());
         assertEquals(List.of(alice, bob, zoe), model.getFilteredPersonList());
         assertEquals(List.of(zoe, alice, bob), model.getAddressBook().getPersonList());

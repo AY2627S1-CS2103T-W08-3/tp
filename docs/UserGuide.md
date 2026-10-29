@@ -189,9 +189,19 @@ Missing or invalid parameters produce an error without changing the displayed li
 
 Format: `sort asc` or `sort desc`
 
-* Sorting clears any `find` filter, so the full list is shown.
-* Sorting only changes the order on screen. The data file is not reordered, and the list returns to its original order when you restart the app.
-* The sort order stays in effect until you restart: later `list`, `find`, `add` and `undelete` results are shown in the same order.
+Successful sorting confirms the direction with `Sorted all persons by name in ascending text order.`
+or `Sorted all persons by name in descending text order.`
+
+Missing directions, unsupported values, and extra arguments show the same error:
+
+```text
+Invalid command format!
+Use one of these commands:
+sort asc  - Sort names in ascending text order
+sort desc - Sort names in descending text order
+```
+
+The displayed list remains unchanged when the command is rejected.
 
 ### Adding or removing a remark: `remark`
 
