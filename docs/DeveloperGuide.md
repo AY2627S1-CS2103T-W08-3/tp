@@ -216,8 +216,8 @@ successful path stores an empty `Remark`, which removes the displayed remark wit
 #### Implementation
 
 The `add` command creates a new `Person` and stores it in the address book. It requires a name,
-phone number, email address, and postal address, while tags are optional and may be supplied more
-than once.
+phone number, email address, and postal address. A remark (`r/`) is optional and may be supplied at
+most once, while tags are optional and may be supplied more than once.
 
 The main classes involved in the implementation are shown in the following class diagram:
 
@@ -249,12 +249,14 @@ How the `add` command works:
    punctuation but must be non-blank, control-character-free, and at most 255 Unicode code points.
    Names and phone numbers must contain a letter or digit, while emails must contain `@` or be
    `UNKNOWN`.
-   The parser also creates an empty `Remark`
-   because a newly added person has no remark, then creates an `AddCommand` containing the
-   new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
-   in a `ParseException` instead.
-4. During execution, `AddCommand` asks the `Model` whether a person with the same identity
-   already exists. If so, it throws a `CommandException` and does not modify the address book.
+   The parser also creates a `Remark` from the trimmed `r/` value, or an empty `Remark` if `r/`
+   is not supplied, then creates an `AddCommand` containing the new `Person`. Missing prefixes,
+   repeated non-tag prefixes, and invalid field values result in a `ParseException` instead.
+4. During execution, `AddCommand` asks the `Model` whether a person with the same name, ignoring
+   letter case, already exists. If so, it throws a `CommandException` and does not modify the
+   address book. The one exception is the placeholder name `UNKNOWN`, which users can enter for
+   information they do not have yet. Persons named `UNKNOWN` are not treated as duplicates of each
+   other, so several can be added.
 5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
    `Model`, and returns a `CommandResult` containing the success message and any warning.
 
