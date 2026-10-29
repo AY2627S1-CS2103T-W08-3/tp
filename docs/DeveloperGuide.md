@@ -559,7 +559,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User searches for the client to update (UC2).
-2.  User requests to edit a specific client in the displayed list by its index, providing the fields to change (e.g. a new phone number or additional tags).
+2.  User requests to edit a specific client by its short UUID, providing the fields to change (e.g. a new phone number, remark, or additional tags).
 3.  ClientConnect validates the new values.
 4.  ClientConnect updates the client and shows a success message with the updated details.
 
@@ -571,12 +571,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 2a. The index is invalid.
+* 2a. The short UUID is invalid, unknown, or ambiguous.
 
     * 2a1. ClientConnect shows an error message.
-    * 2a2. User re-enters the command with a valid index.
+    * 2a2. User re-enters the command with a valid, sufficiently specific short UUID.
 
-      Steps 2a1-2a2 are repeated until the index is valid.
+      Steps 2a1-2a2 are repeated until the short UUID identifies exactly one client.
       Use case resumes at step 3.
 
 * 2b. No fields to edit are provided.
