@@ -151,6 +151,7 @@ Format: `remark SHORT_UUID r/REMARK`
 * The short UUID is the 7-character code shown as `#xxxxxxx` on the person's card.
 * `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
 * The match is made against every person in the address book, not just the currently displayed list.
+* The `r/` prefix is compulsory. Omitting it results in an invalid command.
 * To remove an existing remark, enter `r/` without any text after it.
 
 Examples:
