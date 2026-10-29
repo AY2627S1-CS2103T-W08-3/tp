@@ -57,6 +57,17 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void add_duplicateUnknownName_allowsPerson() {
+        Person firstUnknownPerson = new PersonBuilder().withName("UNKNOWN").withPhone("11111111").build();
+        Person secondUnknownPerson = new PersonBuilder().withName("UNKNOWN").withPhone("22222222").build();
+
+        uniquePersonList.add(firstUnknownPerson);
+        uniquePersonList.add(secondUnknownPerson);
+
+        assertEquals(List.of(firstUnknownPerson, secondUnknownPerson), uniquePersonList.asUnmodifiableObservableList());
+    }
+
+    @Test
     public void addAtIndex_nullPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniquePersonList.add(0, null));
     }

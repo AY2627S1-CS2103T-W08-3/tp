@@ -30,10 +30,6 @@ public class AddCommand extends Command {
             + PREFIX_EMAIL + "EMAIL "
             + PREFIX_ADDRESS + "ADDRESS "
             + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Names may contain alphanumeric characters, spaces, parentheses, and slashes.\n"
-            + "Phone numbers must contain at least one letter or digit and may include "
-            + "spaces, parentheses, and hyphens.\n"
-            + "Email addresses may be separated or annotated with spaces and parentheses.\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "John Doe "
             + PREFIX_PHONE + "1234 5678 (HP) 1111-3333 (Office) "
@@ -45,8 +41,16 @@ public class AddCommand extends Command {
     public static final String MESSAGE_SUCCESS = "New person added: %1$s";
     public static final String MESSAGE_DUPLICATE_PERSON = "This name already exists in the address book. "
             + "Add more details to the name.";
+    public static final String MESSAGE_INVALID_NAME_FIELD = "Invalid name field";
+    public static final String MESSAGE_INVALID_PHONE_NUMBER = "Invalid phone number";
+    public static final String MESSAGE_INVALID_EMAIL_ADDRESS = "Invalid email address";
+    public static final String MESSAGE_INVALID_ADDRESS_FIELD = "Invalid address field";
+    public static final String MESSAGE_INVALID_TAG = "Invalid tag";
+    public static final String MESSAGE_UNKNOWN_INFORMATION =
+            "If information currently unknown, feel free to type UNKNOWN into the field";
 
     private static final Logger logger = LogsCenter.getLogger(AddCommand.class);
+    private static final String UNKNOWN_NAME = "UNKNOWN";
 
     private final Person toAdd;
 
@@ -62,7 +66,7 @@ public class AddCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
-        if (model.hasPerson(toAdd)) {
+        if (model.hasPerson(toAdd) && !UNKNOWN_NAME.equals(toAdd.getName().fullName)) {
             logger.info("Add command rejected because the person already exists: " + toAdd.getName());
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
