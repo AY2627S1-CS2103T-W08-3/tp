@@ -313,6 +313,23 @@ Furthermore, certain edits can cause ClientConnect to behave in unexpected ways 
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Glossary
+
+Term | Meaning
+-----|--------
+**CLI** (Command Line Interface) | A way of using an app by typing commands instead of clicking buttons.
+**GUI** (Graphical User Interface) | The windows, buttons and lists you see and click on.
+**Home folder** | The folder containing the JAR file. The app stores its data and settings there.
+**Hexadecimal** | The characters `0`–`9` and `a`–`f`. UUIDs are made only of these characters.
+**JSON** | The text file format used to store your data in `data/addressbook.json`.
+**Parameter** | A value you supply in a command, written in `UPPER_CASE` in the formats, such as `NAME` in `n/NAME`.
+**Prefix** | The short label before a value in a command, such as `n/` for name or `t/` for tag. It tells the app which field the value belongs to.
+**Short UUID** | The first 7 characters of a person's UUID, shown as `#xxxxxxx` on the person's card. `edit`, `remark` and `delete` use it to pick a person.
+**Tag** | A one-word label attached to a person, such as `TermLife`, used to group and find persons.
+**UUID** | A long, unique ID given to every person automatically when they are added. It does not change when you edit the person.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
