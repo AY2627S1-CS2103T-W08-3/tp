@@ -9,7 +9,10 @@ title: Developer Guide
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* ClientConnect is based on [AddressBook-Level3](https://github.com/se-edu/addressbook-level3) (AB3) by the [SE-EDU initiative](https://se-education.org). Its code, tests, and documentation, including this Developer Guide and the User Guide, were adapted from AB3's ([AB3 Developer Guide](https://se-education.org/addressbook-level3/DeveloperGuide.html), [AB3 User Guide](https://se-education.org/addressbook-level3/UserGuide.html)).
+* Third-party libraries used: [JavaFX](https://openjfx.io/) for the GUI, [Jackson](https://github.com/FasterXML/jackson) for reading and writing JSON data files, and [JUnit 5](https://junit.org/junit5/) for testing.
+* The UML diagrams in this guide are created with [PlantUML](https://plantuml.com/).
+* The similar-name warning compares names using the [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance), a standard edit distance algorithm.
 
 --------------------------------------------------------------------------------------------------------------------
 
