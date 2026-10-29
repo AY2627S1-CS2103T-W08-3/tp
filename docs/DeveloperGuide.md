@@ -758,19 +758,19 @@ testers are expected to do more *exploratory* testing.
 
 1. Sorting the list by name
 
-   1. Test case: `sort Z-A`<br>
-      Expected: All persons are listed in reverse alphabetical order, ignoring case (with only the sample contacts, Roy Balakrishnan first and Alex Yeoh last). The status message shows `Listed all persons alphabetically by name.`
+   1. Test case: `sort desc`<br>
+      Expected: All persons are listed in reverse alphabetical order, ignoring case (with only the sample contacts, Roy Balakrishnan first and Alex Yeoh last). The status message shows `Listed all persons lexicographically by name.`
 
-   1. Test case: `sort A-Z`<br>
+   1. Test case: `sort asc`<br>
       Expected: All persons are listed in alphabetical order (Alex Yeoh first).
 
-   1. Test case: `sort Z-A`, then `find t/colleagues`<br>
+   1. Test case: `sort desc`, then `find t/colleagues`<br>
       Expected: Roy Balakrishnan is listed before Bernice Yu, as the sort order still applies to search results.
 
-   1. Test case: `sort Z-A`, then `exit`, then relaunch the app<br>
+   1. Test case: `sort desc`, then `exit`, then relaunch the app<br>
       Expected: The list is back in its original order, as the sort order is not saved.
 
-   1. Incorrect sort commands to try: `sort`, `sort a-z` (the direction is case-sensitive), `sort A-Z extra`<br>
+   1. Incorrect sort commands to try: `sort`, `sort A-Z`, `sort asc extra`<br>
       Expected: The list order is unchanged. The status message shows an invalid command format error with the sort usage.
 
 ### Adding or removing a remark
