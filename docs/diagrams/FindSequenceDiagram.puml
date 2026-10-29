@@ -76,8 +76,8 @@ FindCommand --> LogicManager : r
 deactivate FindCommand
 
 [<-- LogicManager : r
-deactivate LogicManager
 destroy FindCommand
+deactivate LogicManager
 
 note right of CommandResult
     r is returned to the caller;
