@@ -1,10 +1,16 @@
 package seedu.address.ui;
 
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -68,6 +74,62 @@ public class PersonCard extends UiPart<Region> {
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+        configureCopyMenu();
+    }
+
+    /**
+     * Offers read-only clipboard actions without changing the client or the current list.
+     */
+    private void configureCopyMenu() {
+        ContextMenu copyMenu = new ContextMenu();
+        copyMenu.getItems().addAll(
+                createCopyItem("Copy name", person.getName().fullName),
+                createCopyItem("Copy phone", person.getPhone().value),
+                createCopyItem("Copy email", person.getEmail().value),
+                createCopyItem("Copy address", person.getAddress().value),
+                createCopyItem("Copy remark", person.getRemark().value),
+                createCopyItem("Copy client ID", person.getShortUuid()),
+                createCopyItem("Copy full UUID", person.getUuid().toString()),
+                new SeparatorMenuItem(),
+                createCopyItem("Copy all details", formatContactDetails()));
+        cardPane.setOnContextMenuRequested(event -> {
+            copyMenu.show(cardPane, event.getScreenX(), event.getScreenY());
+            event.consume();
+        });
+        uuid.setTooltip(new Tooltip("Right-click this card to copy client details."));
+        cardPane.setAccessibleHelp("Open the context menu to copy client details.");
+    }
+
+    /**
+     * Creates a copy action, disabling it when the optional field is empty.
+     */
+    private static MenuItem createCopyItem(String title, String value) {
+        MenuItem item = new MenuItem(title);
+        item.setDisable(value.isEmpty());
+        item.setOnAction(event -> {
+            ClipboardContent content = new ClipboardContent();
+            content.putString(value);
+            Clipboard.getSystemClipboard().setContent(content);
+        });
+        return item;
+    }
+
+    /**
+     * Formats a client as plain text with stable tag ordering for pasting elsewhere.
+     */
+    private String formatContactDetails() {
+        String tagNames = person.getTags().stream()
+                .map(tag -> tag.tagName)
+                .sorted()
+                .collect(Collectors.joining(", "));
+        return String.join(System.lineSeparator(),
+                "Name: " + person.getName().fullName,
+                "Phone: " + person.getPhone().value,
+                "Email: " + person.getEmail().value,
+                "Address: " + person.getAddress().value,
+                "Remark: " + person.getRemark().value,
+                "Tags: " + tagNames,
+                "Client ID: " + person.getUuid());
     }
 
     /**
