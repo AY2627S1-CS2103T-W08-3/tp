@@ -620,11 +620,18 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **CLI (Command Line Interface)**: A way of using an application by typing text commands, as in ClientConnect's command box
+* **GUI (Graphical User Interface)**: A way of using an application through visual elements such as windows, lists, and cards
+* **Hexadecimal**: Using the digits `0`–`9` and the letters `a`–`f`. UUIDs are written in hexadecimal
 * **Insurance Agent**: Point of contact for insurance products, manages a list of insurance clients' information
 * **Insurance Client**: Consumer of insurance products, with an associated insurance agent who has the client's contact information
-* **Policyholder**: Insurance client of a specific insurance product, in particular with a purchased policy with an associated policynumber
+* **Mainstream OS**: Windows, Linux, Unix, or macOS
+* **MSS (Main Success Scenario)**: The steps of a use case in which everything goes as expected. Extensions describe what happens otherwise
+* **Remark**: An optional free-text note stored with a client, e.g. `Likes to swim.`
+* **Short UUID**: The first 7 hexadecimal characters of a client's UUID, shown as `#xxxxxxx` on the client's card
+* **Tag**: An alphanumeric label attached to a client, e.g. `friends`. A client can have any number of tags
+* **UUID (Universally Unique Identifier)**: A 32-character hexadecimal identifier given to each client when they are added, e.g. `1a2b3c4d-1000-0000-0000-000000000000`. It does not change when the client is edited
+* **UUID prefix**: The first 7 to 32 hexadecimal characters of a UUID, ignoring dashes. Commands such as `delete`, `edit`, and `remark` use it to select a client
 
 --------------------------------------------------------------------------------------------------------------------
 
