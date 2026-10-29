@@ -186,14 +186,15 @@ Supply at least one name keyword or tag. Put name keywords before any `t/` prefi
 * Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
 Examples:
-* `find Irfan` returns `irfan` and `Irfan Ibrahim`
+* `find Irfan` and `find irfan` return the same results because search is case-insensitive.
+  With the sample data, both return only `Irfan Ibrahim`.
+  After adding a person named `Irfan Mohammed`, both return `Irfan Ibrahim` and `Irfan Mohammed`, as shown below.<br>
+  ![Results for 'find irfan' after adding Irfan Mohammed](images/findIrfanResult.png)
 * `find Irfan Ibrahim` returns `Irfan Mohammed` and `Ismail Ibrahim`, if present,
   because either `Irfan` or `Ibrahim` matches. It also returns `Irfan Ibrahim`, if present.
 * `find t/friends` returns persons tagged `friends`.
 * `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
 * `find Irfan t/friends` returns persons whose names contain `Irfan` or who have the `friends` tag.
-* `find irfan` returns `Irfan Ibrahim`, `Irfan Mohammed`<br>
-  ![result for 'find irfan'](images/findIrfanResult.png)
 
 ### Deleting a person: `delete`
 
