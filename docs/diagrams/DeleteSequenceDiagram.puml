@@ -21,7 +21,7 @@ LogicManager -> AddressBookParser : parseCommand("delete 1a2b3c4")
 activate AddressBookParser
 
 create DeleteCommandParser
-AddressBookParser -> DeleteCommandParser
+AddressBookParser -> DeleteCommandParser : DeleteCommandParser()
 activate DeleteCommandParser
 
 DeleteCommandParser --> AddressBookParser
@@ -31,10 +31,10 @@ AddressBookParser -> DeleteCommandParser : parse("1a2b3c4")
 activate DeleteCommandParser
 
 create DeleteCommand
-DeleteCommandParser -> DeleteCommand
+DeleteCommandParser -> DeleteCommand : DeleteCommand("1a2b3c4")
 activate DeleteCommand
 
-DeleteCommand --> DeleteCommandParser :
+DeleteCommand --> DeleteCommandParser
 deactivate DeleteCommand
 
 DeleteCommandParser --> AddressBookParser : d
@@ -68,7 +68,7 @@ Model --> DeleteCommand
 deactivate Model
 
 create CommandResult
-DeleteCommand -> CommandResult
+DeleteCommand -> CommandResult : CommandResult(message)
 activate CommandResult
 
 CommandResult --> DeleteCommand
@@ -76,7 +76,9 @@ deactivate CommandResult
 
 DeleteCommand --> LogicManager : r
 deactivate DeleteCommand
+DeleteCommand -[hidden]-> LogicManager
+destroy DeleteCommand
 
-[<--LogicManager
+[<--LogicManager : r
 deactivate LogicManager
 @enduml

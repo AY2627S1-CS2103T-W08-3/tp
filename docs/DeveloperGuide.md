@@ -95,7 +95,7 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 ![Interactions Inside the Logic Component for the `delete 1a2b3c4` Command](images/DeleteSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifelines for `DeleteCommandParser` and `DeleteCommand` should end at their destroy markers (X), but due to a limitation of PlantUML, they continue to the end of the diagram.
 </div>
 
 How the `Logic` component works:
@@ -359,9 +359,12 @@ The following sequence diagram shows how the `undelete` command in step 4 goes t
 
 ![UndeleteSequenceDiagram](images/UndeleteSequenceDiagram.png)
 
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifelines for `UndeleteCommandParser` and `UndeleteCommand` should end at their destroy markers (X), but due to a limitation of PlantUML, they continue to the end of the diagram.
+</div>
+
 Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so the address book is back in its original order, and `deletedPersons` is empty again.
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same identity has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`. The entry stays on the stack, so the user can rename the clashing person and run `undelete` again.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** If a person with the same name has been added since the delete (e.g. the user re-added Alice by hand), `UndeleteCommand` fails before calling `Model#restoreLastDeletedPerson()`, as restoring the deleted person would leave two persons with the same name. The entry stays on the stack, and the error message tells the user to rename the clashing person with `edit` and run `undelete` again.
 
 </div>
 
@@ -733,7 +736,7 @@ testers are expected to do more *exploratory* testing.
    1. Prerequisites: Delete a person, e.g. `John Doe`, then add a new person with the same name.
 
    1. Test case: `undelete`<br>
-      Expected: Nothing is restored. The status message shows `Cannot undelete: a person identical to John Doe already exists.`
+      Expected: Nothing is restored. The status message shows `Cannot undelete John Doe: a person with the same name already exists.`, followed by a prompt to rename that person with `edit`.
 
    1. Test case: Rename the new `John Doe` with `edit`, then `undelete`<br>
       Expected: The original `John Doe` is restored, with their original short UUID.

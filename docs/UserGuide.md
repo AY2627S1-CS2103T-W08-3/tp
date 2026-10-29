@@ -214,6 +214,7 @@ Format: `delete UUID_PREFIX`
 * Usually, `UUID_PREFIX` is the short UUID: the 7-character code shown as `#xxxxxxx` on each person's card.
 * `UUID_PREFIX` **must be 7 to 32 hexadecimal characters** (`0`–`9`, `a`–`f`). It is case-insensitive, and dashes are ignored, so you can also paste a person's full UUID.
 * The match is made against **every** person in ClientConnect, not just the currently displayed list, so filtering with `find` does not affect which person is deleted.
+* Type the UUID prefix without the `#` display prefix. If two persons share a short UUID, enter more characters, up to all 32, to pick one.
 
 Examples:
 * `delete 1a2b3c4` deletes the person whose card shows `#1a2b3c4`.
@@ -251,7 +252,7 @@ Examples:
 
 Errors:
 * If there is no deleted person to restore, the command fails with `No deleted persons to restore.`
-* If a person with the same name has been added since the delete, the command fails and nothing is restored. Rename that person with `edit`, then run `undelete` again.
+* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name. Rename that person with `edit`, then run `undelete` again.
 
 ### Exiting the program: `exit`
 
