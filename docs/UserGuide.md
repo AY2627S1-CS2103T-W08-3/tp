@@ -5,6 +5,8 @@ title: User Guide
 
 ClientConnect is a **desktop application that streamlines contact management for insurance agents by providing fast, CLI-optimized access to rapidly growing client lists** while retaining the benefits of a Graphical User Interface (GUI). It solves the inefficiency of constant data entry, enabling agents to seamlessly add, filter, and retrieve critical client details to better manage relationships and their extensive portfolios.
 
+It is built for agents who handle large client portfolios and many active leads. You can record clients, tag them, add remarks, and find them again by name or tag, all by typing short commands. If you type quickly, ClientConnect lets you manage your clients faster than clicking through forms or scrolling a spreadsheet.
+
 * Table of Contents
 {:toc}
 
@@ -22,6 +24,9 @@ ClientConnect is a **desktop application that streamlines contact management for
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ClientConnect.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
+
+   :bulb: Double-clicking the JAR file may not start the app on some systems, so use the `java -jar` command above.<br>
+   Do not put the JAR file in a write-protected folder, such as a system folder or a read-only drive. The app saves its data and settings next to the JAR file and will not work properly if it cannot write there.
 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
@@ -57,14 +62,25 @@ ClientConnect is a **desktop application that streamlines contact management for
 * Items followed by `…`​ can appear zero or more times.<br>
   For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
 
-* Parameters can be in any order.<br>
+* Parameters with a prefix (such as `n/` or `p/`) can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+  Parameters without a prefix must come first: the `SHORT_UUID` for `edit`, `remark` and `delete`, and the name keywords for `find`.<br>
+  For example, `remark 1a2b3c4 r/Likes to swim.` works, but `remark r/Likes to swim. 1a2b3c4` does not.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
+
+### Identifying a person by short UUID
+
+Commands that act on one existing person (`edit`, `remark` and `delete`) identify the person by their **short UUID**: the 7-character code shown as `#xxxxxxx` beside the name on each person's card.
+
+* Type the code without the `#`. For example, for a card showing `#1a2b3c4`, type `delete 1a2b3c4`.
+* The code is made of hexadecimal characters (`0`–`9` and `a`–`f`) and is case-insensitive.
+* The code is matched against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is chosen.
+* If two persons share a short UUID, the command fails instead of guessing. Type more characters of the person's full UUID, up to all 32, to pick one. `delete` and `remark` list the full UUID of each match; you can also find it in the data file. Dashes are ignored, so you can paste a full UUID.
 
 ### Viewing help: `help`
 
@@ -89,7 +105,7 @@ If a field value contains a prefix such as `p/`, `e/`, or `a/` after a space, wr
 For example: `n/"ACME p/Research"`.
 If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
 indicator for unknown values and does not have any special properties in the stored details. The `add` command
-allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
+allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique (see the name uniqueness note below).
 Remarks can be added with the optional `r/REMARK` field.
 
 For example, a phone number can be entered as:
@@ -101,6 +117,9 @@ For example, email addresses can be entered as:
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.
 </div>
+
+Tags may contain only English letters and digits (`A`–`Z`, `a`–`z`, `0`–`9`), with no spaces or punctuation. For example, `t/TermLife` is valid, but `t/term-life` and `t/term life` are not.
+Tags are stored exactly as typed, so `t/friends` and `t/Friends` are two different tags. (`find` still matches tags ignoring case.)
 
 Examples:
 * `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
@@ -144,6 +163,15 @@ or digit, and emails must contain `@` or be `UNKNOWN`. Quote values containing f
 Examples:
 *  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
 *  `edit 1a2b3c4 n/Betsy Crower r/Likes to swim.` Updates the name and remark of that person.
+<div markdown="block" class="alert alert-info">
+
+**:information_source: Name uniqueness:**<br>
+
+* Two persons cannot have the same name. Names are compared ignoring case, so `john tan` counts as the same name as `John Tan`, and `add n/john tan ...` is rejected if `John Tan` exists.
+* The only exception is the exact name `UNKNOWN`, in capitals, which `add` accepts more than once.
+* `edit` and `undelete` do not have this exception. Renaming a person to `UNKNOWN` while another `UNKNOWN` exists fails, and so does undeleting a second `UNKNOWN`.
+
+</div>
 
 ### Listing all persons: `list`
 
@@ -160,6 +188,10 @@ Names are compared character by character (lexicographically), so numbers are tr
 Missing or invalid parameters produce an error without changing the displayed list.
 
 Format: `sort asc` or `sort desc`
+
+* Sorting clears any `find` filter, so the full list is shown.
+* Sorting only changes the order on screen. The data file is not reordered, and the list returns to its original order when you restart the app.
+* The sort order stays in effect until you restart: later `list`, `find`, `add` and `undelete` results are shown in the same order.
 
 ### Adding or removing a remark: `remark`
 
@@ -180,28 +212,26 @@ Examples:
 
 Finds persons whose names contain any given name keyword or whose tags match any given tag.
 
-Format: `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`
+Format: `find [KEYWORD [MORE_KEYWORDS]…​] [t/TAG]…​`
 
 Supply at least one name keyword or tag. Put name keywords before any `t/` prefixes.
+Anything typed after a `t/` is read as part of that tag, so `find t/friends Alice` looks for the tag `friends Alice` and fails with `Tag names should be alphanumeric`. Type `find Alice t/friends` instead.
 
-* The search is case-insensitive; for example, `hans` matches `Hans`.
-* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
+* The search is case-insensitive; for example, `irfan` matches `Irfan`.
+* Keyword order does not matter; for example, `Ibrahim Irfan` matches `Irfan Ibrahim`.
 * Keywords without a prefix search only names. Each `t/TAG` searches only tags.
-* Name keywords match any part of a name; for example, `Han` matches `Hans` and `Johann`.
+* Name keywords match any part of a name; for example, `Irf` matches `Irfan Ibrahim`.
 * Tags are case-insensitive and must match completely; `t/friends` matches `Friends` but not `bestfriends`.
   Use one `t/` prefix per tag. Empty tags and tags containing spaces or punctuation are invalid.
-* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
-* OR matching is automatic when you enter multiple keywords; separate them with spaces.
+* Persons matching at least one name keyword or tag are returned (an `OR` search), and each person appears once.
   This helps when you misremember part of a name, as only one keyword needs to match.
-* Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
 Examples:
 * `find Irfan` and `find irfan` return the same results because search is case-insensitive.
   With the sample data, both return only `Irfan Ibrahim`.
   After adding a person named `Irfan Mohammed`, both return `Irfan Ibrahim` and `Irfan Mohammed`, as shown below.<br>
   ![Results for 'find irfan' after adding Irfan Mohammed](images/findIrfanResult.png)
-* `find Irfan Ibrahim` returns `Irfan Mohammed` and `Ismail Ibrahim`, if present,
-  because either `Irfan` or `Ibrahim` matches. It also returns `Irfan Ibrahim`, if present.
+* `find Irfan Roy` returns `Irfan Ibrahim` and `Roy Balakrishnan` from the sample data, because either `Irfan` or `Roy` matches.
 * `find t/friends` returns persons tagged `friends`.
 * `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
 * `find Irfan t/friends` returns persons whose names contain `Irfan` or who have the `friends` tag.
@@ -242,7 +272,7 @@ Restores the most recently deleted person, in case you deleted the wrong one.
 
 Format: `undelete`
 
-* The person is restored with the same short UUID, at the position in the list they were deleted from.
+* The person is restored with the same short UUID, at the position in the list they were deleted from. If a sort is active, the person appears wherever the sort order places them.
 * Running `undelete` again restores the person deleted before that, and so on, back to the first delete since the app was opened.
 * After a restore, the list shows all persons, so the restored person is always visible.
 * `undelete` only reverses `delete`. It does not reverse `clear`, `add`, `edit` or other commands.
@@ -254,7 +284,7 @@ Examples:
 
 Errors:
 * If there is no deleted person to restore, the command fails with `No deleted persons to restore.`
-* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name. Rename that person with `edit`, then run `undelete` again.
+* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name (ignoring case). Rename that person with `edit`, then run `undelete` again.
 
 ### Exiting the program: `exit`
 
@@ -281,6 +311,22 @@ Furthermore, certain edits can cause ClientConnect to behave in unexpected ways 
 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClientConnect home folder.
+--------------------------------------------------------------------------------------------------------------------
+
+## Glossary
+
+Term | Meaning
+-----|--------
+**CLI** (Command Line Interface) | A way of using an app by typing commands instead of clicking buttons.
+**GUI** (Graphical User Interface) | The windows, buttons and lists you see and click on.
+**Home folder** | The folder containing the JAR file. The app stores its data and settings there.
+**Hexadecimal** | The characters `0`–`9` and `a`–`f`. UUIDs are made only of these characters.
+**JSON** | The text file format used to store your data in `data/ClientConnect.json`.
+**Parameter** | A value you supply in a command, written in `UPPER_CASE` in the formats, such as `NAME` in `n/NAME`.
+**Prefix** | The short label before a value in a command, such as `n/` for name or `t/` for tag. It tells the app which field the value belongs to.
+**Short UUID** | The first 7 characters of a person's UUID, shown as `#xxxxxxx` on the person's card. `edit`, `remark` and `delete` use it to pick a person.
+**Tag** | A one-word label attached to a person, such as `TermLife`, used to group and find persons.
+**UUID** | A long, unique ID given to every person automatically when they are added. It does not change when you edit the person.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -288,6 +334,7 @@ Furthermore, certain edits can cause ClientConnect to behave in unexpected ways 
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
 2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
+3. **On macOS, if you put a secondary window such as the Help Window into fullscreen**, the app may behave unexpectedly. Avoid using fullscreen for secondary windows. If this happens, exit fullscreen (`Ctrl`+`Cmd`+`F`) or restart the app.
 
 --------------------------------------------------------------------------------------------------------------------
 
