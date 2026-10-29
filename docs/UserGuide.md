@@ -114,6 +114,9 @@ For example, email addresses can be entered as:
 A person can have any number of tags, including zero.
 </div>
 
+Tags may contain only English letters and digits (`A`–`Z`, `a`–`z`, `0`–`9`), with no spaces or punctuation. For example, `t/TermLife` is valid, but `t/term-life` and `t/term life` are not.
+Tags are stored exactly as typed, so `t/friends` and `t/Friends` are two different tags. (`find` still matches tags ignoring case.)
+
 Examples:
 * `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
@@ -161,6 +164,7 @@ control-character, and 255-character safeguards as `add`. Quote values containin
 * To update or clear a remark, provide `r/REMARK` or `r/` respectively.
 * When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
 * To remove all of a person's tags, enter `t/` without a tag after it.
+* Tags follow the same rules as in `add`: letters and digits only, stored exactly as typed.
 
 Examples:
 *  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
