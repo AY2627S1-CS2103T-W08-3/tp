@@ -6,8 +6,10 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
+import java.util.List;
 import java.util.Set;
 
 import seedu.address.logic.commands.AddCommand;
@@ -33,25 +35,26 @@ public class AddCommandParser implements Parser<AddCommand> {
     public AddCommand parse(String args) throws ParseException {
         requireNonNull(args);
         ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_TAG);
+                ArgumentTokenizer.tokenizeWithQuotedValues(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL,
+                        PREFIX_ADDRESS, PREFIX_TAG, PREFIX_REMARK);
 
-        // Check required fields before the preamble so a misplaced or missing field is identified precisely.
-        getFieldValue(argMultimap, PREFIX_NAME, AddCommand.MESSAGE_INVALID_NAME_FIELD);
-        getFieldValue(argMultimap, PREFIX_PHONE, AddCommand.MESSAGE_INVALID_PHONE_NUMBER);
-        getFieldValue(argMultimap, PREFIX_EMAIL, AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS);
-        getFieldValue(argMultimap, PREFIX_ADDRESS, AddCommand.MESSAGE_INVALID_ADDRESS_FIELD);
+        String nameValue = getFieldValue(argMultimap, PREFIX_NAME, AddCommand.MESSAGE_INVALID_NAME_FIELD);
+        String phoneValue = getFieldValue(argMultimap, PREFIX_PHONE, AddCommand.MESSAGE_INVALID_PHONE_NUMBER);
+        String emailValue = getFieldValue(argMultimap, PREFIX_EMAIL, AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS);
+        String addressValue = getFieldValue(argMultimap, PREFIX_ADDRESS, AddCommand.MESSAGE_INVALID_ADDRESS_FIELD);
 
         if (!argMultimap.getPreamble().isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
         }
 
-        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS);
-        Name name = parseName(argMultimap);
-        Phone phone = parsePhone(argMultimap);
-        Email email = parseEmail(argMultimap);
-        Address address = parseAddress(argMultimap);
-        Set<Tag> tagList = parseTags(argMultimap);
-        Remark remark = new Remark("");
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
+                PREFIX_REMARK);
+        Name name = parseName(nameValue);
+        Phone phone = parsePhone(phoneValue);
+        Email email = parseEmail(emailValue);
+        Address address = parseAddress(addressValue);
+        Set<Tag> tagList = parseTags(argMultimap.getAllValues(PREFIX_TAG));
+        Remark remark = ParserUtil.parseRemark(argMultimap.getValue(PREFIX_REMARK).orElse(""));
 
         Person person = new Person(name, phone, email, address, remark, tagList);
 
@@ -61,8 +64,7 @@ public class AddCommandParser implements Parser<AddCommand> {
     /**
      * Parses the name field and reports the field that caused an error.
      */
-    private static Name parseName(ArgumentMultimap argumentMultimap) throws ParseException {
-        String name = getFieldValue(argumentMultimap, PREFIX_NAME, AddCommand.MESSAGE_INVALID_NAME_FIELD);
+    private static Name parseName(String name) throws ParseException {
         try {
             return ParserUtil.parseName(name);
         } catch (ParseException exception) {
@@ -73,8 +75,7 @@ public class AddCommandParser implements Parser<AddCommand> {
     /**
      * Parses the phone field and reports the field that caused an error.
      */
-    private static Phone parsePhone(ArgumentMultimap argumentMultimap) throws ParseException {
-        String phone = getFieldValue(argumentMultimap, PREFIX_PHONE, AddCommand.MESSAGE_INVALID_PHONE_NUMBER);
+    private static Phone parsePhone(String phone) throws ParseException {
         try {
             return ParserUtil.parsePhone(phone);
         } catch (ParseException exception) {
@@ -85,8 +86,7 @@ public class AddCommandParser implements Parser<AddCommand> {
     /**
      * Parses the email field and reports the field that caused an error.
      */
-    private static Email parseEmail(ArgumentMultimap argumentMultimap) throws ParseException {
-        String email = getFieldValue(argumentMultimap, PREFIX_EMAIL, AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS);
+    private static Email parseEmail(String email) throws ParseException {
         try {
             return ParserUtil.parseEmail(email);
         } catch (ParseException exception) {
@@ -97,8 +97,7 @@ public class AddCommandParser implements Parser<AddCommand> {
     /**
      * Parses the address field and reports the field that caused an error.
      */
-    private static Address parseAddress(ArgumentMultimap argumentMultimap) throws ParseException {
-        String address = getFieldValue(argumentMultimap, PREFIX_ADDRESS, AddCommand.MESSAGE_INVALID_ADDRESS_FIELD);
+    private static Address parseAddress(String address) throws ParseException {
         try {
             return ParserUtil.parseAddress(address);
         } catch (ParseException exception) {
@@ -109,11 +108,11 @@ public class AddCommandParser implements Parser<AddCommand> {
     /**
      * Parses tags and reports the tag field when a tag is invalid.
      */
-    private static Set<Tag> parseTags(ArgumentMultimap argumentMultimap) throws ParseException {
+    private static Set<Tag> parseTags(List<String> values) throws ParseException {
         try {
-            return ParserUtil.parseTags(argumentMultimap.getAllValues(PREFIX_TAG));
+            return ParserUtil.parseTags(values);
         } catch (ParseException exception) {
-            boolean hasEmptyTag = argumentMultimap.getAllValues(PREFIX_TAG).stream().anyMatch(String::isEmpty);
+            boolean hasEmptyTag = values.stream().anyMatch(String::isEmpty);
             throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, hasEmptyTag, exception);
         }
     }

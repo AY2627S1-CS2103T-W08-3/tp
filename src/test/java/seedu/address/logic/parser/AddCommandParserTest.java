@@ -28,6 +28,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -67,6 +68,25 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_remark_success() {
+        String remark = "Likes to swim.";
+        Person expectedPerson = new PersonBuilder(BOB).withRemark(remark).withTags().build();
+        String userInput = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " " + PREFIX_REMARK + remark;
+
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_emptyRemark_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withRemark("").withTags().build();
+        String userInput = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " " + PREFIX_REMARK;
+
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_repeatedNonTagValue_failure() {
         String validExpectedPersonString = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_FRIEND;
@@ -86,6 +106,11 @@ public class AddCommandParserTest {
         // multiple addresses
         assertParseFailure(parser, ADDRESS_DESC_AMY + validExpectedPersonString,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
+
+        // multiple remarks
+        assertParseFailure(parser, " " + PREFIX_REMARK + "First" + validExpectedPersonString
+                        + " " + PREFIX_REMARK + "Second",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_REMARK));
 
         // multiple fields repeated
         assertParseFailure(parser,
@@ -167,19 +192,20 @@ public class AddCommandParserTest {
     }
 
     @Test
-    public void parse_phoneWithLettersSpacesParenthesesAndHyphens_success() {
-        String phoneWithLabels = "1234 5678 (HP) 1111-3333 (Office)";
-        Person expectedPerson = new PersonBuilder(BOB).withPhone(phoneWithLabels).withTags().build();
-        String phoneDescription = " " + PREFIX_PHONE + phoneWithLabels;
+    public void parse_addressWithQuote_success() {
+        String address = "Blk 5 \"Tower";
+        Person expectedPerson = new PersonBuilder(BOB).withAddress(address).withTags().build();
+        String addressDescription = " " + PREFIX_ADDRESS + address;
 
-        assertParseSuccess(parser, NAME_DESC_BOB + phoneDescription + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + addressDescription,
                 new AddCommand(expectedPerson));
     }
 
     @Test
-    public void parse_unknownPhone_success() {
-        Person expectedPerson = new PersonBuilder(BOB).withPhone("Unknown").withTags().build();
-        String phoneDescription = " " + PREFIX_PHONE + "Unknown";
+    public void parse_phoneWithLettersSpacesParenthesesAndHyphens_success() {
+        String phoneWithLabels = "1234 5678 (HP) 1111-3333 (Office)";
+        Person expectedPerson = new PersonBuilder(BOB).withPhone(phoneWithLabels).withTags().build();
+        String phoneDescription = " " + PREFIX_PHONE + phoneWithLabels;
 
         assertParseSuccess(parser, NAME_DESC_BOB + phoneDescription + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
                 new AddCommand(expectedPerson));
@@ -195,6 +221,22 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_invalidEmail_messageExplainsAtRequirement() {
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + " " + PREFIX_EMAIL + "invalid-email"
+                + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
+    }
+
+    @Test
+    public void parse_unknownPhone_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withPhone("Unknown").withTags().build();
+        String phoneDescription = " " + PREFIX_PHONE + "Unknown";
+
+        assertParseSuccess(parser, NAME_DESC_BOB + phoneDescription + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_emailWithSpacesAndParentheses_success() {
         String emailWithLabels = "peter@example.com (Work) jane@example.com (Personal)";
         Person expectedPerson = new PersonBuilder(BOB).withEmail(emailWithLabels).withTags().build();
@@ -202,6 +244,20 @@ public class AddCommandParserTest {
 
         assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + emailDescription + ADDRESS_DESC_BOB,
                 new AddCommand(expectedPerson));
+    }
+
+    @Test
+    public void parse_punctuationInFields_success() {
+        String name = "ACME p/Research";
+        String phone = "+65 (123)#45";
+        String email = "person+tag@example.com?backup";
+        String address = "10, Main St. #2/3";
+        Person expectedPerson = new PersonBuilder(BOB).withName(name).withPhone(phone).withEmail(email)
+                .withAddress(address).withTags().build();
+        String userInput = " " + PREFIX_NAME + "\"" + name + "\" " + PREFIX_PHONE + "\"" + phone + "\" "
+                + PREFIX_EMAIL + email + " " + PREFIX_ADDRESS + "\"" + address + "\"";
+
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
     }
 
     @Test
@@ -259,7 +315,7 @@ public class AddCommandParserTest {
         // invalid address
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + INVALID_ADDRESS_DESC
                 + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
-                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, true));
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, false));
 
         // invalid tag
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
@@ -274,6 +330,17 @@ public class AddCommandParserTest {
         assertParseFailure(parser, PREAMBLE_NON_EMPTY + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_semanticInvalidValue_failure() {
+        assertParseFailure(parser, " " + PREFIX_NAME + "!!!" + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, false));
+        assertParseFailure(parser, NAME_DESC_BOB + " " + PREFIX_PHONE + "+++" + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, false));
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + " " + PREFIX_EMAIL + "not-an-email"
+                + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
     }
 
     private static String expectedInvalidFieldMessage(String fieldMessage, boolean hasEmptyValue) {

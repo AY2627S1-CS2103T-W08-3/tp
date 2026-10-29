@@ -41,6 +41,10 @@ public class FindCommandParserTest {
 
         // multiple whitespaces between keywords
         assertParseSuccess(parser, " \n Alice \n \t Bob  \t", expectedFindCommand);
+
+        FindCommand quotedWordCommand = new FindCommand(
+                new NameContainsKeywordsPredicate(List.of("\"VIP")));
+        assertParseSuccess(parser, "\"VIP", quotedWordCommand);
     }
 
     @Test

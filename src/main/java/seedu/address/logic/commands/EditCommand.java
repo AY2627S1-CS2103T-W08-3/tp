@@ -17,6 +17,7 @@ import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
+import seedu.address.commons.util.StringUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -45,10 +46,10 @@ public class EditCommand extends Command {
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Names may contain alphanumeric characters, spaces, parentheses, and slashes.\n"
-            + "Phone numbers must contain at least one letter or digit and may include "
-            + "spaces, parentheses, and hyphens.\n"
-            + "Email addresses may be separated or annotated with spaces and parentheses.\n"
+            + "Name, phone, email, and address values may contain punctuation, but must not be blank, contain control "
+            + "characters, or exceed " + StringUtil.MAX_FIELD_LENGTH + " characters.\n"
+            + "Names and phone numbers need a letter or digit; emails need @ or UNKNOWN.\n"
+            + "Use double quotes around a value containing a field prefix after a space.\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "1234 5678 (HP) 1111-3333 (Office) "
             + PREFIX_EMAIL + "johndoe@example.com (Work) jane@example.com (Personal)";

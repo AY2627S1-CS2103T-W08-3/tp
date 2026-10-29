@@ -79,21 +79,23 @@ Format: `help`
 
 Adds a person to the address book.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]`
 
-If a name contains `/`, avoid placing a recognized field prefix such as `p/`, `e/`, or `a/` after a space within
-the name. The parser may interpret it as a separate field instead of part of the name. For example, `s/o` is safe,
-but `p/` within a name may be interpreted as the phone field.
+Names, phone numbers, email addresses, and postal addresses may contain punctuation.
+Values must not be blank, contain control characters, or exceed 255 characters.
+Names and phone numbers must contain a letter or digit; emails must contain `@` or be `UNKNOWN`.
+If a field value contains a prefix such as `p/`, `e/`, or `a/` after a space, wrap the entire value in double quotes.
+For example: `n/"ACME p/Research"`.
+If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
+indicator for unknown values and does not have any special properties in the stored details. The `add` command
+allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
+Remarks can be added with the optional `r/REMARK` field.
 
 For example, a phone number can be entered as:
 `1234 5678 (HP) 1111-3333 (Office)` or `UNKNOWN`.
 
 For example, email addresses can be entered as:
 `peter@example.com (Work) jane@example.com (Personal)`.
-
-If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
-indicator for unknown values and does not have any special properties in the stored details. The `add` command
-allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.
@@ -102,6 +104,7 @@ A person can have any number of tags, including zero.
 Examples:
 * `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/John Doe p/12345678 e/john@example.com a/311, Clementi Ave 2 r/Likes to swim.`
 
 ### Listing all persons: `list`
 
@@ -123,9 +126,8 @@ Edits an existing person in the address book.
 
 Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
 
-Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens.
-
-Email addresses may be separated or annotated with spaces and parentheses.
+Names, phone numbers, email addresses, and postal addresses may contain punctuation, subject to the same blank,
+control-character, and 255-character safeguards as `add`. Quote values containing field prefixes after a space.
 
 * Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, …​
 * At least one of the optional fields must be provided.

@@ -237,9 +237,14 @@ How the `add` command works:
 1. `LogicManager` passes the user input to `AddressBookParser`, which creates an
    `AddCommandParser` for the `add` command.
 2. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
-   that there is no non-empty preamble, and that non-tag prefixes are not repeated.
+   that there is no non-empty preamble, and that non-tag prefixes are not repeated. The tokenizer
+   ignores field-looking prefixes inside double-quoted values and rejects unmatched quotes.
 3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
-   classes validate their respective constraints. The parser also creates an empty `Remark`
+   classes validate their respective constraints. Name, phone, email, and address values allow
+   punctuation but must be non-blank, control-character-free, and at most 255 Unicode code points.
+   Names and phone numbers must contain a letter or digit, while emails must contain `@` or be
+   `UNKNOWN`.
+   The parser also creates an empty `Remark`
    because a newly added person has no remark, then creates an `AddCommand` containing the
    new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
    in a `ParseException` instead.
