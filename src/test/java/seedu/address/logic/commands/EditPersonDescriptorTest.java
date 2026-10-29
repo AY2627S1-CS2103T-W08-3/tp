@@ -18,6 +18,7 @@ import seedu.address.testutil.EditPersonDescriptorBuilder;
 
 public class EditPersonDescriptorTest {
 
+    // EP: Descriptor equality covers equal descriptors, null, another type, and one differing field at a time.
     @Test
     public void equals() {
         // same values -> returns true
@@ -52,11 +53,16 @@ public class EditPersonDescriptorTest {
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withAddress(VALID_ADDRESS_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
+        // EP: Remarks are independent descriptor fields and must affect equality.
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withRemark("Different remark").build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+
         // different tags -> returns false
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(DESC_AMY.equals(editedAmy));
     }
 
+    // EP: The empty descriptor is the boundary state for no fields being edited.
     @Test
     public void toStringMethod() {
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();

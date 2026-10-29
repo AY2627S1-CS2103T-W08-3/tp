@@ -12,19 +12,19 @@ import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
 /**
- * Displays all persons alphabetically by name, ignoring capitalization.
+ * Displays all persons lexicographically by name, ignoring capitalization.
  */
 public class SortCommand extends Command {
 
     public static final String COMMAND_WORD = "sort";
-    public static final String MESSAGE_SUCCESS = "Listed all persons alphabetically by name.";
+    public static final String MESSAGE_SUCCESS = "Listed all persons lexicographically by name.";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Lists all persons alphabetically by name, ignoring capitalization.\n"
-            + "Parameters: A-Z (ascending) or Z-A (descending)\n"
-            + "Example: " + COMMAND_WORD + " A-Z";
+            + ": Lists all persons lexicographically by name, ignoring capitalization.\n"
+            + "Parameters: asc (ascending) or desc (descending)\n"
+            + "Example: " + COMMAND_WORD + " asc";
 
     /**
-     * The alphabetical direction of the displayed list.
+     * The lexicographical direction of the displayed list.
      */
     public enum SortOrder {
         ASCENDING, DESCENDING
@@ -37,7 +37,7 @@ public class SortCommand extends Command {
     private final SortOrder sortOrder;
 
     /**
-     * Creates a command with the specified alphabetical direction.
+     * Creates a command with the specified lexicographical direction.
      *
      * @throws NullPointerException If {@code sortOrder} is null.
      */
