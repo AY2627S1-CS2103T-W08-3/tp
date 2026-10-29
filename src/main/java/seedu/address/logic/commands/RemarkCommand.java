@@ -53,7 +53,8 @@ public class RemarkCommand extends Command {
     public RemarkCommand(String targetUuid, Remark remark) {
         requireAllNonNull(targetUuid, remark);
         if (!targetUuid.matches(UUID_PREFIX_REGEX)) {
-            throw new IllegalArgumentException("Target UUID must contain 7 to 32 hexadecimal characters.");
+            throw new IllegalArgumentException(
+                    "Target UUID must contain 7 to 32 hexadecimal characters without the # prefix.");
         }
 
         this.targetUuid = targetUuid;
