@@ -255,15 +255,16 @@ How the `add` command works:
 
 ### Sort command
 
-The `sort` command displays all contacts alphabetically by name, ignoring capitalization.
-It requires exactly one direction: `sort A-Z` selects ascending order, while `sort Z-A`
+The `sort` command displays all contacts lexicographically by name, ignoring capitalization.
+It requires exactly one direction: `sort asc` selects ascending order, while `sort desc`
 selects descending order. Missing directions, unsupported values, and extra arguments
 produce a `ParseException` with usage instructions before the displayed list is changed.
 
 #### Implementation
 
 `AddressBookParser#parseCommand()` delegates sort arguments to `SortCommandParser#parse()`.
-The parser trims surrounding whitespace and creates a `SortCommand` with the corresponding
+The parser trims surrounding whitespace, normalizes direction arguments with `Locale.ROOT`,
+and creates a `SortCommand` with the corresponding
 `SortOrder` value, either `ASCENDING` or `DESCENDING`. The command stores this required,
 non-null direction in a final field.
 
@@ -273,7 +274,7 @@ uses the reversed comparator. The command then calls these model operations in o
 
 1. `Model#updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)` removes any existing filter
    so that all contacts are displayed.
-2. `Model#updatePersonListComparator(comparator)` applies the requested alphabetical order.
+2. `Model#updatePersonListComparator(comparator)` applies the requested lexicographical order.
 
 `ModelManager` maintains a `FilteredList<Person>` over the address book's person list and
 a `SortedList<Person>` over that filtered list. `ModelManager#getFilteredPersonList()`
@@ -287,11 +288,11 @@ application restores the saved order because the comparator is not persisted.
 
 #### Sequence diagram
 
-The following diagram illustrates the successful execution of `sort A-Z`.
+The following diagram illustrates the successful execution of `sort asc`.
 The object named `s` is the created `SortCommand`, `r` is its `CommandResult`, and `m`
 is the `ModelManager` supplied through the `Model` interface.
 
-![Sequence diagram for the successful sort A-Z command](images/SortSequenceDiagram.png)
+![Sequence diagram for the successful sort asc command](images/SortSequenceDiagram.png)
 
 The editable PlantUML source is [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
 It uses the shared [diagram style](diagrams/style.puml).
@@ -299,7 +300,7 @@ It uses the shared [diagram style](diagrams/style.puml).
 The diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
 Null checks, contact-count retrieval, assertions, logging, and subsequent storage
 interactions are omitted to keep the diagram focused on parsing and sorting.
-`sort Z-A` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
+`sort desc` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
 
 #### Defensive checks
 
