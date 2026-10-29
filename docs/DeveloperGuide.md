@@ -388,10 +388,6 @@ Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so 
   * Pros: Simpler.
   * Cons: The list order changes, and in a long list the restored person is harder to find.
 
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
-
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -437,8 +433,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
 | `* *`    | insurance agent | restore a client I deleted by mistake                            | recover their details without re-entering them                              |
 | `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
-
-*{More to be added}*
 
 ### Use cases
 
@@ -609,8 +603,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Steps 3b1-3b2 are repeated until the name is unique.
       Use case resumes at step 4.
-
-*{More to be added}*
 
 ### Non-Functional Requirements
 
