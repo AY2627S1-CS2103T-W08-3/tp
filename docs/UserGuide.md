@@ -59,8 +59,10 @@ It is built for agents who handle large client portfolios and many active leads.
 * Items followed by `…`​ can appear zero or more times.<br>
   For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
 
-* Parameters can be in any order.<br>
+* Parameters with a prefix (such as `n/` or `p/`) can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+  Parameters without a prefix must come first: the `SHORT_UUID` for `edit`, `remark` and `delete`, and the name keywords for `find`.<br>
+  For example, `remark 1a2b3c4 r/Likes to swim.` works, but `remark r/Likes to swim. 1a2b3c4` does not.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
@@ -189,6 +191,7 @@ Finds persons whose names contain any given name keyword or whose tags match any
 Format: `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`
 
 Supply at least one name keyword or tag. Put name keywords before any `t/` prefixes.
+Anything typed after a `t/` is read as part of that tag, so `find t/friends Alice` looks for the tag `friends Alice` and fails with `Tag names should be alphanumeric`. Type `find Alice t/friends` instead.
 
 * The search is case-insensitive; for example, `hans` matches `Hans`.
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
