@@ -45,6 +45,18 @@ public class StringUtilTest {
         assertTrue(StringUtil.isNonZeroUnsignedInteger("10"));
     }
 
+    @Test
+    public void isValidFieldValue_validAndInvalidInputs_correctResult() {
+        assertTrue(StringUtil.isValidFieldValue("Punctuation, quotes \"and\" symbols!"));
+        assertFalse(StringUtil.isValidFieldValue(""));
+        assertFalse(StringUtil.isValidFieldValue("a".repeat(StringUtil.MAX_FIELD_LENGTH + 1)));
+        assertFalse(StringUtil.isValidFieldValue("line\nbreak"));
+        assertFalse(StringUtil.isValidFieldValue(" leading"));
+        assertFalse(StringUtil.isValidFieldValue("trailing "));
+        assertFalse(StringUtil.isValidFieldValue("\u00A0leading"));
+        assertFalse(StringUtil.isValidFieldValue("trailing\u00A0"));
+    }
+
 
     //---------------- Tests for containsWordIgnoreCase --------------------------------------
 

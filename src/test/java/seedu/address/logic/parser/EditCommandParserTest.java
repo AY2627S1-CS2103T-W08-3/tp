@@ -23,6 +23,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
@@ -125,6 +126,22 @@ public class EditCommandParserTest {
         EditCommand expectedCommand = new EditCommand(targetUuid, descriptor);
 
         assertParseSuccess(parser, userInput, expectedCommand);
+    }
+
+    @Test
+    public void parse_punctuationInFields_success() {
+        String name = "ACME p/Research";
+        String phone = "+65 (123)#45";
+        String email = "person+tag@example.com?backup";
+        String address = "10, Main St. #2/3";
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(name).withPhone(phone)
+                .withEmail(email).withAddress(address).build();
+        String targetUuid = "aaaaaaa";
+        String userInput = targetUuid + " " + PREFIX_NAME + "\"" + name + "\" "
+                + PREFIX_PHONE + "\"" + phone + "\" " + PREFIX_EMAIL + email + " " + PREFIX_ADDRESS + "\""
+                + address + "\"";
+
+        assertParseSuccess(parser, userInput, new EditCommand(targetUuid, descriptor));
     }
 
     @Test

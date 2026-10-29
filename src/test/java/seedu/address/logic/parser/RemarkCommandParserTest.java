@@ -43,6 +43,14 @@ public class RemarkCommandParserTest {
     }
 
     @Test
+    public void parse_remarkContainingQuotes_preservesQuotes() {
+        assertParseSuccess(parser, "aaaaaaa " + PREFIX_REMARK + "Wants a 27\" monitor",
+                new RemarkCommand("aaaaaaa", new Remark("Wants a 27\" monitor")));
+        assertParseSuccess(parser, "aaaaaaa " + PREFIX_REMARK + "\"VIP\"",
+                new RemarkCommand("aaaaaaa", new Remark("\"VIP\"")));
+    }
+
+    @Test
     public void parse_missingCompulsoryField_failure() {
         String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE);
 

@@ -3,21 +3,16 @@ package seedu.address.model.person;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a Person's name in the address book.
  * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
  */
 public class Name {
 
-    public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters, spaces, parentheses, and slashes, "
-            + "and should not be blank";
-
-    /*
-     * The first character of the name must not be a whitespace,
-     * otherwise " " (a blank string) becomes a valid input.
-     */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} ()/]*";
+    public static final String MESSAGE_CONSTRAINTS = "Names must contain at least one letter or digit, must not be "
+            + "blank, contain control characters, or exceed " + StringUtil.MAX_FIELD_LENGTH + " characters";
 
     public final String fullName;
 
@@ -36,7 +31,7 @@ public class Name {
      * Returns true if a given string is a valid name.
      */
     public static boolean isValidName(String test) {
-        return test.matches(VALIDATION_REGEX);
+        return StringUtil.isValidFieldValue(test) && StringUtil.containsLetterOrDigit(test);
     }
 
 
