@@ -176,6 +176,16 @@ public class EditCommandTest {
     }
 
     @Test
+    public void execute_duplicateNameWithDifferentSpacing_failure() {
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(personToEdit).withName("Alice  Pauline").build();
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName("Alice  Pauline").build();
+        EditCommand editCommand = new EditCommand(personToEdit.getShortUuid(), descriptor);
+
+        assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
+    }
+
+    @Test
     public void execute_duplicatePersonFilteredList_failure() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
 

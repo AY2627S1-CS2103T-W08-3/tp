@@ -45,6 +45,14 @@ public class PersonTest {
         Person editedBob = new PersonBuilder(BOB).withName(VALID_NAME_BOB.toLowerCase()).build();
         assertTrue(BOB.isSamePerson(editedBob));
 
+        // names differing only in internal spacing belong to the same identity partition
+        editedBob = new PersonBuilder(BOB).withName("Bob  Choo").build();
+        assertTrue(BOB.isSamePerson(editedBob));
+
+        // Boundary value: removing all blank spaces also makes a joined name equivalent
+        editedBob = new PersonBuilder(BOB).withName("BobChoo").build();
+        assertTrue(BOB.isSamePerson(editedBob));
+
         // punctuation changes the name, all other attributes same -> returns false
         String nameWithPunctuation = VALID_NAME_BOB + "!";
         editedBob = new PersonBuilder(BOB).withName(nameWithPunctuation).build();

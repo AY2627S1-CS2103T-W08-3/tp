@@ -98,6 +98,15 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void add_personWithNameDifferingOnlyInSpacing_throwsDuplicatePersonException() {
+        Person personWithNormalSpacing = new PersonBuilder().withName("John Tan").build();
+        Person personWithExtraSpacing = new PersonBuilder().withName("John  Tan").build();
+        uniquePersonList.add(personWithNormalSpacing);
+
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.add(personWithExtraSpacing));
+    }
+
+    @Test
     public void setPerson_nullTargetPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniquePersonList.setPerson(null, ALICE));
     }

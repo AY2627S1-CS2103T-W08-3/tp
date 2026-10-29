@@ -5,6 +5,7 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -108,7 +109,7 @@ public class Person {
     }
 
     /**
-     * Returns true if both persons have the same name, ignoring letter case.
+     * Returns true if both persons have the same name, ignoring letter case and blank spaces.
      * This defines a weaker notion of equality between two persons.
      */
     public boolean isSamePerson(Person otherPerson) {
@@ -117,7 +118,15 @@ public class Person {
         }
 
         return otherPerson != null
-                && otherPerson.getName().fullName.equalsIgnoreCase(getName().fullName);
+                && normalizeNameForIdentity(otherPerson.getName().fullName)
+                        .equals(normalizeNameForIdentity(getName().fullName));
+    }
+
+    /**
+     * Returns a name representation suitable for duplicate identity checks.
+     */
+    private static String normalizeNameForIdentity(String name) {
+        return name.replaceAll("\\s", "").toLowerCase(Locale.ROOT);
     }
 
     /**

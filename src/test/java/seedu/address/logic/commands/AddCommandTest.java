@@ -55,6 +55,18 @@ public class AddCommandTest {
     }
 
     @Test
+    public void execute_duplicateNameWithDifferentSpacing_throwsCommandException() {
+        ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
+        Person existingPerson = new PersonBuilder().withName("John Tan").build();
+        Person personToAdd = new PersonBuilder().withName("John  Tan").build();
+        model.addPerson(existingPerson);
+
+        AddCommand addCommand = new AddCommand(personToAdd);
+
+        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_PERSON, () -> addCommand.execute(model));
+    }
+
+    @Test
     public void execute_duplicateUnknownName_addsPerson() throws Exception {
         ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
         Person existingPerson = new PersonBuilder().withName("UNKNOWN").withPhone("11111111").build();

@@ -53,17 +53,11 @@ public class AddCommandIntegrationTest {
     }
 
     @Test
-    public void execute_extraSpacesInName_addsPersonWithWarning() {
-        Person existingPerson = model.getAddressBook().getPersonList().get(0);
+    public void execute_extraSpacesInName_duplicate() {
         Person personWithExtraSpace = new PersonBuilder().withName("Alice  Pauline").build();
 
-        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.addPerson(personWithExtraSpace);
-        String expectedMessage = String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(personWithExtraSpace))
-                + String.format(Messages.MESSAGE_SIMILAR_NAME_WARNING_FORMAT,
-                        personWithExtraSpace.getName(), existingPerson.getName());
-
-        assertCommandSuccess(new AddCommand(personWithExtraSpace), model, expectedMessage, expectedModel);
+        assertCommandFailure(new AddCommand(personWithExtraSpace), model,
+                AddCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
     @Test
