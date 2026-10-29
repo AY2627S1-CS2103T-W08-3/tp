@@ -19,7 +19,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
 1. Copy the file to the folder you want to use as the _home folder_ for your AddressBook.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ClientConnect.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -79,18 +79,22 @@ Format: `help`
 
 Adds a person to the address book.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]`
 
-Names may contain alphanumeric characters, spaces, parentheses, and slashes. For example, `John s/o Peter`.
+Names, phone numbers, email addresses, and postal addresses may contain punctuation.
+Values must not be blank, contain control characters, or exceed 255 characters.
+Names and phone numbers must contain a letter or digit; emails must contain `@` or be `UNKNOWN`.
+If a field value contains a prefix such as `p/`, `e/`, or `a/` after a space, wrap the entire value in double quotes.
+For example: `n/"ACME p/Research"`.
+If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
+indicator for unknown values and does not have any special properties in the stored details. The `add` command
+allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
+Remarks can be added with the optional `r/REMARK` field.
 
-If a name contains `/`, avoid placing a recognized field prefix such as `p/`, `e/`, or `a/` after a space within
-the name. The parser may interpret it as a separate field instead of part of the name. For example, `s/o` is safe,
-but `p/` within a name may be interpreted as the phone field.
+For example, a phone number can be entered as:
+`1234 5678 (HP) 1111-3333 (Office)` or `UNKNOWN`.
 
-Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens. For example:
-`1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
-
-Email addresses may be separated or annotated with spaces and parentheses. For example:
+For example, email addresses can be entered as:
 `peter@example.com (Work) jane@example.com (Personal)`.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
@@ -100,6 +104,7 @@ A person can have any number of tags, including zero.
 Examples:
 * `add n/John Doe p/1234 5678 (HP) 1111-3333 (Office) e/johnd@example.com (Work) jane@example.com (Personal) a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/John Doe p/12345678 e/john@example.com a/311, Clementi Ave 2 r/Likes to swim.`
 
 ### Listing all persons: `list`
 
@@ -119,21 +124,22 @@ Format: `sort A-Z` or `sort Z-A`
 
 Edits an existing person in the address book.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
+Format: `edit SHORT_UUID [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`
 
-Phone numbers must contain at least one letter or digit and may include spaces, parentheses, and hyphens.
+Names, phone numbers, email addresses, and postal addresses may contain punctuation, subject to the same blank,
+control-character, and 255-character safeguards as `add`. Quote values containing field prefixes after a space.
 
-Email addresses may be separated or annotated with spaces and parentheses.
-
-* Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, …​
+* Edits the person whose short UUID matches `SHORT_UUID`. The short UUID is the 7-character code shown as `#xxxxxxx` on the person's card and is case-insensitive.
+* The UUID is matched against every person in the address book, not just the currently displayed list.
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
+* To update or clear a remark, provide `r/REMARK` or `r/` respectively.
 * When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
 * To remove all of a person's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+*  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
+*  `edit 1a2b3c4 n/Betsy Crower r/Likes to swim.` Updates the name and remark of that person.
 
 ### Adding or removing a remark: `remark`
 
@@ -145,6 +151,7 @@ Format: `remark SHORT_UUID r/REMARK`
 * The short UUID is the 7-character code shown as `#xxxxxxx` on the person's card.
 * `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
 * The match is made against every person in the address book, not just the currently displayed list.
+* The `r/` prefix is compulsory. Omitting it results in an invalid command.
 * To remove an existing remark, enter `r/` without any text after it.
 
 Examples:
@@ -186,14 +193,15 @@ Supply at least one name keyword or tag. Put name keywords before any `t/` prefi
 * Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find Alice Richards` returns `Alice Davidson` and `Alison Richards`, if present,
-  because either `Alice` or `Richards` matches. It also returns `Alice Richards`, if present.
+* `find Irfan` and `find irfan` return the same results because search is case-insensitive.
+  With the sample data, both return only `Irfan Ibrahim`.
+  After adding a person named `Irfan Mohammed`, both return `Irfan Ibrahim` and `Irfan Mohammed`, as shown below.<br>
+  ![Results for 'find irfan' after adding Irfan Mohammed](images/findIrfanResult.png)
+* `find Irfan Ibrahim` returns `Irfan Mohammed` and `Ismail Ibrahim`, if present,
+  because either `Irfan` or `Ibrahim` matches. It also returns `Irfan Ibrahim`, if present.
 * `find t/friends` returns persons tagged `friends`.
 * `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
-* `find Alice t/friends` returns persons whose names contain `Alice` or who have the `friends` tag.
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find Irfan t/friends` returns persons whose names contain `Irfan` or who have the `friends` tag.
 
 ### Deleting a person: `delete`
 
@@ -243,7 +251,7 @@ Examples:
 
 Errors:
 * If there is no deleted person to restore, the command fails with `No deleted persons to restore.`
-* If a person with the same name has been added since the delete, the command fails and nothing is restored. Rename that person with `edit`, then run `undelete` again.
+* If a person with the same name has been added since the delete, the command fails with `Cannot undelete NAME: a person with the same name already exists.` and nothing is restored, because two persons cannot share a name. Rename that person with `edit`, then run `undelete` again.
 
 ### Exiting the program: `exit`
 

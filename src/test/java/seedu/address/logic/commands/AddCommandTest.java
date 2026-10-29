@@ -19,8 +19,10 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
@@ -50,6 +52,30 @@ public class AddCommandTest {
         ModelStub modelStub = new ModelStubWithPerson(validPerson);
 
         assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_PERSON, () -> addCommand.execute(modelStub));
+    }
+
+    @Test
+    public void execute_duplicateUnknownName_addsPerson() throws Exception {
+        ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
+        Person existingPerson = new PersonBuilder().withName("UNKNOWN").withPhone("11111111").build();
+        Person personToAdd = new PersonBuilder().withName("UNKNOWN").withPhone("22222222").build();
+        model.addPerson(existingPerson);
+
+        new AddCommand(personToAdd).execute(model);
+
+        assertEquals(List.of(existingPerson, personToAdd), model.getAddressBook().getPersonList());
+    }
+
+    @Test
+    public void execute_lowercaseUnknownName_duplicate() {
+        ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
+        Person existingPerson = new PersonBuilder().withName("UNKNOWN").build();
+        Person personToAdd = new PersonBuilder().withName("unknown").build();
+        model.addPerson(existingPerson);
+
+        AddCommand addCommand = new AddCommand(personToAdd);
+
+        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_PERSON, () -> addCommand.execute(model));
     }
 
     @Test
