@@ -7,7 +7,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.util.Duration;
 import seedu.address.model.person.Person;
@@ -57,16 +56,15 @@ public class PersonCard extends UiPart<Region> {
         super(FXML);
         this.person = person;
         id.setText(displayedIndex + ". ");
-        configureValueLabel(name, person.getName().fullName);
+        configureValueLabel(name, person.getName().fullName, false);
         name.setMinWidth(0);
-        HBox.setHgrow(name, Priority.ALWAYS);
         uuid.setText("#" + person.getShortUuid());
         uuid.setMinWidth(Region.USE_PREF_SIZE);
         uuid.setMaxWidth(Region.USE_PREF_SIZE);
-        configureValueLabel(phone, person.getPhone().value);
-        configureValueLabel(address, person.getAddress().value);
-        configureValueLabel(email, person.getEmail().value);
-        configureValueLabel(remark, person.getRemark().value);
+        configureValueLabel(phone, person.getPhone().value, true);
+        configureValueLabel(address, person.getAddress().value, true);
+        configureValueLabel(email, person.getEmail().value, true);
+        configureValueLabel(remark, person.getRemark().value, true);
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
@@ -75,10 +73,12 @@ public class PersonCard extends UiPart<Region> {
     /**
      * Configures a field label to display its complete value across multiple lines and on hover.
      */
-    private static void configureValueLabel(Label label, String value) {
+    private static void configureValueLabel(Label label, String value, boolean fillsAvailableWidth) {
         label.setText(value);
         label.setWrapText(true);
-        label.setMaxWidth(Double.MAX_VALUE);
+        if (fillsAvailableWidth) {
+            label.setMaxWidth(Double.MAX_VALUE);
+        }
 
         if (!value.isEmpty()) {
             Tooltip tooltip = new Tooltip(value);
