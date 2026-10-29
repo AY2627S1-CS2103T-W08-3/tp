@@ -42,6 +42,9 @@ public class Email {
      * Returns true if a given string is a valid email.
      */
     public static boolean isValidEmail(String test) {
+        if (test.equalsIgnoreCase("UNKNOWN")) {
+            return true;
+        }
         if (!test.matches(ALLOWED_CHARACTERS_REGEX) || !test.equals(test.trim())) {
             return false;
         }

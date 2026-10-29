@@ -13,6 +13,7 @@ import seedu.address.model.person.exceptions.PersonNotFoundException;
 
 /**
  * A list of persons that enforces uniqueness between its elements and does not allow nulls.
+ * Persons whose name is exactly {@code UNKNOWN} are exempt from the uniqueness check.
  * A person is considered unique by comparing using {@code Person#isSamePerson(Person)}. As such, adding and updating of
  * persons uses Person#isSamePerson(Person) for equality so as to ensure that the person being added or updated is
  * unique in terms of identity in the UniquePersonList. However, the removal of a person uses Person#equals(Object) so
@@ -38,11 +39,11 @@ public class UniquePersonList implements Iterable<Person> {
 
     /**
      * Adds a person to the list.
-     * The person must not already exist in the list.
+     * The person must not already exist in the list unless the person's name is {@code UNKNOWN}.
      */
     public void add(Person toAdd) {
         requireNonNull(toAdd);
-        if (contains(toAdd)) {
+        if (contains(toAdd) && !isUnknownName(toAdd)) {
             throw new DuplicatePersonException();
         }
         internalList.add(toAdd);
@@ -50,11 +51,12 @@ public class UniquePersonList implements Iterable<Person> {
 
     /**
      * Inserts a person into the list at {@code index}, shifting later persons back by one.
-     * The person must not already exist in the list, and {@code index} must be from 0 to the list size.
+     * The person must not already exist in the list unless the person's name is {@code UNKNOWN}, and {@code index}
+     * must be from 0 to the list size.
      */
     public void add(int index, Person toAdd) {
         requireNonNull(toAdd);
-        if (contains(toAdd)) {
+        if (contains(toAdd) && !isUnknownName(toAdd)) {
             throw new DuplicatePersonException();
         }
         internalList.add(index, toAdd);
@@ -107,6 +109,10 @@ public class UniquePersonList implements Iterable<Person> {
         }
 
         internalList.setAll(persons);
+    }
+
+    private static boolean isUnknownName(Person person) {
+        return "UNKNOWN".equals(person.getName().fullName);
     }
 
     /**
