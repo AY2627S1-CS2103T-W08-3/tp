@@ -141,6 +141,26 @@ Examples:
 *  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
 *  `edit 1a2b3c4 n/Betsy Crower r/Likes to swim.` Updates the name and remark of that person.
 
+### Name typo warnings
+
+When adding a person or editing a person's name, ClientConnect compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match. The warning is shown after the usual success message:
+
+```
+Warning: "Jon Smith" is very similar to existing entry "John Smith".
+```
+
+The comparison:
+
+* ignores leading and trailing spaces, repeated internal spaces, and letter case;
+* preserves punctuation when comparing names;
+* requires at least three characters and uses a stricter similarity requirement for short names;
+* checks only the person's name, not phone numbers, email addresses, addresses, remarks, or tags; and
+* does not warn for a case-only match, an exact duplicate, or the person currently being edited.
+
+Additional or misplaced spaces are flagged separately. For example, `John  Smith` may warn about the existing `John Smith`.
+
+The warning is advisory only. The add or edit command is still completed and the input is saved; ClientConnect does not ask for confirmation. If the warning identifies the intended existing person, review the result and correct it with another command if necessary. If the new entry is intentional, no further action is required.
+
 ### Adding or removing a remark: `remark`
 
 Adds or updates a remark for an existing person in the address book. The existing remark will be overwritten.
@@ -157,21 +177,6 @@ Format: `remark SHORT_UUID r/REMARK`
 Examples:
 * `remark 1a2b3c4 r/Likes to swim.` adds a remark to the contact whose card shows `#1a2b3c4`.
 * `remark 1a2b3c4 r/` removes the remark from the contact whose card shows `#1a2b3c4`.
-### Name typo warnings
-
-When adding a person or editing a person's name, AddressBook compares the new name with existing names and may display a non-blocking warning when it finds a likely typo. For example, entering `Jon Smith` when `John Smith` already exists produces a warning naming `John Smith` as a possible match.
-
-The comparison:
-
-* ignores leading and trailing spaces, repeated internal spaces, and letter case;
-* preserves punctuation when comparing names;
-* requires at least three characters and uses a stricter similarity requirement for short names;
-* checks only the person's name, not phone numbers, email addresses, addresses, remarks, or tags; and
-* does not warn for a case-only match, an exact duplicate, or the person currently being edited.
-
-Additional or misplaced spaces are flagged separately. For example, `John  Smith` may warn about the existing `John Smith`.
-
-The warning is advisory only. The add or edit command is still completed and the input is saved; AddressBook does not ask for confirmation. If the warning identifies the intended existing person, review the result and correct it with another command if necessary. If the new entry is intentional, no further action is required.
 
 ### Locating persons by name or tag: `find`
 
@@ -271,10 +276,6 @@ AddressBook data is saved automatically as a JSON file `[JAR file location]/data
 If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
-
-### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
