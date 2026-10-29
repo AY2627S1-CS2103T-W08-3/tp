@@ -28,7 +28,7 @@ activate Model
 Model --> AddCommand : duplicate status
 deactivate Model
 
-alt duplicate person
+alt duplicate name (other than UNKNOWN)
     AddCommand --> LogicManager : throws CommandException
 else new person
     AddCommand --> LogicManager : person is new
