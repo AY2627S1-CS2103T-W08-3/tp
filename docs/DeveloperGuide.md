@@ -643,8 +643,8 @@ testers are expected to do more *exploratory* testing.
 
    1. Download the JAR file and copy it into an empty folder.
 
-   1. Double-click the JAR file.<br>
-      Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.
+   1. Double-click the JAR file. If double-clicking does not open the app (e.g. on some macOS or Linux setups), open a terminal in that folder and run `java -jar ClientConnect.jar` instead.<br>
+      Expected: The GUI opens with six sample contacts (Alex Yeoh, Bernice Yu, Charlotte Oliveiro, David Li, Irfan Ibrahim and Roy Balakrishnan). The window size may not be optimal.
 
 1. Saving window preferences
 
@@ -653,7 +653,146 @@ testers are expected to do more *exploratory* testing.
    1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
 
-1. _{ more test cases …​ }_
+1. Shutting down
+
+   1. Test case: `exit`<br>
+      Expected: The window closes and the app shuts down.
+
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The test cases below assume the app starts with the sample contacts. To reset to the sample contacts, close the app and delete the `data` folder next to the JAR file. Short UUIDs are generated randomly, so read them from the `#xxxxxxx` label on each contact's card.
+
+</div>
+
+### Adding a person
+
+1. Adding a person with valid details
+
+   1. Test case: `add n/John Doe p/98765432 e/johnd@example.com a/311, Clementi Ave 2, #02-25 t/friends`<br>
+      Expected: John Doe is added to the end of the list. The status message starts with `New person added: John Doe; Phone: 98765432; ...`.
+
+   1. Test case: `add n/Mary Tan p/93333333 e/mary@example.com a/Blk 1 r/Prefers email`<br>
+      Expected: Mary Tan is added, and her card shows the remark `Prefers email`.
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com a/"Blk 3 t/b"`<br>
+      Expected: Kim Lee is added with the address `Blk 3 t/b`. The double quotes stop `t/` in the address from being read as a tag.
+
+1. Adding a person whose name is already taken or similar to an existing name
+
+   1. Prerequisites: John Doe has been added as above.
+
+   1. Test case: `add n/john doe p/91111111 e/x@example.com a/Somewhere`<br>
+      Expected: No person is added, as names are compared ignoring case. The status message shows `This name already exists in the address book. Add more details to the name.`
+
+   1. Test case: `add n/Jon Doe p/92222222 e/jon@example.com a/Elsewhere`<br>
+      Expected: Jon Doe is added. The status message also shows `Warning: "Jon Doe" is very similar to existing entry "John Doe".`
+
+   1. Test case: `add n/UNKNOWN p/UNKNOWN e/UNKNOWN a/UNKNOWN`, entered twice<br>
+      Expected: Both entries are added. `UNKNOWN` is a placeholder for missing information, so it is not treated as a duplicate name.
+
+1. Adding a person with invalid details
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kimlee.example.com a/Blk 2`<br>
+      Expected: No person is added. The status message shows `Invalid email address: @ is required unless the value is UNKNOWN`, followed by the command usage.
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com a/Blk 2 t/high risk`<br>
+      Expected: No person is added. The status message shows `Invalid tag`, followed by the command usage. Tags must be alphanumeric.
+
+   1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com e/kim2@example.com a/Blk 2`<br>
+      Expected: No person is added. The status message shows `Multiple values specified for the following single-valued field(s): e/`.
+
+   1. Other incorrect add commands to try: `add`, `add n/Kim Lee p/94444444 a/Blk 2` (missing email)<br>
+      Expected: No person is added, and an error message with the command usage is shown.
+
+### Editing a person
+
+1. Editing a person by short UUID
+
+   1. Prerequisites: Note the short UUIDs of Alex Yeoh and Bernice Yu.
+
+   1. Test case: `edit <Alex's short UUID> p/91234567 e/alex.new@example.com`<br>
+      Expected: Alex's phone and email are updated, and the other fields are unchanged. The status message starts with `Edited person: Alex Yeoh; Phone: 91234567; Email: alex.new@example.com; ...`.
+
+   1. Test case: `edit <Alex's short UUID> t/`<br>
+      Expected: All of Alex's tags are removed.
+
+   1. Test case: `edit <Alex's short UUID> r/Renewal due in March`<br>
+      Expected: Alex's card shows the remark `Renewal due in March`.
+
+   1. Test case: `edit <Alex's short UUID> n/Bernice Yu`<br>
+      Expected: Alex is not edited. The status message shows `This person already exists in the address book.`
+
+   1. Test case: `edit <Alex's short UUID>`<br>
+      Expected: Alex is not edited. The status message shows `At least one field to edit must be provided.`
+
+   1. Test case: `edit 9999999 p/91234567`<br>
+      Expected: No person is edited. The status message shows `No person with UUID: 9999999`.
+
+   1. Test case: `edit 1 p/91234567`<br>
+      Expected: No person is edited. The status message shows `Invalid UUID prefix. It must contain 7 to 32 hexadecimal characters, ignoring dashes.`, followed by the command usage.
+
+### Finding persons
+
+1. Finding persons by name or tag
+
+   1. Test case: `find alex`<br>
+      Expected: Only Alex Yeoh is listed. The status message shows `1 person(s) listed!`.
+
+   1. Test case: `find ber yu`<br>
+      Expected: Only Bernice Yu is listed, as names match partial keywords.
+
+   1. Test case: `find t/colleagues`<br>
+      Expected: Bernice Yu and Roy Balakrishnan are listed. The status message shows `2 person(s) listed!`.
+
+   1. Test case: `find alex t/family`<br>
+      Expected: Alex Yeoh and David Li are listed, as name keywords and tags are combined with OR.
+
+   1. Test case: `find zzz`<br>
+      Expected: No persons are listed. The status message shows `0 person(s) listed!`.
+
+   1. Test case: `find`<br>
+      Expected: The list is unchanged. The status message shows an invalid command format error with `Specify at least part of a name or a tag.`
+
+   1. Other incorrect find commands to try: `find t/` (empty tag), `find t/high risk` (tag with a space)<br>
+      Expected: The list is unchanged, and an error message is shown.
+
+### Sorting persons
+
+1. Sorting the list by name
+
+   1. Test case: `sort Z-A`<br>
+      Expected: All persons are listed in reverse alphabetical order, ignoring case (with only the sample contacts, Roy Balakrishnan first and Alex Yeoh last). The status message shows `Listed all persons alphabetically by name.`
+
+   1. Test case: `sort A-Z`<br>
+      Expected: All persons are listed in alphabetical order (Alex Yeoh first).
+
+   1. Test case: `sort Z-A`, then `find t/colleagues`<br>
+      Expected: Roy Balakrishnan is listed before Bernice Yu, as the sort order still applies to search results.
+
+   1. Test case: `sort Z-A`, then `exit`, then relaunch the app<br>
+      Expected: The list is back in its original order, as the sort order is not saved.
+
+   1. Incorrect sort commands to try: `sort`, `sort a-z` (the direction is case-sensitive), `sort A-Z extra`<br>
+      Expected: The list order is unchanged. The status message shows an invalid command format error with the sort usage.
+
+### Adding or removing a remark
+
+1. Changing a remark by short UUID
+
+   1. Prerequisites: Note the short UUID of Bernice Yu.
+
+   1. Test case: `remark <Bernice's short UUID> r/Likes to swim.`<br>
+      Expected: Bernice's card shows the remark `Likes to swim.` The status message starts with `Added remark to Person: Bernice Yu; ...`.
+
+   1. Test case: `remark <Bernice's short UUID> r/`<br>
+      Expected: Bernice's remark is removed. The status message starts with `Removed remark from Person: Bernice Yu; ...`.
+
+   1. Test case: `remark <Bernice's short UUID>` (no `r/`)<br>
+      Expected: The remark is unchanged. The status message shows `Missing remark prefix. Add r/ before the remark, or use r/ to remove the existing remark.`, followed by the command usage.
+
+   1. Test case: `remark 9999999 r/Hello`<br>
+      Expected: No remark is changed. The status message shows `No person with UUID: 9999999`.
+
+   1. Test case: `remark #<Bernice's short UUID> r/Hello` (with the `#` from the card)<br>
+      Expected: No remark is changed. The status message shows that the UUID must be 7 to 32 hexadecimal characters, without the `#` prefix.
 
 ### Deleting a person
 
@@ -685,8 +824,6 @@ testers are expected to do more *exploratory* testing.
 
    1. Test case: `delete 1a2b3c4d-2000-0000-0000-000000000000` (the full UUID, with dashes)<br>
       Expected: The second person is deleted.
-
-1. _{ more test cases …​ }_
 
 ### Restoring a deleted person
 
@@ -726,6 +863,10 @@ testers are expected to do more *exploratory* testing.
    1. Test case: Close the app. In `data/addressbook.json`, change one person's `uuid` to `not-a-uuid`. Relaunch the app.<br>
       Expected: The app starts with an empty address book instead of crashing. The log shows that the data file could not be loaded.
 
-   1. _{Explain how to simulate other missing or corrupted data files and state the expected behavior.}_
+   1. Test case: Close the app. Delete `data/addressbook.json`. Relaunch the app.<br>
+      Expected: The app starts with the six sample contacts, and creates a new data file when the data is next saved.
 
-1. _{ more test cases …​ }_
+1. Saving changes automatically
+
+   1. Test case: `add n/Save Test p/90000000 e/save@example.com a/Blk 9`, then `exit`, then relaunch the app.<br>
+      Expected: Save Test is still in the list.
