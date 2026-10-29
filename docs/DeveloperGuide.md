@@ -345,6 +345,11 @@ Null checks, contact-count retrieval, assertions, logging, and subsequent storag
 interactions are omitted to keep the diagram focused on parsing and sorting.
 `sort desc` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
 
+The destruction markers indicate when the temporary `SortCommandParser` and `SortCommand`
+instances become eligible for garbage collection, following the course's UML convention.
+They do not indicate when Java actually reclaims the memory. `CommandResult` remains alive
+because `LogicManager#execute()` returns it to its caller.
+
 #### Defensive checks
 
 `SortCommand` rejects a null sort order during construction
