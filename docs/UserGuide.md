@@ -19,7 +19,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
 1. Copy the file to the folder you want to use as the _home folder_ for your AddressBook.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar ClientConnect.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -86,12 +86,16 @@ Values must not be blank, contain control characters, or exceed 255 characters.
 Names and phone numbers must contain a letter or digit; emails must contain `@` or be `UNKNOWN`.
 If a field value contains a prefix such as `p/`, `e/`, or `a/` after a space, wrap the entire value in double quotes.
 For example: `n/"ACME p/Research"`.
-If information currently unknown, feel free to type `UNKNOWN` into the field.
+If information is currently unknown, type `UNKNOWN` into the field. `UNKNOWN` is currently just a standard
+indicator for unknown values and does not have any special properties in the stored details. The `add` command
+allows multiple entries whose name is exactly `UNKNOWN`; other names must remain unique.
 Remarks can be added with the optional `r/REMARK` field.
 
-For example, a phone number can be entered as `1234 5678 (HP) 1111-3333 (Office)` or `Unknown`.
+For example, a phone number can be entered as:
+`1234 5678 (HP) 1111-3333 (Office)` or `UNKNOWN`.
 
-For example, email addresses can be entered as `peter@example.com (Work) jane@example.com (Personal)`.
+For example, email addresses can be entered as:
+`peter@example.com (Work) jane@example.com (Personal)`.
 
 <div markdown="span" class="alert alert-primary">:bulb: **Tip:**
 A person can have any number of tags, including zero.
@@ -186,14 +190,15 @@ Supply at least one name keyword or tag. Put name keywords before any `t/` prefi
 * Name keywords and tags are also combined using OR. A person matching any term appears once in the results.
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find Alice Richards` returns `Alice Davidson` and `Alison Richards`, if present,
-  because either `Alice` or `Richards` matches. It also returns `Alice Richards`, if present.
+* `find Irfan` and `find irfan` return the same results because search is case-insensitive.
+  With the sample data, both return only `Irfan Ibrahim`.
+  After adding a person named `Irfan Mohammed`, both return `Irfan Ibrahim` and `Irfan Mohammed`, as shown below.<br>
+  ![Results for 'find irfan' after adding Irfan Mohammed](images/findIrfanResult.png)
+* `find Irfan Ibrahim` returns `Irfan Mohammed` and `Ismail Ibrahim`, if present,
+  because either `Irfan` or `Ibrahim` matches. It also returns `Irfan Ibrahim`, if present.
 * `find t/friends` returns persons tagged `friends`.
 * `find t/friends t/colleagues` returns persons tagged either `friends` or `colleagues`.
-* `find Alice t/friends` returns persons whose names contain `Alice` or who have the `friends` tag.
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find Irfan t/friends` returns persons whose names contain `Irfan` or who have the `friends` tag.
 
 ### Deleting a person: `delete`
 

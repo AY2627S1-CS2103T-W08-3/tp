@@ -10,7 +10,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_REMARK;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import seedu.address.logic.commands.AddCommand;
@@ -62,57 +61,83 @@ public class AddCommandParser implements Parser<AddCommand> {
         return new AddCommand(person);
     }
 
-    private static String getFieldValue(ArgumentMultimap argumentMultimap, Prefix prefix, String fieldMessage)
-            throws ParseException {
-        Optional<String> fieldValue = argumentMultimap.getValue(prefix);
-        if (!fieldValue.isPresent()) {
-            throw createInvalidFieldException(fieldMessage, null);
-        }
-        return fieldValue.get();
-    }
-
-    private static Name parseName(String value) throws ParseException {
+    /**
+     * Parses the name field and reports the field that caused an error.
+     */
+    private static Name parseName(String name) throws ParseException {
         try {
-            return ParserUtil.parseName(value);
+            return ParserUtil.parseName(name);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_NAME_FIELD, exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_NAME_FIELD, name.isEmpty(), exception);
         }
     }
 
-    private static Phone parsePhone(String value) throws ParseException {
+    /**
+     * Parses the phone field and reports the field that caused an error.
+     */
+    private static Phone parsePhone(String phone) throws ParseException {
         try {
-            return ParserUtil.parsePhone(value);
+            return ParserUtil.parsePhone(phone);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, phone.isEmpty(), exception);
         }
     }
 
-    private static Email parseEmail(String value) throws ParseException {
+    /**
+     * Parses the email field and reports the field that caused an error.
+     */
+    private static Email parseEmail(String email) throws ParseException {
         try {
-            return ParserUtil.parseEmail(value);
+            return ParserUtil.parseEmail(email);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, email.isEmpty(), exception);
         }
     }
 
-    private static Address parseAddress(String value) throws ParseException {
+    /**
+     * Parses the address field and reports the field that caused an error.
+     */
+    private static Address parseAddress(String address) throws ParseException {
         try {
-            return ParserUtil.parseAddress(value);
+            return ParserUtil.parseAddress(address);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, address.isEmpty(), exception);
         }
     }
 
+    /**
+     * Parses tags and reports the tag field when a tag is invalid.
+     */
     private static Set<Tag> parseTags(List<String> values) throws ParseException {
         try {
             return ParserUtil.parseTags(values);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, exception);
+            boolean hasEmptyTag = values.stream().anyMatch(String::isEmpty);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, hasEmptyTag, exception);
         }
     }
 
-    private static ParseException createInvalidFieldException(String fieldMessage, ParseException cause) {
-        String message = fieldMessage + "\n" + AddCommand.MESSAGE_USAGE;
+    /**
+     * Returns a required field value, reporting the field when it is not present.
+     */
+    private static String getFieldValue(ArgumentMultimap argumentMultimap, Prefix prefix, String fieldMessage)
+            throws ParseException {
+        return argumentMultimap.getValue(prefix)
+                .orElseThrow(() -> createInvalidFieldException(fieldMessage, true, null));
+    }
+
+    /**
+     * Creates a field-specific parse error while retaining the add command usage guidance.
+     */
+    private static ParseException createInvalidFieldException(String fieldMessage, boolean hasEmptyValue,
+            ParseException cause) {
+        String usage = AddCommand.MESSAGE_USAGE;
+        if (hasEmptyValue) {
+            int firstLineEnd = usage.indexOf('\n');
+            usage = usage.substring(0, firstLineEnd + 1) + AddCommand.MESSAGE_UNKNOWN_INFORMATION + "\n"
+                    + usage.substring(firstLineEnd + 1);
+        }
+        String message = fieldMessage + "\n" + usage;
         return cause == null ? new ParseException(message) : new ParseException(message, cause);
     }
 

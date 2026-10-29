@@ -343,7 +343,13 @@ public class AddCommandParserTest {
                 expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
     }
 
-    private static String expectedInvalidFieldMessage(String fieldMessage, boolean ignored) {
-        return fieldMessage + "\n" + AddCommand.MESSAGE_USAGE;
+    private static String expectedInvalidFieldMessage(String fieldMessage, boolean hasEmptyValue) {
+        String usage = AddCommand.MESSAGE_USAGE;
+        if (hasEmptyValue) {
+            int firstLineEnd = usage.indexOf('\n');
+            usage = usage.substring(0, firstLineEnd + 1) + AddCommand.MESSAGE_UNKNOWN_INFORMATION + "\n"
+                    + usage.substring(firstLineEnd + 1);
+        }
+        return fieldMessage + "\n" + usage;
     }
 }
