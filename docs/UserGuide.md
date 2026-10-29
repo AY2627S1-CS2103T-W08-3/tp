@@ -112,13 +112,15 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
-### Sorting all persons alphabetically: `sort`
+### Sorting all persons lexicographically: `sort`
 
-Displays all persons alphabetically by name, ignoring capitalization.
-Use `A-Z` for ascending order or `Z-A` for descending order.
+Displays all persons by name in ascending or descending text order, ignoring capitalization.
+Use `asc` for ascending order or `desc` for descending order. Direction parameters are case-insensitive.
+Names are compared character by character (lexicographically), so numbers are treated as text:
+`Client 10` appears before `Client 2` in ascending order. Symbols follow the comparator's character ordering.
 Missing or invalid parameters produce an error without changing the displayed list.
 
-Format: `sort A-Z` or `sort Z-A`
+Format: `sort asc` or `sort desc`
 
 ### Editing a person: `edit`
 
@@ -305,5 +307,5 @@ Action | Format, Examples
 **Help** | `help`
 **List** | `list`
 **Remark** | `remark SHORT_UUID r/REMARK`<br> e.g., `remark 1a2b3c4 r/Likes to swim.`
-**Sort** | `sort A-Z` or `sort Z-A`
+**Sort** | `sort asc` or `sort desc`
 **Undelete** | `undelete`

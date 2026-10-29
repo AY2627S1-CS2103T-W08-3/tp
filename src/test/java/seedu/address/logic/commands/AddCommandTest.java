@@ -28,11 +28,21 @@ import seedu.address.testutil.PersonBuilder;
 
 public class AddCommandTest {
 
+    // EP: Constructor input is either a valid person or null.
     @Test
     public void constructor_nullPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new AddCommand(null));
     }
 
+    // Boundary value: a null execution model is outside the valid command state.
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        AddCommand addCommand = new AddCommand(new PersonBuilder().build());
+
+        assertThrows(NullPointerException.class, () -> addCommand.execute(null));
+    }
+
+    // EP: The model either accepts a new person or reports an existing duplicate.
     @Test
     public void execute_personAcceptedByModel_addSuccessful() throws Exception {
         ModelStubAcceptingPersonAdded modelStub = new ModelStubAcceptingPersonAdded();
@@ -45,6 +55,7 @@ public class AddCommandTest {
         assertEquals(List.of(validPerson), modelStub.personsAdded);
     }
 
+    // EP: A duplicate name is rejected when it is not the UNKNOWN sentinel.
     @Test
     public void execute_duplicatePerson_throwsCommandException() {
         Person validPerson = new PersonBuilder().build();
@@ -54,6 +65,7 @@ public class AddCommandTest {
         assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_PERSON, () -> addCommand.execute(modelStub));
     }
 
+    // EP: The exact uppercase UNKNOWN name is the only duplicate-name exception.
     @Test
     public void execute_duplicateUnknownName_addsPerson() throws Exception {
         ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
@@ -66,6 +78,7 @@ public class AddCommandTest {
         assertEquals(List.of(existingPerson, personToAdd), model.getAddressBook().getPersonList());
     }
 
+    // EP: UNKNOWN matching is case-sensitive; lowercase unknown remains an ordinary duplicate name.
     @Test
     public void execute_lowercaseUnknownName_duplicate() {
         ModelManager model = new ModelManager(new AddressBook(), new UserPrefs());
@@ -78,6 +91,7 @@ public class AddCommandTest {
         assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_PERSON, () -> addCommand.execute(model));
     }
 
+    // EP: Equality partitions are same instance, equal person, different person, null, and another type.
     @Test
     public void equals() {
         Person alice = new PersonBuilder().withName("Alice").build();
@@ -102,6 +116,7 @@ public class AddCommandTest {
         assertFalse(addAliceCommand.equals(addBobCommand));
     }
 
+    // EP: A command's string representation contains the person it will add.
     @Test
     public void toStringMethod() {
         AddCommand addCommand = new AddCommand(ALICE);
