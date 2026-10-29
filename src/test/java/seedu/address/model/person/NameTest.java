@@ -6,6 +6,8 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.util.StringUtil;
+
 public class NameTest {
 
     @Test
@@ -27,8 +29,10 @@ public class NameTest {
         // invalid name
         assertFalse(Name.isValidName("")); // empty string
         assertFalse(Name.isValidName(" ")); // spaces only
-        assertFalse(Name.isValidName("^")); // only non-alphanumeric characters
-        assertFalse(Name.isValidName("peter*")); // contains non-alphanumeric characters
+        assertFalse(Name.isValidName("^")); // punctuation-only values are rejected
+        assertTrue(Name.isValidName("peter*")); // punctuation is allowed
+        assertFalse(Name.isValidName("peter\u0007jack")); // control characters are rejected
+        assertFalse(Name.isValidName("a".repeat(StringUtil.MAX_FIELD_LENGTH + 1))); // overly long values are rejected
 
         // valid name
         assertTrue(Name.isValidName("peter jack")); // alphabets only

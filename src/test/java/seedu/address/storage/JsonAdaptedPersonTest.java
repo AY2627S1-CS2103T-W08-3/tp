@@ -20,10 +20,10 @@ import seedu.address.model.person.Phone;
 import seedu.address.model.person.Remark;
 
 public class JsonAdaptedPersonTest {
-    private static final String INVALID_NAME = "R@chel";
-    private static final String INVALID_PHONE = "+651234";
-    private static final String INVALID_ADDRESS = " ";
-    private static final String INVALID_EMAIL = "example.com";
+    private static final String INVALID_NAME = "R@\u0007chel";
+    private static final String INVALID_PHONE = "+65\u00071234";
+    private static final String INVALID_ADDRESS = "Main\u0007Street";
+    private static final String INVALID_EMAIL = "example\u0007.com";
     private static final String INVALID_TAG = "#friend";
 
     private static final String VALID_UUID = BENSON.getUuid().toString();
