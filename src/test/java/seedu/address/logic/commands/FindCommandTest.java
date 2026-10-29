@@ -133,7 +133,40 @@ public class FindCommandTest {
 
         CommandResult noMatchResult = parser.parseCommand("find t/family").execute(searchModel);
 
-        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0), noMatchResult.getFeedbackToUser());
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0) + FindCommand.MESSAGE_TAG_SEARCH_HINT,
+                noMatchResult.getFeedbackToUser());
+        assertEquals(List.of(), searchModel.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_nameContainingTagPrefix_showsHintAndAllowsSubstringSearch()
+            throws ParseException, CommandException {
+        Person agent = new PersonBuilder().withName("agent/1").withTags("agent").build();
+        AddressBook addressBook = new AddressBook();
+        addressBook.addPerson(agent);
+        Model searchModel = new ModelManager(addressBook, new UserPrefs());
+        AddressBookParser parser = new AddressBookParser();
+
+        CommandResult tagResult = parser.parseCommand("find t/1").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0) + FindCommand.MESSAGE_TAG_SEARCH_HINT,
+                tagResult.getFeedbackToUser());
+        assertEquals(List.of(), searchModel.getFilteredPersonList());
+
+        CommandResult substringResult = parser.parseCommand("find /1").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 1), substringResult.getFeedbackToUser());
+        assertEquals(List.of(agent), searchModel.getFilteredPersonList());
+
+        CommandResult mixedResult = parser.parseCommand("find missing t/1 t/unknown").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0) + FindCommand.MESSAGE_TAG_SEARCH_HINT,
+                mixedResult.getFeedbackToUser());
+        assertEquals(List.of(), searchModel.getFilteredPersonList());
+
+        CommandResult nameResult = parser.parseCommand("find missing").execute(searchModel);
+
+        assertEquals(String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0), nameResult.getFeedbackToUser());
         assertEquals(List.of(), searchModel.getFilteredPersonList());
     }
 

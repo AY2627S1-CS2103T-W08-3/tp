@@ -236,6 +236,10 @@ Anything typed after a `t/` is read as part of that tag, so `find t/friends Alic
 * Persons matching at least one name keyword or tag are returned (an `OR` search), and each person appears once.
   This helps when you misremember part of a name, as only one keyword needs to match.
 
+**Note:** `t/` searches tags, even when it is part of a person's name. To find a name containing `t/`,
+use a substring that does not start with `t/`. For example, use `find /1` to find `agent/1`;
+`find t/1` searches for persons tagged `1`.
+
 Examples:
 * `find Irfan` and `find irfan` return the same results because search is case-insensitive.
   With the sample data, both return only `Irfan Ibrahim`.

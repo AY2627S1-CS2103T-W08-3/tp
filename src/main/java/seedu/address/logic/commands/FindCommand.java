@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.model.Model;
+import seedu.address.model.person.NameOrTagContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 
 /**
@@ -17,6 +18,10 @@ public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
+    public static final String MESSAGE_TAG_SEARCH_HINT =
+            "\nNo results matched the tag search. t/ searches tags, not names. "
+            + "To find a name containing t/, use a substring that does not start with t/ "
+            + "(e.g. find /1 for the name agent/1).";
     public static final String MESSAGE_MISSING_SEARCH_TERMS =
             "Specify at least part of a name or a tag.";
     public static final String MESSAGE_MISSING_TAG =
@@ -44,8 +49,12 @@ public class FindCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
-        return new CommandResult(
-                String.format(Messages.MESSAGE_PERSONS_LISTED_OVERVIEW, model.getFilteredPersonList().size()));
+        int resultCount = model.getFilteredPersonList().size();
+        String feedback = String.format(Messages.MESSAGE_PERSONS_LISTED_OVERVIEW, resultCount);
+        if (resultCount == 0 && predicate instanceof NameOrTagContainsKeywordsPredicate) {
+            feedback += MESSAGE_TAG_SEARCH_HINT;
+        }
+        return new CommandResult(feedback);
     }
 
     @Override
