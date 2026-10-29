@@ -66,6 +66,15 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
+### Identifying a person by short UUID
+
+Commands that act on one existing person (`edit`, `remark` and `delete`) identify the person by their **short UUID**: the 7-character code shown as `#xxxxxxx` beside the name on each person's card.
+
+* Type the code without the `#`. For example, for a card showing `#1a2b3c4`, type `delete 1a2b3c4`.
+* The code is made of hexadecimal characters (`0`–`9` and `a`–`f`) and is case-insensitive.
+* The code is matched against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is chosen.
+* If two persons share a short UUID, the command fails instead of guessing. Type more characters of the person's full UUID, up to all 32, to pick one. `delete` and `remark` list the full UUID of each match; you can also find it in the data file. Dashes are ignored, so you can paste a full UUID.
+
 ### Viewing help: `help`
 
 Shows a message explaining how to access the help page.
@@ -129,8 +138,7 @@ Format: `edit SHORT_UUID [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/
 Names, phone numbers, email addresses, and postal addresses may contain punctuation, subject to the same blank,
 control-character, and 255-character safeguards as `add`. Quote values containing field prefixes after a space.
 
-* Edits the person whose short UUID matches `SHORT_UUID`. The short UUID is the 7-character code shown as `#xxxxxxx` on the person's card and is case-insensitive.
-* The UUID is matched against every person in the address book, not just the currently displayed list.
+* Edits the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
 * To update or clear a remark, provide `r/REMARK` or `r/` respectively.
@@ -147,10 +155,7 @@ Adds or updates a remark for an existing person in the address book. The existin
 
 Format: `remark SHORT_UUID r/REMARK`
 
-* Updates the remark of the person whose short UUID matches `SHORT_UUID`.
-* The short UUID is the 7-character code shown as `#xxxxxxx` on the person's card.
-* `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
-* The match is made against every person in the address book, not just the currently displayed list.
+* Updates the remark of the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
 * The `r/` prefix is compulsory. Omitting it results in an invalid command.
 * To remove an existing remark, enter `r/` without any text after it.
 
@@ -209,11 +214,7 @@ Deletes the specified person from the address book.
 
 Format: `delete SHORT_UUID`
 
-* Deletes the person whose short UUID matches `SHORT_UUID`.
-* The short UUID is the 7-character code shown as `#xxxxxxx` on each person's card. Type it without the `#`.
-* `SHORT_UUID` **must be 7 hexadecimal characters** (`0`–`9`, `a`–`f`); it is case-insensitive.
-* If two persons share a short UUID, type more characters of the UUID, up to all 32, to pick one. Dashes are ignored, so you can also paste a person's full UUID.
-* The match is made against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is deleted.
+* Deletes the person with the given `SHORT_UUID`. See [Identifying a person by short UUID](#identifying-a-person-by-short-uuid).
 
 Examples:
 * `delete 1a2b3c4` deletes the person whose card shows `#1a2b3c4`.
