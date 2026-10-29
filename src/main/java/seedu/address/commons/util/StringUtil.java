@@ -12,6 +12,48 @@ import java.util.Arrays;
  */
 public class StringUtil {
 
+    /** Maximum number of Unicode code points allowed in a person field. */
+    public static final int MAX_FIELD_LENGTH = 255;
+
+    /**
+     * Returns whether a person field contains a bounded, printable, non-blank value.
+     * Leading and trailing whitespace is rejected because command parsing trims field boundaries.
+     */
+    public static boolean isValidFieldValue(String value) {
+        requireNonNull(value);
+
+        if (value.isEmpty() || value.codePointCount(0, value.length()) > MAX_FIELD_LENGTH) {
+            return false;
+        }
+        if (value.codePoints().anyMatch(Character::isISOControl)) {
+            return false;
+        }
+
+        int firstCodePoint = value.codePointAt(0);
+        int lastCodePoint = value.codePointBefore(value.length());
+        return !isWhitespace(firstCodePoint) && !isWhitespace(lastCodePoint);
+    }
+
+    /**
+     * Returns whether a string contains a control character.
+     */
+    public static boolean containsControlCharacter(String value) {
+        requireNonNull(value);
+        return value.codePoints().anyMatch(Character::isISOControl);
+    }
+
+    /**
+     * Returns whether a string contains at least one letter or digit.
+     */
+    public static boolean containsLetterOrDigit(String value) {
+        requireNonNull(value);
+        return value.codePoints().anyMatch(Character::isLetterOrDigit);
+    }
+
+    private static boolean isWhitespace(int codePoint) {
+        return Character.isWhitespace(codePoint) || Character.isSpaceChar(codePoint);
+    }
+
     /**
      * Returns true if the {@code sentence} contains the {@code word}.
      *   Ignores case, but a full word match is required.

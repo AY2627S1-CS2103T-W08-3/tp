@@ -67,8 +67,13 @@ activate Model
 Model --> SortCommand
 deactivate Model
 
+SortCommand -> SortCommand : getSuccessMessage()
+activate SortCommand
+SortCommand --> SortCommand : message
+deactivate SortCommand
+
 create CommandResult
-SortCommand -> CommandResult : CommandResult(MESSAGE_SUCCESS)
+SortCommand -> CommandResult : CommandResult(message)
 activate CommandResult
 CommandResult --> SortCommand
 deactivate CommandResult
