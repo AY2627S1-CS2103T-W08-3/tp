@@ -120,6 +120,11 @@ Missing or invalid parameters produce an error without changing the displayed li
 
 Format: `sort A-Z` or `sort Z-A`
 
+* `A-Z` and `Z-A` must be typed in capitals; `sort a-z` is rejected.
+* Sorting clears any `find` filter, so the full list is shown.
+* Sorting only changes the order on screen. The data file is not reordered, and the list returns to its original order when you restart the app.
+* The sort order stays in effect until you restart: later `list`, `find`, `add` and `undelete` results are shown in the same order.
+
 ### Editing a person: `edit`
 
 Edits an existing person in the address book.
@@ -239,7 +244,7 @@ Restores the most recently deleted person, in case you deleted the wrong one.
 
 Format: `undelete`
 
-* The person is restored with the same short UUID, at the position in the list they were deleted from.
+* The person is restored with the same short UUID, at the position in the list they were deleted from. If a sort is active, the person appears wherever the sort order places them.
 * Running `undelete` again restores the person deleted before that, and so on, back to the first delete since the app was opened.
 * After a restore, the list shows all persons, so the restored person is always visible.
 * `undelete` only reverses `delete`. It does not reverse `clear`, `add`, `edit` or other commands.
