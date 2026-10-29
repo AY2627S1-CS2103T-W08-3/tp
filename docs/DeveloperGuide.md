@@ -187,7 +187,7 @@ The `find` command filters the displayed client list by name keywords and/or tag
 4. `FindCommand.execute(model)` calls `Model.updateFilteredPersonList(predicate)`. `ModelManager` sets the predicate on its internal `FilteredList`, applying the search to the full client list. Names match any keyword as a case-insensitive substring; tags match any complete tag value, also ignoring case. These conditions are combined with **OR**, so the example matches clients whose names contain `Alice` or whose tags include `friends`.
 5. The command reads the size of `Model.getFilteredPersonList()` and returns a `CommandResult` containing the number of matches, including zero when no clients match. The UI observes the filtered and sorted list and displays the matching clients.
 
-Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted.
+Empty arguments or invalid tags cause a `ParseException` during parsing, before a `FindCommand` is created or the displayed list is changed. Finding clients changes the list filter without modifying client records. The diagram focuses on parsing and filtering; the usual `LogicManager` storage save after command execution is omitted. Destruction markers indicate when the temporary parser and command are no longer referenced in this interaction, rather than when Java garbage collection occurs. The `CommandResult` remains alive because it is returned to the caller.
 
 ### Remark command
 
@@ -237,9 +237,14 @@ How the `add` command works:
 1. `LogicManager` passes the user input to `AddressBookParser`, which creates an
    `AddCommandParser` for the `add` command.
 2. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
-   that there is no non-empty preamble, and that non-tag prefixes are not repeated.
+   that there is no non-empty preamble, and that non-tag prefixes are not repeated. The tokenizer
+   ignores field-looking prefixes inside double-quoted values and rejects unmatched quotes.
 3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
-   classes validate their respective constraints. The parser also creates an empty `Remark`
+   classes validate their respective constraints. Name, phone, email, and address values allow
+   punctuation but must be non-blank, control-character-free, and at most 255 Unicode code points.
+   Names and phone numbers must contain a letter or digit, while emails must contain `@` or be
+   `UNKNOWN`.
+   The parser also creates an empty `Remark`
    because a newly added person has no remark, then creates an `AddCommand` containing the
    new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
    in a `ParseException` instead.
@@ -498,7 +503,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2b. Too many clients match to find the right one quickly.
 
-    * 2b1. User re-enters the command with a more specific keyword (e.g. a full name instead of a first name).
+    * 2b1. User re-enters the command with a single, longer name keyword (e.g. `find Alex` instead of `find Al`).
+      Adding separate keywords does not narrow the results because `find` matches any keyword (OR search).
 
       Use case resumes at step 2.
 
@@ -553,7 +559,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1.  User searches for the client to update (UC2).
-2.  User requests to edit a specific client in the displayed list by its index, providing the fields to change (e.g. a new phone number or additional tags).
+2.  User requests to edit a specific client by its short UUID, providing the fields to change (e.g. a new phone number, remark, or additional tags).
 3.  ClientConnect validates the new values.
 4.  ClientConnect updates the client and shows a success message with the updated details.
 
@@ -565,12 +571,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     Use case ends.
 
-* 2a. The index is invalid.
+* 2a. The short UUID is invalid, unknown, or ambiguous.
 
     * 2a1. ClientConnect shows an error message.
-    * 2a2. User re-enters the command with a valid index.
+    * 2a2. User re-enters the command with a valid, sufficiently specific short UUID.
 
-      Steps 2a1-2a2 are repeated until the index is valid.
+      Steps 2a1-2a2 are repeated until the short UUID identifies exactly one client.
       Use case resumes at step 3.
 
 * 2b. No fields to edit are provided.

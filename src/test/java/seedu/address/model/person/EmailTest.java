@@ -6,6 +6,8 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.util.StringUtil;
+
 public class EmailTest {
 
     @Test
@@ -28,29 +30,16 @@ public class EmailTest {
         assertFalse(Email.isValidEmail("")); // empty string
         assertFalse(Email.isValidEmail(" ")); // spaces only
 
-        // missing parts
-        assertFalse(Email.isValidEmail("@example.com")); // missing local part
-        assertFalse(Email.isValidEmail("peterjackexample.com")); // missing '@' symbol
-        assertFalse(Email.isValidEmail("peterjack@")); // missing domain name
-
-        // invalid parts
-        assertFalse(Email.isValidEmail("peterjack@-")); // invalid domain name
-        assertFalse(Email.isValidEmail("peterjack@exam_ple.com")); // underscore in domain name
         assertFalse(Email.isValidEmail(" peterjack@example.com")); // leading space
         assertFalse(Email.isValidEmail("peterjack@example.com ")); // trailing space
-        assertFalse(Email.isValidEmail("peterjack@@example.com")); // double '@' symbol
-        assertFalse(Email.isValidEmail("peter@jack@example.com")); // '@' symbol in local part
-        assertFalse(Email.isValidEmail("-peterjack@example.com")); // local part starts with a hyphen
-        assertFalse(Email.isValidEmail("peterjack-@example.com")); // local part ends with a hyphen
-        assertFalse(Email.isValidEmail("peter..jack@example.com")); // local part has two consecutive periods
-        assertFalse(Email.isValidEmail("peterjack@example@com")); // '@' symbol in domain name
-        assertFalse(Email.isValidEmail("peterjack@.example.com")); // domain name starts with a period
-        assertFalse(Email.isValidEmail("peterjack@example.com.")); // domain name ends with a period
-        assertFalse(Email.isValidEmail("peterjack@-example.com")); // domain name starts with a hyphen
-        assertFalse(Email.isValidEmail("peterjack@example.com-")); // domain name ends with a hyphen
-        assertFalse(Email.isValidEmail("peterjack@example.c")); // top level domain has less than two chars
+        assertFalse(Email.isValidEmail("peterjack@example.com\u0007")); // control characters are rejected
+        assertFalse(Email.isValidEmail("e".repeat(StringUtil.MAX_FIELD_LENGTH + 1))); // overly long values are rejected
+        assertFalse(Email.isValidEmail("not-an-email")); // an email needs an @ or UNKNOWN
 
         // valid email
+        assertTrue(Email.isValidEmail("UNKNOWN")); // unknown email information is supported
+        assertTrue(Email.isValidEmail("@example.com")); // punctuation is allowed
+        assertTrue(Email.isValidEmail("peterjack@@example.com")); // punctuation is allowed
         assertTrue(Email.isValidEmail("PeterJack_1190@example.com")); // underscore in local part
         assertTrue(Email.isValidEmail("PeterJack.1190@example.com")); // period in local part
         assertTrue(Email.isValidEmail("PeterJack+1190@example.com")); // '+' symbol in local part

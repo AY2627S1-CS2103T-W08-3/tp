@@ -30,7 +30,7 @@ public class RemarkCommand extends Command {
             + "Existing remark will be overwritten by the input.\n"
             + "Parameters: UUID_PREFIX (7 to 32 hexadecimal characters; dashes are ignored; "
             + "without the # prefix) "
-            + "r/ [REMARK]\n"
+            + "r/[REMARK]\n"
             + "Example: " + COMMAND_WORD + " 1a2b3c4 "
             + "r/ Likes to swim.";
 
