@@ -37,6 +37,7 @@ import static seedu.address.testutil.TypicalPersons.BOB;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.model.person.Person;
@@ -45,21 +46,23 @@ import seedu.address.testutil.PersonBuilder;
 public class AddCommandParserTest {
     private AddCommandParser parser = new AddCommandParser();
 
+    // EP: Null input is outside the parser's valid input domain.
     @Test
     public void parse_nullArgs_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> parser.parse(null));
     }
 
+    // EP: All required fields are present, with zero, one, or multiple optional values.
     @Test
     public void parse_allFieldsPresent_success() {
         Person expectedPerson = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).build();
 
-        // whitespace only preamble
+        // Boundary value: whitespace-only preamble is accepted as equivalent to no preamble.
         assertParseSuccess(parser, PREAMBLE_WHITESPACE + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_FRIEND, new AddCommand(expectedPerson));
 
 
-        // multiple tags - all accepted
+        // EP: Multiple tags are accepted and preserved as a set.
         Person expectedPersonMultipleTags = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND, VALID_TAG_HUSBAND)
                 .build();
         assertParseSuccess(parser,
@@ -67,6 +70,7 @@ public class AddCommandParserTest {
                 new AddCommand(expectedPersonMultipleTags));
     }
 
+    // EP: Remarks may be non-empty or empty; empty is the boundary value for clearing a remark.
     @Test
     public void parse_remark_success() {
         String remark = "Likes to swim.";
@@ -86,12 +90,13 @@ public class AddCommandParserTest {
         assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
     }
 
+    // EP: Repeated non-tag prefixes are rejected regardless of whether the repeated value is valid.
     @Test
     public void parse_repeatedNonTagValue_failure() {
         String validExpectedPersonString = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_FRIEND;
 
-        // multiple names
+        // EP: One repeated required prefix.
         assertParseFailure(parser, NAME_DESC_AMY + validExpectedPersonString,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
 
@@ -112,13 +117,13 @@ public class AddCommandParserTest {
                         + " " + PREFIX_REMARK + "Second",
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_REMARK));
 
-        // multiple fields repeated
+        // EP: Several repeated required prefixes are all reported.
         assertParseFailure(parser,
                 validExpectedPersonString + PHONE_DESC_AMY + EMAIL_DESC_AMY + NAME_DESC_AMY + ADDRESS_DESC_AMY
                         + validExpectedPersonString,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME, PREFIX_ADDRESS, PREFIX_EMAIL, PREFIX_PHONE));
 
-        // invalid value followed by valid value
+        // EP: Invalid value followed by a valid value still belongs to the duplicate-prefix partition.
 
         // invalid name
         assertParseFailure(parser, INVALID_NAME_DESC + validExpectedPersonString,
@@ -136,7 +141,7 @@ public class AddCommandParserTest {
         assertParseFailure(parser, INVALID_ADDRESS_DESC + validExpectedPersonString,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
 
-        // valid value followed by invalid value
+        // EP: Valid value followed by an invalid value is also a duplicate-prefix case.
 
         // invalid name
         assertParseFailure(parser, validExpectedPersonString + INVALID_NAME_DESC,
@@ -155,6 +160,7 @@ public class AddCommandParserTest {
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
     }
 
+    // EP: Optional tags are absent; the lower boundary is zero tags.
     @Test
     public void parse_optionalFieldsMissing_success() {
         // zero tags
@@ -163,6 +169,17 @@ public class AddCommandParserTest {
                 new AddCommand(expectedPerson));
     }
 
+    // EP: UNKNOWN is a valid standard indicator for a required field and is case-sensitive in stored names.
+    @Test
+    public void parse_unknownName_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withName("UNKNOWN").withTags().build();
+        String nameDescription = " " + PREFIX_NAME + "UNKNOWN";
+
+        assertParseSuccess(parser, nameDescription + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    // EP: Valid names may include supported punctuation and notation.
     @Test
     public void parse_nameWithParentheses_success() {
         Person expectedPerson = new PersonBuilder(BOB).withName("Peter (Pete) Tan").withTags().build();
@@ -191,6 +208,7 @@ public class AddCommandParserTest {
                 new AddCommand(expectedPerson));
     }
 
+    // EP: Valid non-name field syntax includes quotes, labels, and punctuation.
     @Test
     public void parse_addressWithQuote_success() {
         String address = "Blk 5 \"Tower";
@@ -260,6 +278,44 @@ public class AddCommandParserTest {
         assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
     }
 
+    // Boundary value: every required field is exactly MAX_FIELD_LENGTH code points long and remains valid.
+    @Test
+    public void parse_maxLengthFields_success() {
+        String name = "N".repeat(StringUtil.MAX_FIELD_LENGTH);
+        String phone = "1".repeat(StringUtil.MAX_FIELD_LENGTH);
+        String email = "e".repeat(StringUtil.MAX_FIELD_LENGTH - 1) + "@";
+        String address = "A".repeat(StringUtil.MAX_FIELD_LENGTH);
+        String userInput = " " + PREFIX_NAME + name + " " + PREFIX_PHONE + phone + " " + PREFIX_EMAIL + email
+                + " " + PREFIX_ADDRESS + address;
+        Person expectedPerson = new PersonBuilder(BOB).withName(name).withPhone(phone).withEmail(email)
+                .withAddress(address).withTags().build();
+
+        assertParseSuccess(parser, userInput, new AddCommand(expectedPerson));
+    }
+
+    // Boundary value: one code point beyond the maximum invalidates each person field partition.
+    @Test
+    public void parse_fieldsBeyondMaximumLength_failure() {
+        String tooLongName = "N".repeat(StringUtil.MAX_FIELD_LENGTH + 1);
+        String tooLongPhone = "1".repeat(StringUtil.MAX_FIELD_LENGTH + 1);
+        String tooLongEmail = "e".repeat(StringUtil.MAX_FIELD_LENGTH) + "@";
+        String tooLongAddress = "A".repeat(StringUtil.MAX_FIELD_LENGTH + 1);
+
+        assertParseFailure(parser, " " + PREFIX_NAME + tooLongName + PHONE_DESC_BOB + EMAIL_DESC_BOB
+                        + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, false));
+        assertParseFailure(parser, NAME_DESC_BOB + " " + PREFIX_PHONE + tooLongPhone + EMAIL_DESC_BOB
+                        + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, false));
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + " " + PREFIX_EMAIL + tooLongEmail
+                        + ADDRESS_DESC_BOB,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, false));
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " " + PREFIX_ADDRESS
+                        + tooLongAddress,
+                expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, false));
+    }
+
+    // EP: A missing required prefix is distinct from a present prefix with an empty value.
     @Test
     public void parse_compulsoryFieldMissing_failure() {
         // missing name prefix
@@ -285,6 +341,7 @@ public class AddCommandParserTest {
 
     @Test
     public void parse_emptyField_failure() {
+        // Boundary value: an empty value is rejected and displays the UNKNOWN suggestion.
         assertParseFailure(parser, " " + PREFIX_NAME + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
                 expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, true));
         assertParseFailure(parser, NAME_DESC_BOB + " " + PREFIX_PHONE + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
@@ -295,6 +352,8 @@ public class AddCommandParserTest {
                 expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, true));
     }
 
+    // EP: Invalid values are partitioned into control characters, unsupported semantic values, invalid tags,
+    // and a non-empty preamble.
     @Test
     public void parse_invalidValue_failure() {
         // invalid name
@@ -334,6 +393,7 @@ public class AddCommandParserTest {
 
     @Test
     public void parse_semanticInvalidValue_failure() {
+        // Boundary value: punctuation-only names and phone numbers contain no letter or digit.
         assertParseFailure(parser, " " + PREFIX_NAME + "!!!" + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
                 expectedInvalidFieldMessage(AddCommand.MESSAGE_INVALID_NAME_FIELD, false));
         assertParseFailure(parser, NAME_DESC_BOB + " " + PREFIX_PHONE + "+++" + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,

@@ -48,6 +48,7 @@ public class EditCommandParserTest {
 
     private EditCommandParser parser = new EditCommandParser();
 
+    // EP: The target preamble is missing, malformed, or accompanied by no editable field.
     @Test
     public void parse_missingParts_failure() {
         // no UUID specified
@@ -60,12 +61,13 @@ public class EditCommandParserTest {
         assertParseFailure(parser, "", expectedUuidError(EditCommand.MESSAGE_MISSING_UUID));
     }
 
+    // EP: UUID prefixes outside the accepted hexadecimal range are rejected.
     @Test
     public void parse_invalidPreamble_failure() {
-        // invalid UUID characters
+        // EP: Non-hexadecimal and embedded-whitespace targets are invalid.
         assertParseFailure(parser, "-5" + NAME_DESC_AMY, expectedUuidError(EditCommand.MESSAGE_INVALID_UUID));
 
-        // UUID that is too short
+        // Boundary value: six hexadecimal characters are one below the minimum of seven.
         assertParseFailure(parser, "0" + NAME_DESC_AMY, expectedUuidError(EditCommand.MESSAGE_INVALID_UUID));
 
         // invalid arguments being parsed as preamble
@@ -74,11 +76,24 @@ public class EditCommandParserTest {
         // invalid prefix being parsed as preamble
         assertParseFailure(parser, "1 i/ string", expectedUuidError(EditCommand.MESSAGE_INVALID_UUID));
 
-        // UUID prefix that is too long after dashes are removed
+        // Boundary value: 33 hexadecimal characters are one above the maximum of 32.
         assertParseFailure(parser, "1234567890abcdef1234567890abcdef0" + NAME_DESC_AMY,
                 expectedUuidError(EditCommand.MESSAGE_INVALID_UUID));
     }
 
+    // Boundary values: seven characters and a full 32-character UUID are both valid targets.
+    @Test
+    public void parse_uuidLengthBoundaries_success() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build();
+        String fullUuid = "1234567890abcdef1234567890abcdef";
+
+        assertParseSuccess(parser, "1234567" + NAME_DESC_AMY,
+                new EditCommand("1234567", descriptor));
+        assertParseSuccess(parser, fullUuid + NAME_DESC_AMY,
+                new EditCommand(fullUuid, descriptor));
+    }
+
+    // EP: Dashes and letter case are presentation variations of the same UUID prefix.
     @Test
     public void parse_dashedFullUuid_success() {
         String dashedUuid = "ABCDEF12-3456-7890-abcd-ef1234567890";
@@ -88,6 +103,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, dashedUuid + NAME_DESC_AMY, new EditCommand(normalizedUuid, descriptor));
     }
 
+    // EP: Field values are invalid when they violate field constraints or tag cardinality rules.
     @Test
     public void parse_invalidValue_failure() {
         assertParseFailure(parser, "aaaaaaa" + INVALID_NAME_DESC, Name.MESSAGE_CONSTRAINTS); // invalid name
@@ -114,6 +130,7 @@ public class EditCommandParserTest {
                 Name.MESSAGE_CONSTRAINTS);
     }
 
+    // EP: Any non-empty subset of editable fields is valid, including a complete update.
     @Test
     public void parse_allFieldsSpecified_success() {
         String targetUuid = "bbbbbbb";
@@ -128,6 +145,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, expectedCommand);
     }
 
+    // EP: Punctuation-bearing values remain valid when quoted values contain field-like prefixes.
     @Test
     public void parse_punctuationInFields_success() {
         String name = "ACME p/Research";
@@ -156,6 +174,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, expectedCommand);
     }
 
+    // EP: Each individual editable field, including an empty remark, is a valid update partition.
     @Test
     public void parse_oneFieldSpecified_success() {
         // name
@@ -202,6 +221,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, expectedCommand);
     }
 
+    // EP: Repeated non-tag prefixes are rejected in either order and regardless of value validity.
     @Test
     public void parse_multipleRepeatedFields_failure() {
         // More extensive testing of duplicate parameter detections is done in
@@ -234,6 +254,7 @@ public class EditCommandParserTest {
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS));
     }
 
+    // Boundary value: a lone tag prefix resets the existing tag set to zero tags.
     @Test
     public void parse_resetTags_success() {
         String targetUuid = "ccccccc";
