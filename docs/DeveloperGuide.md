@@ -447,7 +447,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to add a client by entering the name, phone, email, address and optional tags.
+1.  User requests to add a client by entering the name, phone, email, address, an optional remark and optional tags.
 2.  ClientConnect validates the details.
 3.  ClientConnect adds the client and shows a success message with the client's details.
 
@@ -464,7 +464,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       Use case resumes at step 2.
 
 
-* 2a. One or more field values are invalid (e.g. a phone number with fewer than 8 digits, or a tag containing spaces).
+* 2a. One or more field values are invalid (e.g. an email address without `@`, or a tag containing spaces).
 
     * 2a1. ClientConnect shows the error message for the first invalid field.
     * 2a2. User re-enters the command with a corrected value.
@@ -472,9 +472,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       Steps 2a1-2a2 are repeated until all values are valid.
       Use case resumes at step 3.
 
-* 2b. A client with the same name already exists (case-insensitive, ignoring leading and trailing spaces).
+* 2b. A client with the same name already exists (case-insensitive, ignoring leading and trailing spaces), and the name is not the placeholder `UNKNOWN`.
 
-    * 2b1. ClientConnect rejects the entry and shows "This client already exists in the address book."
+    * 2b1. ClientConnect rejects the entry and shows "This name already exists in the address book. Add more details to the name."
     * 2b2. User decides to update the existing client instead (see UC4).
 
       Use case ends.
@@ -483,7 +483,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User requests to find clients by entering one or more keywords (a name or a tag).
+1.  User requests to find clients by entering one or more name keywords and/or tags (each tag with the `t/` prefix).
 2.  ClientConnect shows the matching clients in the list and the number of clients listed.
 3.  User reads the required details from the client's card.
 
@@ -501,7 +501,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2a. No clients match the keywords.
 
-    * 2a1. ClientConnect shows "0 persons listed!" and an empty list.
+    * 2a1. ClientConnect shows "0 person(s) listed!" and an empty list.
     * 2a2. User re-enters the command with different keywords (e.g. an alternative spelling).
 
       Steps 2a1-2a2 are repeated until at least one client matches.
@@ -603,7 +603,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 3b. The new name matches another existing client's name (case-insensitive).
 
-    * 3b1. ClientConnect rejects the edit and shows a duplicate client error.
+    * 3b1. ClientConnect rejects the edit and shows "This person already exists in the address book."
     * 3b2. User re-enters the command with a different name.
 
       Steps 3b1-3b2 are repeated until the name is unique.
