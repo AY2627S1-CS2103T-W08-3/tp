@@ -124,7 +124,7 @@ Format: `sort A-Z` or `sort Z-A`
 
 Edits an existing person in the address book.
 
-Format: `edit SHORT_UUID [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`
+Format: `edit SHORT_UUID [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`
 
 Names, phone numbers, email addresses, and postal addresses may contain punctuation, subject to the same blank,
 control-character, and 255-character safeguards as `add`. Quote values containing field prefixes after a space.
@@ -296,12 +296,14 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​ [r/REMARK]` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete SHORT_UUID`<br> e.g., `delete 1a2b3c4`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
-**Find** | `find [KEYWORD [MORE_KEYWORDS]...] [t/TAG]...`<br> e.g., `find James t/friends`
-**List** | `list`
-**Sort** | `sort A-Z` or `sort Z-A`
-**Remark** | `remark SHORT_UUID r/REMARK`<br> e.g., `remark 1a2b3c4 r/Likes to swim.`
+**Edit** | `edit SHORT_UUID [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [r/REMARK] [t/TAG]…​`<br> e.g., `edit 1a2b3c4 n/James Lee e/jameslee@example.com`
+**Exit** | `exit`
+**Find** | `find [KEYWORD [MORE_KEYWORDS]…​] [t/TAG]…​`<br> e.g., `find James t/friends`
 **Help** | `help`
+**List** | `list`
+**Remark** | `remark SHORT_UUID r/REMARK`<br> e.g., `remark 1a2b3c4 r/Likes to swim.`
+**Sort** | `sort A-Z` or `sort Z-A`
+**Undelete** | `undelete`
