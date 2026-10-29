@@ -25,6 +25,9 @@ It is built for agents who handle large client portfolios and many active leads.
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
+   :bulb: Double-clicking the JAR file may not start the app on some systems, so use the `java -jar` command above.<br>
+   Do not put the JAR file in a write-protected folder, such as a system folder or a read-only drive. The app saves its data and settings next to the JAR file and will not work properly if it cannot write there.
+
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
@@ -314,6 +317,7 @@ Furthermore, certain edits can cause ClientConnect to behave in unexpected ways 
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
 2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
+3. **On macOS, if you put a secondary window such as the Help Window into fullscreen**, the app may behave unexpectedly. Avoid using fullscreen for secondary windows. If this happens, exit fullscreen (`Ctrl`+`Cmd`+`F`) or restart the app.
 
 --------------------------------------------------------------------------------------------------------------------
 
