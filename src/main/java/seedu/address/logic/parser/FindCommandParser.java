@@ -25,7 +25,8 @@ public class FindCommandParser implements Parser<FindCommand> {
         String trimmedArgs = args.trim();
         if (trimmedArgs.isEmpty()) {
             throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                            FindCommand.MESSAGE_MISSING_SEARCH_TERMS + "\n" + FindCommand.MESSAGE_USAGE));
         }
 
         ArgumentMultimap arguments = ArgumentTokenizer.tokenize(" " + trimmedArgs.replaceAll("\\s+", " "), PREFIX_TAG);
@@ -33,6 +34,10 @@ public class FindCommandParser implements Parser<FindCommand> {
         List<String> nameKeywords = nameArgs.isEmpty() ? List.of() : List.of(nameArgs.split("\\s+"));
         List<String> tagKeywords = arguments.getAllValues(PREFIX_TAG);
         for (String tagKeyword : tagKeywords) {
+            if (tagKeyword.isEmpty()) {
+                throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT,
+                        FindCommand.MESSAGE_MISSING_TAG + "\n" + FindCommand.MESSAGE_USAGE));
+            }
             ParserUtil.parseTag(tagKeyword);
         }
 

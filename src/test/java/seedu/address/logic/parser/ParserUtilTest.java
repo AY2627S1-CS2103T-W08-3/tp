@@ -19,10 +19,10 @@ import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
-    private static final String INVALID_NAME = "R@chel";
-    private static final String INVALID_PHONE = "+651234";
-    private static final String INVALID_ADDRESS = " ";
-    private static final String INVALID_EMAIL = "example.com";
+    private static final String INVALID_NAME = "R@\u0007chel";
+    private static final String INVALID_PHONE = "+65\u00071234";
+    private static final String INVALID_ADDRESS = "Main\u0007Street";
+    private static final String INVALID_EMAIL = "example\u0007.com";
     private static final String INVALID_TAG = "#friend";
 
     private static final String VALID_NAME = "Rachel Walker";
@@ -32,7 +32,7 @@ public class ParserUtilTest {
     private static final String VALID_TAG_1 = "friend";
     private static final String VALID_TAG_2 = "neighbour";
 
-    private static final String WHITESPACE = " \t\r\n";
+    private static final String WHITESPACE = "  ";
 
     @Test
     public void parseIndex_invalidInput_throwsParseException() {
@@ -131,6 +131,14 @@ public class ParserUtilTest {
     @Test
     public void parseEmail_invalidValue_throwsParseException() {
         assertThrows(ParseException.class, () -> ParserUtil.parseEmail(INVALID_EMAIL));
+    }
+
+    @Test
+    public void parsePersonField_trailingControlCharacter_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parseName("name\u0007"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("phone\u0007"));
+        assertThrows(ParseException.class, () -> ParserUtil.parseEmail("email\u0007"));
+        assertThrows(ParseException.class, () -> ParserUtil.parseAddress("address\u0007"));
     }
 
     @Test

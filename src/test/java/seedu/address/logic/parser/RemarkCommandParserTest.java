@@ -50,6 +50,13 @@ public class RemarkCommandParserTest {
         assertParseSuccess(parser, "AAAAAAAa-0000-0000-0000-000000000000 "
                         + PREFIX_REMARK + nonEmptyRemark,
                 new RemarkCommand("aaaaaaaa000000000000000000000000", new Remark("A remark.")));
+
+    @Test
+    public void parse_remarkContainingQuotes_preservesQuotes() {
+        assertParseSuccess(parser, "aaaaaaa " + PREFIX_REMARK + "Wants a 27\" monitor",
+                new RemarkCommand("aaaaaaa", new Remark("Wants a 27\" monitor")));
+        assertParseSuccess(parser, "aaaaaaa " + PREFIX_REMARK + "\"VIP\"",
+                new RemarkCommand("aaaaaaa", new Remark("\"VIP\"")));
     }
 
     @Test
