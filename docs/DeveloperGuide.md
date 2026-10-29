@@ -211,8 +211,8 @@ displayed remark without requiring a separate command.
 #### Implementation
 
 The `add` command creates a new `Person` and stores it in the address book. It requires a name,
-phone number, email address, and postal address, while tags are optional and may be supplied more
-than once.
+phone number, email address, and postal address. Tags are optional and may be supplied more than
+once, while a single optional remark can be supplied with `r/REMARK`.
 
 The main classes involved in the implementation are shown in the following class diagram:
 
@@ -239,19 +239,41 @@ How the `add` command works:
 2. `AddCommandParser` tokenizes the input and checks that all required prefixes are present,
    that there is no non-empty preamble, and that non-tag prefixes are not repeated. The tokenizer
    ignores field-looking prefixes inside double-quoted values and rejects unmatched quotes.
-3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, and `Tag` value
-   classes validate their respective constraints. Name, phone, email, and address values allow
-   punctuation but must be non-blank, control-character-free, and at most 255 Unicode code points.
-   Names and phone numbers must contain a letter or digit, while emails must contain `@` or be
-   `UNKNOWN`.
-   The parser also creates an empty `Remark`
-   because a newly added person has no remark, then creates an `AddCommand` containing the
-   new `Person`. Missing prefixes, repeated non-tag prefixes, and invalid field values result
-   in a `ParseException` instead.
+3. `ParserUtil` parses each field. The `Name`, `Phone`, `Email`, `Address`, `Remark`, and `Tag`
+   value classes validate their respective constraints. Name, phone, email, address, and remark
+   values allow punctuation but must be non-blank, control-character-free, and at most 255 Unicode
+   code points. Names and phone numbers must contain a letter or digit, while emails must contain
+   `@` or be `UNKNOWN`. Missing required fields, repeated non-tag prefixes, and invalid field values
+   produce field-specific parse errors while retaining the add usage guidance.
+   When a required field is empty or missing, that guidance also reminds users that they can enter
+   the uppercase value `UNKNOWN` when the information is currently unavailable.
 4. During execution, `AddCommand` asks the `Model` whether a person with the same identity
-   already exists. If so, it throws a `CommandException` and does not modify the address book.
+   already exists. If so, it throws a `CommandException` and does not modify the address book, except
+   that names exactly equal to `UNKNOWN` are allowed to repeat.
 5. Otherwise, it requests a similar-name warning from `Messages`, adds the person through the
-   `Model`, and returns a `CommandResult` containing the success message and any warning.
+   `Model`, logs the outcome, and returns a `CommandResult` containing the success message and any warning.
+
+### Edit command
+
+#### Implementation
+
+The `edit` command updates one existing `Person`, identified by a UUID prefix, without changing
+the person's UUID. It supports optional name, phone, email, address, remark, and tag fields. At least
+one optional field must be supplied; tags replace the existing tag set, while `t/` clears it. A
+remark replaces the existing remark, and `r/` clears it.
+
+`EditCommandParser` tokenizes quoted values and recognizes the `n/`, `p/`, `e/`, `a/`, `r/`, and
+`t/` prefixes. The target UUID is trimmed, normalized to lower case, and has dashes removed before
+validation. It must contain between 7 and 32 hexadecimal characters, inclusive. The parser rejects
+duplicate non-tag prefixes, missing UUIDs, invalid UUIDs, unmatched quotes, and commands that do not
+specify a field to edit. The same punctuation, blank-value, control-character, length, and
+field-specific content constraints used by add apply to editable person fields.
+
+During execution, `EditCommand` searches the complete client list rather than only the currently
+displayed filtered list. It rejects a UUID prefix that matches no person or more than one person,
+creates a replacement with the original UUID, checks that the edited identity is not a duplicate,
+and then updates the model and restores the unfiltered display. Name typo warnings are generated
+for the edited name in the same way as for add.
 
 ### Sort command
 
@@ -672,7 +694,7 @@ testers are expected to do more *exploratory* testing.
 
 1. Deleting one of two persons that share a short UUID
 
-   1. Prerequisites: Close the app. In `data/addressbook.json`, change the `uuid` of two persons so that both start with the same 7 characters but differ afterwards, e.g. `1a2b3c4d-1000-0000-0000-000000000000` and `1a2b3c4d-2000-0000-0000-000000000000`. Relaunch the app.
+   1. Prerequisites: Close the app. In `data/ClientConnect.json`, change the `uuid` of two persons so that both start with the same 7 characters but differ afterwards, e.g. `1a2b3c4d-1000-0000-0000-000000000000` and `1a2b3c4d-2000-0000-0000-000000000000`. Relaunch the app.
 
    1. Test case: `delete 1a2b3c4`<br>
       Expected: No person is deleted. The status message lists both persons' full UUIDs and names.
@@ -720,7 +742,7 @@ testers are expected to do more *exploratory* testing.
 
 1. Dealing with missing/corrupted data files
 
-   1. Test case: Close the app. In `data/addressbook.json`, change one person's `uuid` to `not-a-uuid`. Relaunch the app.<br>
+   1. Test case: Close the app. In `data/ClientConnect.json`, change one person's `uuid` to `not-a-uuid`. Relaunch the app.<br>
       Expected: The app starts with an empty address book instead of crashing. The log shows that the data file could not be loaded.
 
    1. _{Explain how to simulate other missing or corrupted data files and state the expected behavior.}_
