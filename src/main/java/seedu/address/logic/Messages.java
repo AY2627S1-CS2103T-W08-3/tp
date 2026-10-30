@@ -20,6 +20,8 @@ public class Messages {
     public static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$d person(s) listed!";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
+    public static final String MESSAGE_DUPLICATE_FIELDS_ADVICE =
+            "Use double quotes around the value containing a field prefix. Example: n/\"John s/o Josh\"";
     public static final String MESSAGE_SIMILAR_NAME_WARNING_FORMAT =
             "\nWarning: \"%1$s\" is very similar to existing entry \"%2$s\".";
 
@@ -32,7 +34,8 @@ public class Messages {
         Set<String> duplicateFields =
                 Stream.of(duplicatePrefixes).map(Prefix::toString).collect(Collectors.toSet());
 
-        return MESSAGE_DUPLICATE_FIELDS + String.join(" ", duplicateFields);
+        return MESSAGE_DUPLICATE_FIELDS + String.join(" ", duplicateFields) + "\n"
+                + MESSAGE_DUPLICATE_FIELDS_ADVICE;
     }
 
     /**

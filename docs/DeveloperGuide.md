@@ -770,7 +770,7 @@ testers are expected to do more *exploratory* testing.
       Expected: No person is added. The status message shows `Invalid tag`, followed by the command usage. Tags must be alphanumeric.
 
    1. Test case: `add n/Kim Lee p/94444444 e/kim@example.com e/kim2@example.com a/Blk 2`<br>
-      Expected: No person is added. The status message shows `Multiple values specified for the following single-valued field(s): e/`.
+      Expected: No person is added. The status message shows `Multiple values specified for the following single-valued field(s): e/`, followed by `Use double quotes around the value containing a field prefix. Example: n/"John s/o Josh"`.
 
    1. Other incorrect add commands to try: `add`, `add n/Kim Lee p/94444444 a/Blk 2` (missing email)<br>
       Expected: No person is added, and an error message with the command usage is shown.
