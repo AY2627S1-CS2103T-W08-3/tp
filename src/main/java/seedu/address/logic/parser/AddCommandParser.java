@@ -68,7 +68,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseName(name);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_NAME_FIELD, name.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_NAME_FIELD, exception);
         }
     }
 
@@ -79,7 +79,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parsePhone(phone);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, phone.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_PHONE_NUMBER, exception);
         }
     }
 
@@ -90,7 +90,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseEmail(email);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, email.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_EMAIL_ADDRESS, exception);
         }
     }
 
@@ -101,7 +101,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseAddress(address);
         } catch (ParseException exception) {
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, address.isEmpty(), exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_ADDRESS_FIELD, exception);
         }
     }
 
@@ -112,8 +112,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         try {
             return ParserUtil.parseTags(values);
         } catch (ParseException exception) {
-            boolean hasEmptyTag = values.stream().anyMatch(String::isEmpty);
-            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, hasEmptyTag, exception);
+            throw createInvalidFieldException(AddCommand.MESSAGE_INVALID_TAG, exception);
         }
     }
 
@@ -123,21 +122,14 @@ public class AddCommandParser implements Parser<AddCommand> {
     private static String getFieldValue(ArgumentMultimap argumentMultimap, Prefix prefix, String fieldMessage)
             throws ParseException {
         return argumentMultimap.getValue(prefix)
-                .orElseThrow(() -> createInvalidFieldException(fieldMessage, true, null));
+                .orElseThrow(() -> createInvalidFieldException(fieldMessage, null));
     }
 
     /**
      * Creates a field-specific parse error while retaining the add command usage guidance.
      */
-    private static ParseException createInvalidFieldException(String fieldMessage, boolean hasEmptyValue,
-            ParseException cause) {
-        String usage = AddCommand.MESSAGE_USAGE;
-        if (hasEmptyValue) {
-            int firstLineEnd = usage.indexOf('\n');
-            usage = usage.substring(0, firstLineEnd + 1) + AddCommand.MESSAGE_UNKNOWN_INFORMATION + "\n"
-                    + usage.substring(firstLineEnd + 1);
-        }
-        String message = fieldMessage + "\n" + usage;
+    private static ParseException createInvalidFieldException(String fieldMessage, ParseException cause) {
+        String message = fieldMessage + "\n" + AddCommand.MESSAGE_USAGE;
         return cause == null ? new ParseException(message) : new ParseException(message, cause);
     }
 
