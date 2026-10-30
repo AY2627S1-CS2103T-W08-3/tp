@@ -253,6 +253,12 @@ The main classes involved in the implementation are shown in the following class
 
 The `add` command flow is split into the following sequence diagrams:
 
+Activation bars are omitted in the parsing and duplicate-detection diagrams for clarity.
+Solid arrows denote synchronous calls and dashed arrows denote returns or propagated exceptions.
+New object lifelines begin at their constructor calls. The `ref` frame in the duplicate-detection
+diagram expands into the successful-addition diagram, which continues the same `execute(m)` call.
+Field-value construction, logging, and string-formatting details are omitted.
+
 Parsing and validation:
 
 <img src="images/AddCommandParsingSequenceDiagram.png" width="800" />

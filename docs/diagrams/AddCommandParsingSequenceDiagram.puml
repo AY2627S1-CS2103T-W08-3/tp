@@ -17,27 +17,29 @@ participant ":AddCommandParser" as AddCommandParser LOGIC_COLOR
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
 end box
 
-[-> LogicManager : execute("add ...")
-activate LogicManager
+box Model MODEL_COLOR_T1
+participant "p:Person" as Person MODEL_COLOR
+end box
+
 LogicManager -> AddressBookParser : parseCommand("add ...")
-activate AddressBookParser
+create AddCommandParser
+AddressBookParser -> AddCommandParser : AddCommandParser()
 AddressBookParser -> AddCommandParser : parse(arguments)
-activate AddCommandParser
+
+note over AddCommandParser
+    Tokenize and validate fields.
+    Field-value construction details omitted.
+end note
 
 alt invalid command format or field value
     AddCommandParser --> AddressBookParser : throws ParseException
-    deactivate AddCommandParser
     AddressBookParser --> LogicManager : throws ParseException
-    deactivate AddressBookParser
-    [<--LogicManager
-    deactivate LogicManager
 else valid input
-    AddCommandParser -> AddCommand : create Person and AddCommand
-    AddCommandParser --> AddressBookParser : AddCommand
-    deactivate AddCommandParser
-    AddressBookParser --> LogicManager : AddCommand
-    deactivate AddressBookParser
-    [<--LogicManager
-    deactivate LogicManager
+    create Person
+    AddCommandParser -> Person : Person(name, phone, email, address, remark, tags)
+    create AddCommand
+    AddCommandParser -> AddCommand : AddCommand(p)
+    AddCommandParser --> AddressBookParser : a
+    AddressBookParser --> LogicManager : a
 end
 @enduml
