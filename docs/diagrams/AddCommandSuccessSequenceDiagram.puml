@@ -10,43 +10,43 @@ skinparam Participant {
     Padding 8
 }
 
+title Successful person addition (within execute(m))
+
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
+participant "Messages" as Messages <<class>> LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
-participant ":Messages" as Messages LOGIC_COLOR
 end box
 
 box Model MODEL_COLOR_T1
 participant "m:Model" as Model MODEL_COLOR
+participant ":ReadOnlyAddressBook" as AddressBook MODEL_COLOR
 end box
 
-[-> LogicManager : execute("add ...")
-activate LogicManager
-LogicManager -> AddCommand : execute(m)
 activate AddCommand
-AddCommand -> Model : getAddressBook().getPersonList()
+AddCommand -> Model : getAddressBook()
 activate Model
-Model --> AddCommand : existing persons
+Model --> AddCommand : addressBook
 deactivate Model
-AddCommand -> Messages : getSimilarNameWarning(...)
+AddCommand -> AddressBook : getPersonList()
+activate AddressBook
+AddressBook --> AddCommand : existingPersons
+deactivate AddressBook
+AddCommand -> Messages : getSimilarNameWarning(toAdd, existingPersons, null)
 activate Messages
-Messages --> AddCommand : warning or empty string
+Messages --> AddCommand : warning
 deactivate Messages
 AddCommand -> Model : addPerson(toAdd)
 activate Model
-Model --> AddCommand : added
+Model --> AddCommand
 deactivate Model
 AddCommand -> Messages : format(toAdd)
 activate Messages
-Messages --> AddCommand : formatted person
+Messages --> AddCommand : formattedPerson
 deactivate Messages
-AddCommand -> CommandResult : create success result
+create CommandResult
+AddCommand -> CommandResult : CommandResult(successMessage + warning)
 activate CommandResult
-CommandResult --> AddCommand : result
+CommandResult --> AddCommand
 deactivate CommandResult
-AddCommand --> LogicManager : success result
-deactivate AddCommand
-[<--LogicManager
-deactivate LogicManager
 @enduml

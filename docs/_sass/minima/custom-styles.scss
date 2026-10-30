@@ -4,6 +4,12 @@ h2, h3, h4, h5, h6 {
   color: #e46c0a;
 }
 
+.post-content h3 code {
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+}
+
 // Bootstrap style alerts
 .alert {
   position: relative;

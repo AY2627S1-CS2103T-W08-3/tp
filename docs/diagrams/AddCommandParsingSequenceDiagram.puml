@@ -10,34 +10,44 @@ skinparam Participant {
     Padding 8
 }
 
+title Within AddressBookParser.parseCommand(...)
+
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":AddCommandParser" as AddCommandParser LOGIC_COLOR
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
 end box
 
-[-> LogicManager : execute("add ...")
-activate LogicManager
-LogicManager -> AddressBookParser : parseCommand("add ...")
+box Model MODEL_COLOR_T1
+participant "p:Person" as Person MODEL_COLOR
+end box
+
 activate AddressBookParser
-AddressBookParser -> AddCommandParser : parse(arguments)
+create AddCommandParser
+AddressBookParser -> AddCommandParser : AddCommandParser()
 activate AddCommandParser
+AddCommandParser --> AddressBookParser
+deactivate AddCommandParser
 
 alt invalid command format or field value
+    AddressBookParser -> AddCommandParser : parse(arguments)
+    activate AddCommandParser
     AddCommandParser --> AddressBookParser : throws ParseException
     deactivate AddCommandParser
-    AddressBookParser --> LogicManager : throws ParseException
-    deactivate AddressBookParser
-    [<--LogicManager
-    deactivate LogicManager
 else valid input
-    AddCommandParser -> AddCommand : create Person and AddCommand
-    AddCommandParser --> AddressBookParser : AddCommand
+    AddressBookParser -> AddCommandParser : parse(arguments)
+    activate AddCommandParser
+    create Person
+    AddCommandParser -> Person : Person(name, phone, email, address, remark, tags)
+    activate Person
+    Person --> AddCommandParser
+    deactivate Person
+    create AddCommand
+    AddCommandParser -> AddCommand : AddCommand(p)
+    activate AddCommand
+    AddCommand --> AddCommandParser
+    deactivate AddCommand
+    AddCommandParser --> AddressBookParser : a
     deactivate AddCommandParser
-    AddressBookParser --> LogicManager : AddCommand
-    deactivate AddressBookParser
-    [<--LogicManager
-    deactivate LogicManager
 end
 @enduml

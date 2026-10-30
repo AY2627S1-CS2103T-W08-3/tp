@@ -253,7 +253,7 @@ The main classes involved in the implementation are shown in the following class
 
 The `add` command flow is split into the following sequence diagrams:
 
-Parsing and validation:
+Parser construction and validation within `AddressBookParser.parseCommand(...)`:
 
 <img src="images/AddCommandParsingSequenceDiagram.png" width="800" />
 
@@ -261,7 +261,7 @@ Execution and duplicate detection:
 
 <img src="images/AddCommandDuplicateSequenceDiagram.png" width="800" />
 
-Successful person addition:
+Successful person addition (the referenced interaction within `execute(m)`):
 
 <img src="images/AddCommandSuccessSequenceDiagram.png" width="800" />
 

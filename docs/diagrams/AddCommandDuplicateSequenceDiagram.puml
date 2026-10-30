@@ -19,21 +19,27 @@ box Model MODEL_COLOR_T1
 participant "m:Model" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute("add ...")
 activate LogicManager
-LogicManager -> AddCommand : execute(m)
-activate AddCommand
-AddCommand -> Model : hasPerson(toAdd)
-activate Model
-Model --> AddCommand : duplicate status
-deactivate Model
-
-alt duplicate name (other than UNKNOWN)
+alt duplicate name other than "UNKNOWN"
+    LogicManager -> AddCommand : execute(m)
+    activate AddCommand
+    AddCommand -> Model : hasPerson(toAdd)
+    activate Model
+    Model --> AddCommand : true
+    deactivate Model
     AddCommand --> LogicManager : throws CommandException
-else new person
-    AddCommand --> LogicManager : person is new
+    deactivate AddCommand
+else new name or name is "UNKNOWN"
+    LogicManager -> AddCommand : execute(m)
+    activate AddCommand
+    AddCommand -> Model : hasPerson(toAdd)
+    activate Model
+    Model --> AddCommand : hasDuplicate
+    deactivate Model
+    ref over AddCommand, Model
+        Successful person addition
+    end ref
+    AddCommand --> LogicManager : r
+    deactivate AddCommand
 end
-[<--LogicManager
-deactivate AddCommand
-deactivate LogicManager
 @enduml
