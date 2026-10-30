@@ -10,8 +10,9 @@ skinparam Participant {
     Padding 8
 }
 
+title Within AddressBookParser.parseCommand(...)
+
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":AddCommandParser" as AddCommandParser LOGIC_COLOR
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
@@ -21,25 +22,32 @@ box Model MODEL_COLOR_T1
 participant "p:Person" as Person MODEL_COLOR
 end box
 
-LogicManager -> AddressBookParser : parseCommand("add ...")
+activate AddressBookParser
 create AddCommandParser
 AddressBookParser -> AddCommandParser : AddCommandParser()
-AddressBookParser -> AddCommandParser : parse(arguments)
-
-note over AddCommandParser
-    Tokenize and validate fields.
-    Field-value construction details omitted.
-end note
+activate AddCommandParser
+AddCommandParser --> AddressBookParser
+deactivate AddCommandParser
 
 alt invalid command format or field value
+    AddressBookParser -> AddCommandParser : parse(arguments)
+    activate AddCommandParser
     AddCommandParser --> AddressBookParser : throws ParseException
-    AddressBookParser --> LogicManager : throws ParseException
+    deactivate AddCommandParser
 else valid input
+    AddressBookParser -> AddCommandParser : parse(arguments)
+    activate AddCommandParser
     create Person
     AddCommandParser -> Person : Person(name, phone, email, address, remark, tags)
+    activate Person
+    Person --> AddCommandParser
+    deactivate Person
     create AddCommand
     AddCommandParser -> AddCommand : AddCommand(p)
+    activate AddCommand
+    AddCommand --> AddCommandParser
+    deactivate AddCommand
     AddCommandParser --> AddressBookParser : a
-    AddressBookParser --> LogicManager : a
+    deactivate AddCommandParser
 end
 @enduml

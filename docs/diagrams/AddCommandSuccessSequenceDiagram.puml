@@ -10,7 +10,7 @@ skinparam Participant {
     Padding 8
 }
 
-title Successful person addition
+title Successful person addition (within execute(m))
 
 box Logic LOGIC_COLOR_T1
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
@@ -23,11 +23,7 @@ participant "m:Model" as Model MODEL_COLOR
 participant ":ReadOnlyAddressBook" as AddressBook MODEL_COLOR
 end box
 
-note over AddCommand
-    Continuation of execute(m) after
-    the duplicate-name check passes.
-end note
-
+activate AddCommand
 AddCommand -> Model : getAddressBook()
 activate Model
 Model --> AddCommand : addressBook
@@ -50,9 +46,7 @@ Messages --> AddCommand : formattedPerson
 deactivate Messages
 create CommandResult
 AddCommand -> CommandResult : CommandResult(successMessage + warning)
-note over AddCommand, CommandResult
-    r is returned by execute(m) in
-    the execution and duplicate-detection diagram.
-    Logging and string formatting details omitted.
-end note
+activate CommandResult
+CommandResult --> AddCommand
+deactivate CommandResult
 @enduml
