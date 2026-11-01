@@ -244,6 +244,7 @@ Format: `remark UUID_PREFIX r/[REMARK]`
 Examples:
 * `remark 1a2b3c4 r/Likes to swim.` adds a remark to the contact whose card shows `#1a2b3c4`.
 * `remark 1a2b3c4 r/` removes the remark from the contact whose card shows `#1a2b3c4`.
+
 ### Locating persons by name or tag: `find`
 
 Finds persons whose names contain any given name keyword or whose tags match any given tag.
