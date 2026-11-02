@@ -2,27 +2,22 @@
 !include style.puml
 
 skinparam ArrowFontStyle plain
+skinparam sequenceArrowFontSize 20
+skinparam sequenceParticipantFontSize 20
+skinparam sequenceBoxFontSize 20
+skinparam TitleFontSize 22
 skinparam sequenceMessageAlign center
 hide footbox
 
-title Sorting contacts: sort asc
+title Sort command: parsing
 
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":SortCommandParser" as SortCommandParser LOGIC_COLOR
 participant "s:SortCommand" as SortCommand LOGIC_COLOR
-participant "r:CommandResult" as CommandResult LOGIC_COLOR
 end box
 
-box Model MODEL_COLOR_T1
-participant "m:ModelManager" as Model MODEL_COLOR
-end box
-
-[-> LogicManager : execute("sort asc")
-activate LogicManager
-
-LogicManager -> AddressBookParser : parseCommand("sort asc")
+[-> AddressBookParser : parseCommand("sort asc")
 activate AddressBookParser
 
 create SortCommandParser
@@ -45,45 +40,7 @@ deactivate SortCommandParser
 'The temporary parser is no longer referenced after parsing.
 destroy SortCommandParser
 
-AddressBookParser --> LogicManager : s
+[<-- AddressBookParser : s
 deactivate AddressBookParser
-
-LogicManager -> SortCommand : execute(m)
-activate SortCommand
-
-SortCommand -> SortCommand : getComparator()
-activate SortCommand
-SortCommand --> SortCommand : comparator
-deactivate SortCommand
-
-SortCommand -> Model : updateFilteredPersonList(\nPREDICATE_SHOW_ALL_PERSONS)
-activate Model
-Model --> SortCommand
-deactivate Model
-
-SortCommand -> Model : updatePersonListComparator(\ncomparator)
-activate Model
-Model --> SortCommand
-deactivate Model
-
-SortCommand -> SortCommand : getSuccessMessage()
-activate SortCommand
-SortCommand --> SortCommand : message
-deactivate SortCommand
-
-create CommandResult
-SortCommand -> CommandResult : CommandResult(message)
-activate CommandResult
-CommandResult --> SortCommand
-deactivate CommandResult
-
-SortCommand --> LogicManager : r
-deactivate SortCommand
-
-[<-- LogicManager : r
-'The local command reference is released when LogicManager.execute returns.
-destroy SortCommand
-deactivate LogicManager
-'CommandResult remains referenced by the caller, so its lifeline continues.
 
 @enduml

@@ -1,0 +1,71 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant "u:UndeleteCommand" as UndeleteCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("undelete")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("undelete")
+activate AddressBookParser
+
+ref over AddressBookParser, UndeleteCommand
+    Parse undelete command
+end ref
+
+AddressBookParser --> LogicManager : u
+deactivate AddressBookParser
+
+LogicManager -> UndeleteCommand : execute(m)
+activate UndeleteCommand
+
+UndeleteCommand -> Model : hasDeletedPersons()
+activate Model
+
+Model --> UndeleteCommand : true
+deactivate Model
+
+UndeleteCommand -> Model : getLastDeletedPerson()
+activate Model
+
+Model --> UndeleteCommand : p
+deactivate Model
+
+UndeleteCommand -> Model : hasPerson(p)
+activate Model
+
+Model --> UndeleteCommand : false
+deactivate Model
+
+UndeleteCommand -> Model : restoreLastDeletedPerson()
+activate Model
+
+Model --> UndeleteCommand
+deactivate Model
+
+create CommandResult
+UndeleteCommand -> CommandResult : CommandResult(message)
+activate CommandResult
+
+CommandResult --> UndeleteCommand
+deactivate CommandResult
+
+UndeleteCommand --> LogicManager : r
+deactivate UndeleteCommand
+'Hidden arrow to position the destroy marker below the end of the activation bar.
+UndeleteCommand -[hidden]-> LogicManager
+destroy UndeleteCommand
+
+[<--LogicManager : r
+deactivate LogicManager
+@enduml

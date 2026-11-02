@@ -384,18 +384,27 @@ The comparator remains active during subsequent additions, edits, and searches i
 same session. `list` shows all contacts while retaining the comparator. Restarting the
 application restores the saved order because the comparator is not persisted.
 
-#### Sequence diagram
+#### Sequence diagrams
 
-The following diagram illustrates the successful execution of `sort asc`.
-The object named `s` is the created `SortCommand`, `r` is its `CommandResult`, and `m`
-is the `ModelManager` supplied through the `Model` interface.
+The successful `sort asc` interaction is split into parsing and execution so that the labels
+remain readable. Both diagrams refer to the same command instance, `s:SortCommand`.
+Click either diagram to view the full-size image.
 
-![Sequence diagram for the successful sort asc command](images/SortSequenceDiagram.png)
+**Parsing:** `LogicManager` calls `AddressBookParser#parseCommand("sort asc")`, shown as the
+incoming call below. The parser creates `s` with `ASCENDING` and returns it to `LogicManager`.
+The command remains alive for execution; the end of this diagram does not mark its destruction.
 
-The editable PlantUML source is [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
-It uses the shared [diagram style](diagrams/style.puml).
+[![Parsing the sort asc command](images/SortSequenceDiagram.png)](images/SortSequenceDiagram.png)
 
-The diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
+**Execution:** This diagram continues inside the same `LogicManager#execute("sort asc")` call,
+after parsing returns. `LogicManager` executes `s` using `m:ModelManager`, supplied through
+the `Model` interface. The result `r:CommandResult` is returned to the caller.
+
+[![Executing the parsed sort command](images/SortExecutionSequenceDiagram.png)](images/SortExecutionSequenceDiagram.png)
+
+Both diagrams use the shared [diagram style](diagrams/style.puml).
+
+The execution diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
 Null checks, contact-count retrieval, assertions, logging, and subsequent storage
 interactions are omitted to keep the diagram focused on parsing and sorting.
 `sort desc` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
@@ -437,12 +446,20 @@ Step 3. The user executes `delete 0f9e8d7` to delete Alice, the 1st person. `Mod
 
 Step 4. The user realises that deleting Alice was a mistake, and executes `undelete`. `UndeleteCommand` checks that there is a deleted person to restore, and that no person with the same identity as Alice already exists. It then calls `Model#restoreLastDeletedPerson()`, which reinserts Alice at index 0 and pops `(Alice, 0)` off the stack.
 
-The following sequence diagram shows how the `undelete` command in step 4 goes through the `Logic` and `Model` components:
+The following sequence diagram shows how the `undelete` command in step 4 goes through the `Logic` component:
 
-![UndeleteSequenceDiagram](images/UndeleteSequenceDiagram.png)
+![UndeleteSequenceDiagram-Logic](images/UndeleteSequenceDiagram-Logic.png)
+
+The reference frame `Parse undelete command` is shown in the following sequence diagram:
+
+![UndeleteSequenceDiagram-Parser](images/UndeleteSequenceDiagram-Parser.png)
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The lifelines for `UndeleteCommandParser` and `UndeleteCommand` should end at their destroy markers (X), but due to a limitation of PlantUML, they continue to the end of the diagram.
 </div>
+
+The following sequence diagram shows what happens inside the `Model` component when `Model#restoreLastDeletedPerson()` is called:
+
+![UndeleteSequenceDiagram-Model](images/UndeleteSequenceDiagram-Model.png)
 
 Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so the address book is back in its original order, and `deletedPersons` is empty again.
 
@@ -522,8 +539,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | Priority | As a …​      | I want to …​                                                  | So that I can…​                                                          |
 | -------- |-----------------|------------------------------------------------------------------|-----------------------------------------------------------------------------|
 | `* * *`  | insurance agent | quickly update client information                                | maintain accurate records of life changes that impact policy coverage needs |
-| `* * *`  | insurance agent | sort clients alphabetically by name                              | efficiently structure my daily outreach                                     |
-| `* * *`  | insurance agent | view a complete list of all my clients                           | scan key metrics and navigate quickly to specific profiles                  |
+| `* * *`  | insurance agent | sort clients by name in ascending or descending text order       | locate clients in a predictable order                                       |
+| `* * *`  | insurance agent | view a complete list of all my clients                           | review my contacts and locate specific client profiles                      |
 | `* * *`  | insurance agent | add a new client with their contact information                  | immediately capture leads and initiate the policy assessment process        |
 | `* * *`  | insurance agent | search clients by name                                           | access their profile immediately during real time client interactions       |
 | `* * *`  | insurance agent | search client by tag                                             | generate target lists for specialised policy reviews                        |
@@ -531,11 +548,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | insurance agent | assign tags to clients                                           | categorise them according to risk profile and product interest              |
 | `* *`    | insurance agent | add a remark to a client                                         | record notes from conversations, such as preferences or follow-ups          |
 | `* *`    | insurance agent | be warned when a new client's name is similar to an existing one | avoid creating duplicate records because of a typo                          |
-| `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
-| `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
+| `* *`    | insurance agent | copy client details, IDs, and tags to the clipboard              | reuse them in commands or other applications without retyping               |
 | `* *`    | insurance agent | restore a client I deleted by mistake                            | recover their details without re-entering them                              |
-| `* *`    | insurance agent | copy individual client details or all details to the clipboard   | reuse client information in messages and forms without retyping it          |
-| `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
 
 ### Use cases
 
@@ -904,7 +918,7 @@ testers are expected to do more *exploratory* testing.
 1. Sorting the list by name
 
    1. Test case: `sort desc`<br>
-      Expected: All persons are listed in reverse alphabetical order, ignoring case (with only the sample contacts, Roy Balakrishnan first and Alex Yeoh last). The status message shows `Listed all persons lexicographically by name.`
+      Expected: All persons are listed in reverse alphabetical order, ignoring case (with only the sample contacts, Roy Balakrishnan first and Alex Yeoh last). The status message shows `Sorted all persons by name in descending text order.`
 
    1. Test case: `sort asc`<br>
       Expected: All persons are listed in alphabetical order (Alex Yeoh first).
