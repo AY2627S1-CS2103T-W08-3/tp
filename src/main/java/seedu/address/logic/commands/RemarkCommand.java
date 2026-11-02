@@ -22,6 +22,7 @@ public class RemarkCommand extends Command {
 
     public static final String COMMAND_WORD = "remark";
     public static final String MESSAGE_ADD_REMARK_SUCCESS = "Added remark to Person: %1$s";
+    public static final String MESSAGE_UPDATE_REMARK_SUCCESS = "Updated remark for Person: %1$s";
     public static final String MESSAGE_DELETE_REMARK_SUCCESS = "Removed remark from Person: %1$s";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
@@ -89,19 +90,23 @@ public class RemarkCommand extends Command {
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
         logger.info("Updated remark for person with UUID: " + targetUuid);
-        return new CommandResult(generateSuccessMessage(editedPerson));
+        return new CommandResult(generateSuccessMessage(personToEdit, editedPerson));
     }
 
     /**
-     * Generates a command execution success message based on whether
-     * the remark is added to or removed from
-     * {@code personToEdit}.
+     * Generates a success message based on the previous remark and the requested value.
      */
-    private String generateSuccessMessage(Person personToEdit) {
-        assert personToEdit != null : "The person used to generate a success message must not be null";
+    private String generateSuccessMessage(Person originalPerson, Person editedPerson) {
+        assert originalPerson != null : "The original person used to generate a success message must not be null";
+        assert editedPerson != null : "The edited person used to generate a success message must not be null";
 
-        String message = !remark.value.isEmpty() ? MESSAGE_ADD_REMARK_SUCCESS : MESSAGE_DELETE_REMARK_SUCCESS;
-        return String.format(message, Messages.format(personToEdit));
+        String message = MESSAGE_UPDATE_REMARK_SUCCESS;
+        if (remark.value.isEmpty()) {
+            message = MESSAGE_DELETE_REMARK_SUCCESS;
+        } else if (originalPerson.getRemark().value.isEmpty()) {
+            message = MESSAGE_ADD_REMARK_SUCCESS;
+        }
+        return String.format(message, Messages.format(editedPerson));
     }
 
     /**

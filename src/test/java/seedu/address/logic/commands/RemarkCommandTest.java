@@ -94,17 +94,24 @@ public class RemarkCommandTest {
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ParseException {
         RemarkCommand command = new RemarkCommand("aaaaaaa", ParserUtil.parseRemark("Some remark"));
         Method generateSuccessMessage = RemarkCommand.class
-                .getDeclaredMethod("generateSuccessMessage", Person.class);
+                .getDeclaredMethod("generateSuccessMessage", Person.class, Person.class);
         generateSuccessMessage.setAccessible(true);
+        Person person = model.getPersonsByUuidPrefix("aaaaaaa").get(0);
 
-        Executable generateMessage = () -> generateSuccessMessage.invoke(command, new Object[] {null});
-        InvocationTargetException exception = assertThrows(InvocationTargetException.class, generateMessage);
+        Executable withNullOriginal = () -> generateSuccessMessage.invoke(command, new Object[] {null, person});
+        InvocationTargetException originalException = assertThrows(InvocationTargetException.class, withNullOriginal);
 
-        assertTrue(exception.getCause() instanceof AssertionError);
+        assertTrue(originalException.getCause() instanceof AssertionError);
+
+        Executable withNullEdited = () -> generateSuccessMessage.invoke(command, new Object[] {person, null});
+        InvocationTargetException editedException = assertThrows(InvocationTargetException.class, withNullEdited);
+
+        assertTrue(editedException.getCause() instanceof AssertionError);
     }
 
     @Test
     public void execute_nonEmptyRemark_success() throws ParseException {
+        // EP: A nonempty remark replaces an existing remark.
         final Remark remark = ParserUtil.parseRemark("Some remark");
         String targetUuid = "aaaaaaa";
         RemarkCommand command = new RemarkCommand(targetUuid, remark);
@@ -112,6 +119,22 @@ public class RemarkCommandTest {
         PersonBuilder editedPersonBuilder = personBuilder.withRemark(remark.value);
         Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
         Person editedPerson = editedPersonBuilder.build();
+        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        expectedModel.setPerson(originalPerson, editedPerson);
+
+        assertCommandSuccess(command, model,
+                String.format(RemarkCommand.MESSAGE_UPDATE_REMARK_SUCCESS,
+                        Messages.format(editedPerson)), expectedModel);
+    }
+
+    @Test
+    public void execute_newRemark_addedSuccess() throws ParseException {
+        // EP: A nonempty remark fills an empty remark.
+        String targetUuid = "ccccccc";
+        Remark remark = ParserUtil.parseRemark("Some remark");
+        RemarkCommand command = new RemarkCommand(targetUuid, remark);
+        Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
+        Person editedPerson = new PersonBuilder(originalPerson).withRemark(remark.value).build();
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         expectedModel.setPerson(originalPerson, editedPerson);
 
@@ -134,6 +157,7 @@ public class RemarkCommandTest {
 
     @Test
     public void execute_longerUuidPrefix_success() throws ParseException {
+        // EP: A longer UUID prefix identifies a person whose remark is replaced.
         String targetUuid = "aaaaaaaa0";
         Remark remark = ParserUtil.parseRemark("Updated remark");
         RemarkCommand command = new RemarkCommand(targetUuid, remark);
@@ -143,7 +167,7 @@ public class RemarkCommandTest {
         expectedModel.setPerson(originalPerson, editedPerson);
 
         assertCommandSuccess(command, model,
-                String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
+                String.format(RemarkCommand.MESSAGE_UPDATE_REMARK_SUCCESS,
                         Messages.format(editedPerson)), expectedModel);
     }
 
@@ -169,7 +193,8 @@ public class RemarkCommandTest {
         expectedModel.setPerson(originalPerson, editedPerson);
 
         assertCommandSuccess(command, model,
-                String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS, Messages.format(editedPerson)), expectedModel);
+                String.format(RemarkCommand.MESSAGE_UPDATE_REMARK_SUCCESS,
+                        Messages.format(editedPerson)), expectedModel);
 
         Person actualPerson = model.getAddressBook().getPersonList().get(0);
         assertEquals(originalPerson.getUuid(), actualPerson.getUuid());
@@ -177,6 +202,7 @@ public class RemarkCommandTest {
 
     @Test
     public void execute_emptyRemark_success() throws ParseException {
+        // EP: An empty remark clears an existing remark.
         final Remark remark = ParserUtil.parseRemark("");
         String targetUuid = "aaaaaaa";
         RemarkCommand command = new RemarkCommand(targetUuid, remark);
@@ -188,6 +214,20 @@ public class RemarkCommandTest {
         assertCommandSuccess(command, model,
                 String.format(RemarkCommand.MESSAGE_DELETE_REMARK_SUCCESS,
                         Messages.format(editedPerson)), expectedModel);
+    }
+
+    @Test
+    public void execute_emptyRemarkAlreadyEmpty_reportsRemoval() throws ParseException {
+        // EP: An empty remark still reports the requested removal when no remark was stored.
+        String targetUuid = "ccccccc";
+        Remark remark = ParserUtil.parseRemark("");
+        RemarkCommand command = new RemarkCommand(targetUuid, remark);
+        Person originalPerson = model.getPersonsByUuidPrefix(targetUuid).get(0);
+        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+
+        assertCommandSuccess(command, model,
+                String.format(RemarkCommand.MESSAGE_DELETE_REMARK_SUCCESS,
+                        Messages.format(originalPerson)), expectedModel);
     }
 
     @Test

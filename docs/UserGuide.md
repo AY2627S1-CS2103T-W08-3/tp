@@ -229,7 +229,7 @@ sort desc - Sort names in descending text order
 
 The displayed list remains unchanged when the command is rejected.
 
-### Adding or removing a remark: `remark`
+### Adding, updating, or removing a remark: `remark`
 
 Adds or updates a remark for an existing person in ClientConnect. The existing remark will be overwritten.
 
@@ -241,6 +241,8 @@ Format: `remark UUID_PREFIX r/[REMARK]`
 * The `r/` prefix is compulsory. With a valid UUID, omitting it results in an error asking you to add `r/` before
   the remark.
 * To remove an existing remark, enter `r/` without any text after it.
+* On success, the status message starts with `Added remark` when filling an empty remark, `Updated remark` when
+  replacing an existing remark, or `Removed remark` when you enter an empty `r/` value.
 * A second `r/` after whitespace outside a quoted remark is rejected as a repeated field. For example,
   `remark 1a2b3c4 r/Discuss r/ clause` is rejected. The error asks you to remove the extra field or quote the
   whole remark if `r/` is intended as text.
