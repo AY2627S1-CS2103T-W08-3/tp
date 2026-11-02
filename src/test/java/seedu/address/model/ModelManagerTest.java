@@ -15,9 +15,11 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
 import seedu.address.model.person.exceptions.PersonNotFoundException;
 import seedu.address.testutil.AddressBookBuilder;
+import seedu.address.testutil.PersonBuilder;
 
 public class ModelManagerTest {
 
@@ -150,6 +152,26 @@ public class ModelManagerTest {
         modelManager.restoreLastDeletedPerson();
 
         assertEquals(List.of(ALICE, BENSON), modelManager.getAddressBook().getPersonList());
+        assertFalse(modelManager.hasDeletedPersons());
+    }
+
+    @Test
+    public void restoreLastDeletedPerson_equalDetailsWithDifferentUuid_restoresCorrectRecordAndPosition() {
+        Person firstPerson = new PersonBuilder().withName("UNKNOWN").build();
+        Person secondPerson = new PersonBuilder().withName("UNKNOWN").build();
+        List<Person> originalPersons = List.of(firstPerson, ALICE, secondPerson, BENSON);
+        originalPersons.forEach(modelManager::addPerson);
+
+        modelManager.deletePerson(secondPerson);
+
+        assertEquals(List.of(firstPerson.getUuid(), ALICE.getUuid(), BENSON.getUuid()),
+                modelManager.getAddressBook().getPersonList().stream().map(Person::getUuid).toList());
+        assertEquals(secondPerson.getUuid(), modelManager.getLastDeletedPerson().getUuid());
+
+        modelManager.restoreLastDeletedPerson();
+
+        assertEquals(originalPersons.stream().map(Person::getUuid).toList(),
+                modelManager.getAddressBook().getPersonList().stream().map(Person::getUuid).toList());
         assertFalse(modelManager.hasDeletedPersons());
     }
 

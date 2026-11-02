@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -88,7 +89,11 @@ public class ModelManager implements Model {
     @Override
     public void deletePerson(Person target) {
         requireNonNull(target);
-        int index = addressBook.getPersonList().indexOf(target);
+        List<Person> persons = addressBook.getPersonList();
+        int index = IntStream.range(0, persons.size())
+                .filter(i -> persons.get(i).getUuid().equals(target.getUuid()))
+                .findFirst()
+                .orElse(-1);
         addressBook.removePerson(target);
 
         assert index >= 0 : "A person that was removed must have been in the list";

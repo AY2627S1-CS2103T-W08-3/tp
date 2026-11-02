@@ -2,6 +2,7 @@ package seedu.address.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
@@ -115,6 +116,30 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void setPerson_equalDetailsWithDifferentUuid_replacesOnlyTarget() {
+        Person firstPerson = new PersonBuilder().withName("UNKNOWN").build();
+        Person secondPerson = new PersonBuilder().withName("UNKNOWN").build();
+        uniquePersonList.add(firstPerson);
+        uniquePersonList.add(secondPerson);
+        Person editedPerson = new PersonBuilder(secondPerson).withRemark("Second contact").build();
+
+        uniquePersonList.setPerson(secondPerson, editedPerson);
+
+        assertSame(firstPerson, uniquePersonList.asUnmodifiableObservableList().get(0));
+        assertSame(editedPerson, uniquePersonList.asUnmodifiableObservableList().get(1));
+    }
+
+    @Test
+    public void setPerson_equalDetailsWithAbsentUuid_throwsPersonNotFoundException() {
+        Person existingPerson = new PersonBuilder().build();
+        Person absentPerson = new PersonBuilder().build();
+        uniquePersonList.add(existingPerson);
+
+        assertThrows(PersonNotFoundException.class, () -> uniquePersonList.setPerson(absentPerson, BOB));
+        assertSame(existingPerson, uniquePersonList.asUnmodifiableObservableList().get(0));
+    }
+
+    @Test
     public void setPerson_editedPersonIsSamePerson_success() {
         uniquePersonList.add(ALICE);
         uniquePersonList.setPerson(ALICE, ALICE);
@@ -166,6 +191,29 @@ public class UniquePersonListTest {
         uniquePersonList.remove(ALICE);
         UniquePersonList expectedUniquePersonList = new UniquePersonList();
         assertEquals(expectedUniquePersonList, uniquePersonList);
+    }
+
+    @Test
+    public void remove_equalDetailsWithDifferentUuid_removesOnlyTarget() {
+        Person firstPerson = new PersonBuilder().withName("UNKNOWN").build();
+        Person secondPerson = new PersonBuilder().withName("UNKNOWN").build();
+        uniquePersonList.add(firstPerson);
+        uniquePersonList.add(secondPerson);
+
+        uniquePersonList.remove(secondPerson);
+
+        assertEquals(1, uniquePersonList.asUnmodifiableObservableList().size());
+        assertSame(firstPerson, uniquePersonList.asUnmodifiableObservableList().get(0));
+    }
+
+    @Test
+    public void remove_equalDetailsWithAbsentUuid_throwsPersonNotFoundException() {
+        Person existingPerson = new PersonBuilder().build();
+        Person absentPerson = new PersonBuilder().build();
+        uniquePersonList.add(existingPerson);
+
+        assertThrows(PersonNotFoundException.class, () -> uniquePersonList.remove(absentPerson));
+        assertSame(existingPerson, uniquePersonList.asUnmodifiableObservableList().get(0));
     }
 
     @Test

@@ -16,8 +16,8 @@ import seedu.address.model.person.exceptions.PersonNotFoundException;
  * Persons whose name is exactly {@code UNKNOWN} are exempt from the uniqueness check.
  * A person is considered unique by comparing using {@code Person#isSamePerson(Person)}. As such, adding and updating of
  * persons uses Person#isSamePerson(Person) for equality so as to ensure that the person being added or updated is
- * unique in terms of identity in the UniquePersonList. However, the removal of a person uses Person#equals(Object) so
- * as to ensure that the person with exactly the same fields will be removed.
+ * unique in terms of identity in the UniquePersonList. Replacement and removal locate the target by UUID so that
+ * persons with identical fields can be modified independently.
  *
  * Supports a minimal set of list operations.
  *
@@ -64,13 +64,13 @@ public class UniquePersonList implements Iterable<Person> {
 
     /**
      * Replaces the person {@code target} in the list with {@code editedPerson}.
-     * {@code target} must exist in the list.
+     * A person with {@code target}'s UUID must exist in the list.
      * The person identity of {@code editedPerson} must not be the same as another existing person in the list.
      */
     public void setPerson(Person target, Person editedPerson) {
         requireAllNonNull(target, editedPerson);
 
-        int index = internalList.indexOf(target);
+        int index = indexOfUuid(target);
         if (index == -1) {
             throw new PersonNotFoundException();
         }
@@ -83,14 +83,28 @@ public class UniquePersonList implements Iterable<Person> {
     }
 
     /**
-     * Removes the equivalent person from the list.
-     * The person must exist in the list.
+     * Removes the person with {@code toRemove}'s UUID from the list.
+     * A person with that UUID must exist in the list.
      */
     public void remove(Person toRemove) {
         requireNonNull(toRemove);
-        if (!internalList.remove(toRemove)) {
+        int index = indexOfUuid(toRemove);
+        if (index == -1) {
             throw new PersonNotFoundException();
         }
+        internalList.remove(index);
+    }
+
+    /**
+     * Returns the index of the person with {@code person}'s UUID, or -1 if no such person exists.
+     */
+    private int indexOfUuid(Person person) {
+        for (int i = 0; i < internalList.size(); i++) {
+            if (internalList.get(i).getUuid().equals(person.getUuid())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public void setPersons(UniquePersonList replacement) {
