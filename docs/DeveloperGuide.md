@@ -17,6 +17,7 @@ learn how to use the app, see the [User Guide](UserGuide.html).
 * Third-party libraries used: [JavaFX](https://openjfx.io/) for the GUI, [Jackson](https://github.com/FasterXML/jackson) for reading and writing JSON data files, and [JUnit 5](https://junit.org/junit5/) for testing.
 * The UML diagrams in this guide are created with [PlantUML](https://plantuml.com/).
 * The similar-name warning compares names using the [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance), a standard edit distance algorithm.
+* **AI assistance:** Our team used ChatGPT 6.1 Sol and Claude Opus 5.5 extensively throughout ClientConnect's development. These tools assisted with implementing and refining command features (including search, sorting, remarks, UUID-based client selection, and restoring deleted clients), input parsing and validation, UI styling and client-card layout, and clipboard actions. They also assisted with finding and fixing bugs, including storage and UUID-handling issues, writing and expanding tests, and updating documentation and UML diagrams.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -533,6 +534,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *`    | insurance agent | link contacts                                                    | understand family and corporate policy ecosystems                           |
 | `* *`    | insurance agent | link individual personal contact information to business details | manage both individual policies and corporate plans seamlessly              |
 | `* *`    | insurance agent | restore a client I deleted by mistake                            | recover their details without re-entering them                              |
+| `* *`    | insurance agent | copy individual client details or all details to the clipboard   | reuse client information in messages and forms without retyping it          |
 | `*`      | insurance agent | set reminders for important clients/urgent appointments          | be notified ahead of time for renewals, reviews, or appointments            |
 
 ### Use cases
