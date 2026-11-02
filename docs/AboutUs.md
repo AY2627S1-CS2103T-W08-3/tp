@@ -49,7 +49,7 @@ We are a team based in the [School of Computing, National University of Singapor
 <img src="images/yjenexd.png" width="200px">
 
 [[github](https://github.com/yjenexd)]
-[[portfolio](team/johndoe.md)]
+[[portfolio](team/yjenexd.md)]
 
 * Role: Celery Worker, Testing/QCE Specialist
 * Responsibilities: Full Stack, In Charge of Delete Command
