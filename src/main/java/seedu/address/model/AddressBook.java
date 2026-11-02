@@ -74,8 +74,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Replaces the given person {@code target} in the list with {@code editedPerson}.
-     * {@code target} must exist in the address book.
+     * Replaces the person with {@code target}'s UUID in the list with {@code editedPerson}.
+     * A person with that UUID must exist in the address book.
      * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
      */
     public void setPerson(Person target, Person editedPerson) {
@@ -85,8 +85,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Removes {@code key} from this {@code AddressBook}.
-     * {@code key} must exist in the address book.
+     * Removes the person with {@code key}'s UUID from this {@code AddressBook}.
+     * A person with that UUID must exist in the address book.
      */
     public void removePerson(Person key) {
         persons.remove(key);
