@@ -244,7 +244,8 @@ after the tokenizer removes the outer quotes, so leading and trailing spaces are
 `RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It calls
 `Model#getPersonsByUuidPrefix` to find every person whose UUID starts with the identifier, searching the full address
 book rather than the displayed list. If exactly one person matches, it creates an edited `Person` carrying over the
-unchanged fields and asks the model to replace the old value.
+unchanged fields and asks the model to replace the old value. Like `edit`, it then clears any `find` filter while
+keeping the `sort` comparator; see [Edit command](#edit-command) for the reasons.
 
 If no person matches, `RemarkCommand` throws a `CommandException` with the message `No person with UUID: <identifier>`.
 If more than one person matches, the `CommandException` lists the full UUID and name of each match, so that the user
@@ -326,6 +327,21 @@ displayed filtered list. It rejects a UUID prefix that matches no person or more
 creates a replacement with the original UUID, checks that the edited identity is not a duplicate,
 and then updates the model and restores the unfiltered display. Name typo warnings are generated
 for the edited name in the same way as for add.
+
+#### Design considerations
+
+**Aspect: What the list shows after a successful edit:**
+
+* **Alternative 1 (current choice):** Clear any `find` filter, but keep the `sort` comparator.
+  * Pros: The edited person is always visible, even if the edit changes a name or tag that they were found by.
+    Sorting only reorders the list and never hides anyone, so the user's chosen order is kept.
+  * Cons: The user must run `find` again to return to the previous search results.
+
+* **Alternative 2:** Keep the `find` filter.
+  * Pros: The user stays in the previous search results.
+  * Cons: The edited person can disappear from the list after a successful edit, which looks like the edit failed.
+
+`remark` follows the same choice, as it also replaces the stored `Person`.
 
 ### Sort command
 

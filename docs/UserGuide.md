@@ -185,6 +185,8 @@ or digit, and emails must contain `@` or be `UNKNOWN`. Quote values containing f
 * To update or clear a remark, provide `r/REMARK` or `r/` respectively.
 * When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
 * To remove all of a person's tags, enter `t/` without a tag after it.
+* After a successful edit, all persons are shown again, so the edited person stays visible even if they no longer
+  match your `find` search. Any order set by `sort` is kept.
 
 Examples:
 *  `edit 1a2b3c4 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the person whose card shows `#1a2b3c4`.
@@ -243,6 +245,7 @@ Format: `remark UUID_PREFIX r/[REMARK]`
 * To remove an existing remark, enter `r/` without any text after it.
 * On success, the status message starts with `Added remark` when filling an empty remark, `Updated remark` when
   replacing an existing remark, or `Removed remark` when you enter an empty `r/` value.
+* Like `edit`, a successful remark shows all persons again and keeps any order set by `sort`.
 * A second `r/` after whitespace outside a quoted remark is rejected as a repeated field. For example,
   `remark 1a2b3c4 r/Discuss r/ clause` is rejected. The error asks you to remove the extra field or quote the
   whole remark if `r/` is intended as text.
