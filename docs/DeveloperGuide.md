@@ -436,12 +436,20 @@ Step 3. The user executes `delete 0f9e8d7` to delete Alice, the 1st person. `Mod
 
 Step 4. The user realises that deleting Alice was a mistake, and executes `undelete`. `UndeleteCommand` checks that there is a deleted person to restore, and that no person with the same identity as Alice already exists. It then calls `Model#restoreLastDeletedPerson()`, which reinserts Alice at index 0 and pops `(Alice, 0)` off the stack.
 
-The following sequence diagram shows how the `undelete` command in step 4 goes through the `Logic` and `Model` components:
+The following sequence diagram shows how the `undelete` command in step 4 goes through the `Logic` component:
 
-![UndeleteSequenceDiagram](images/UndeleteSequenceDiagram.png)
+![UndeleteSequenceDiagram-Logic](images/UndeleteSequenceDiagram-Logic.png)
+
+The reference frame `Parse undelete command` is shown in the following sequence diagram:
+
+![UndeleteSequenceDiagram-Parser](images/UndeleteSequenceDiagram-Parser.png)
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The lifelines for `UndeleteCommandParser` and `UndeleteCommand` should end at their destroy markers (X), but due to a limitation of PlantUML, they continue to the end of the diagram.
 </div>
+
+The following sequence diagram shows what happens inside the `Model` component when `Model#restoreLastDeletedPerson()` is called:
+
+![UndeleteSequenceDiagram-Model](images/UndeleteSequenceDiagram-Model.png)
 
 Step 5. The user executes `undelete` again. Benson is reinserted at index 1, so the address book is back in its original order, and `deletedPersons` is empty again.
 

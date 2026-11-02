@@ -1,0 +1,41 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+title Parse undelete command
+
+box Logic LOGIC_COLOR_T1
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":UndeleteCommandParser" as UndeleteCommandParser LOGIC_COLOR
+participant "u:UndeleteCommand" as UndeleteCommand LOGIC_COLOR
+end box
+
+[-> AddressBookParser : parseCommand("undelete")
+activate AddressBookParser
+
+create UndeleteCommandParser
+AddressBookParser -> UndeleteCommandParser : UndeleteCommandParser()
+activate UndeleteCommandParser
+
+UndeleteCommandParser --> AddressBookParser
+deactivate UndeleteCommandParser
+
+AddressBookParser -> UndeleteCommandParser : parse("")
+activate UndeleteCommandParser
+
+create UndeleteCommand
+UndeleteCommandParser -> UndeleteCommand : UndeleteCommand()
+activate UndeleteCommand
+
+UndeleteCommand --> UndeleteCommandParser
+deactivate UndeleteCommand
+
+UndeleteCommandParser --> AddressBookParser : u
+deactivate UndeleteCommandParser
+'Hidden arrow to position the destroy marker below the end of the activation bar.
+UndeleteCommandParser -[hidden]-> AddressBookParser
+destroy UndeleteCommandParser
+
+[<-- AddressBookParser : u
+deactivate AddressBookParser
+@enduml
