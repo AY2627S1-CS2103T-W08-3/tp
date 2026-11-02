@@ -100,7 +100,7 @@ public class UniquePersonList implements Iterable<Person> {
 
     /**
      * Replaces the contents of this list with {@code persons}.
-     * {@code persons} must not contain duplicate persons.
+     * Duplicate names are allowed only when the later person's name is exactly {@code UNKNOWN}, as when adding persons.
      */
     public void setPersons(List<Person> persons) {
         requireAllNonNull(persons);
@@ -152,12 +152,12 @@ public class UniquePersonList implements Iterable<Person> {
     }
 
     /**
-     * Returns true if {@code persons} contains only unique persons.
+     * Returns true if {@code persons} satisfies the same uniqueness checks as adding persons in list order.
      */
     private boolean personsAreUnique(List<Person> persons) {
         for (int i = 0; i < persons.size() - 1; i++) {
             for (int j = i + 1; j < persons.size(); j++) {
-                if (persons.get(i).isSamePerson(persons.get(j))) {
+                if (persons.get(i).isSamePerson(persons.get(j)) && !isUnknownName(persons.get(j))) {
                     return false;
                 }
             }
