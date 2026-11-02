@@ -2,6 +2,16 @@
  * ClientConnect theme: red and white, flat, light.
  * Colour tokens are defined once on .root and looked up everywhere else.
  */
+
+/* Inter is bundled so text metrics, and hence card heights, match on every OS. */
+@font-face {
+    src: url("../fonts/Inter-Regular.ttf");
+}
+
+@font-face {
+    src: url("../fonts/Inter-Bold.ttf");
+}
+
 .root {
     -cc-red: #d31145;
     -cc-red-dark: #a50e37;
@@ -15,7 +25,7 @@
     -fx-accent: -cc-red;
     -fx-focus-color: -cc-red;
     -fx-faint-focus-color: #d3114522;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: "Inter";
     -fx-font-size: 10pt;
 }
 
@@ -181,7 +191,6 @@
 }
 
 .cell_uuid_label {
-    -fx-font-family: "Consolas";
     -fx-font-size: 9.5pt;
     -fx-text-fill: -cc-red;
     -fx-background-color: -cc-white;
