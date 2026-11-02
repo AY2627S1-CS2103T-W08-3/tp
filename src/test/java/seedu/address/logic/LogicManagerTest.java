@@ -12,6 +12,8 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,33 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+    }
+
+    @Test
+    public void execute_duplicateUnknownNames_surviveReloadAndNextCommand() throws Exception {
+        String addCommand = "add n/UNKNOWN p/UNKNOWN e/UNKNOWN a/UNKNOWN";
+        logic.execute(addCommand);
+        logic.execute(addCommand);
+        List<Person> originalPersons = new ArrayList<>(model.getAddressBook().getPersonList());
+        assertEquals(2, originalPersons.size());
+
+        // Reopen storage and reconstruct the model as on application startup.
+        JsonAddressBookStorage addressBookStorage =
+                new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        Model reloadedModel = new ModelManager(addressBookStorage.readAddressBook().orElseThrow(), new UserPrefs());
+        assertEquals(originalPersons, reloadedModel.getAddressBook().getPersonList());
+        assertEquals(originalPersons.stream().map(Person::getUuid).toList(),
+                reloadedModel.getAddressBook().getPersonList().stream().map(Person::getUuid).toList());
+
+        // A successful command saves again; both entries must remain in the file.
+        StorageManager reloadedStorage = new StorageManager(addressBookStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json")));
+        Logic reloadedLogic = new LogicManager(reloadedModel, reloadedStorage);
+        reloadedLogic.execute(ListCommand.COMMAND_WORD);
+        ReadOnlyAddressBook savedAgain = addressBookStorage.readAddressBook().orElseThrow();
+        assertEquals(originalPersons, savedAgain.getPersonList());
+        assertEquals(originalPersons.stream().map(Person::getUuid).toList(),
+                savedAgain.getPersonList().stream().map(Person::getUuid).toList());
     }
 
     @Test

@@ -12,6 +12,8 @@ import static seedu.address.testutil.TypicalPersons.BOB;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import seedu.address.model.person.exceptions.DuplicatePersonException;
 import seedu.address.model.person.exceptions.PersonNotFoundException;
@@ -199,6 +201,30 @@ public class UniquePersonListTest {
     public void setPersons_listWithDuplicatePersons_throwsDuplicatePersonException() {
         List<Person> listWithDuplicatePersons = List.of(ALICE, ALICE);
         assertThrows(DuplicatePersonException.class, () -> uniquePersonList.setPersons(listWithDuplicatePersons));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"UNKNOWN, UNKNOWN", "unknown, UNKNOWN"})
+    public void setPersons_listWithUnknownPlaceholder_preservesPersons(String firstName, String secondName) {
+        Person firstPerson = new PersonBuilder().withName(firstName).build();
+        Person secondPerson = new PersonBuilder().withName(secondName).build();
+        List<Person> persons = List.of(firstPerson, ALICE, secondPerson);
+
+        uniquePersonList.setPersons(persons);
+
+        assertEquals(persons, uniquePersonList.asUnmodifiableObservableList());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"UNKNOWN, unknown", "unknown, unknown", "UNKNOWN, UnKnOwN", "Alice, alice"})
+    public void setPersons_listWithDuplicateOrdinaryName_throwsDuplicatePersonException(
+            String firstName, String secondName) {
+        uniquePersonList.add(BOB);
+        List<Person> persons = List.of(new PersonBuilder().withName(firstName).build(),
+                new PersonBuilder().withName(secondName).build());
+
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.setPersons(persons));
+        assertEquals(List.of(BOB), uniquePersonList.asUnmodifiableObservableList());
     }
 
     @Test
