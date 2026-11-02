@@ -58,6 +58,16 @@ public class Messages {
     }
 
     /**
+     * Returns one line per person, showing their full UUID and name, so the user can see how much
+     * of the UUID to type to tell them apart.
+     */
+    public static String formatUuids(Collection<Person> persons) {
+        return persons.stream()
+                .map(person -> person.getUuid() + " " + person.getName())
+                .collect(Collectors.joining("\n"));
+    }
+
+    /**
      * Returns a warning when a person's name is very similar to an existing name.
      *
      * @param person person being added or edited

@@ -106,7 +106,7 @@ Commands that act on one existing person (`edit`, `remark` and `delete`) identif
 * Type the code without the `#`. For example, for a card showing `#1a2b3c4`, type `delete 1a2b3c4`.
 * The code is made of hexadecimal characters (`0`–`9` and `a`–`f`) and is case-insensitive.
 * The code is matched against **every** person in the address book, not just the currently displayed list, so filtering with `find` does not affect which person is chosen.
-* If two persons share a short UUID, the command fails instead of guessing. Type more characters of the person's full UUID, up to all 32, to pick one. `delete` and `remark` list the full UUID of each match; you can also find it in the data file. Dashes are ignored, so you can paste a full UUID.
+* If two persons share a short UUID, the command fails instead of guessing. Type more characters of the person's full UUID, up to all 32, to pick one. The error message lists the full UUID and name of each match. Dashes are ignored, so you can paste a full UUID.
 
 ### Viewing help: `help`
 

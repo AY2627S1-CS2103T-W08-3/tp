@@ -6,7 +6,6 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Messages;
@@ -75,7 +74,7 @@ public class RemarkCommand extends Command {
         if (matches.size() > 1) {
             logger.warning("Ambiguous UUID for remark command: " + targetUuid);
             throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuid,
-                    formatUuids(matches)));
+                    Messages.formatUuids(matches)));
         }
 
         assert matches.size() == 1 : "A valid UUID must resolve to exactly one person";
@@ -107,16 +106,6 @@ public class RemarkCommand extends Command {
             message = MESSAGE_ADD_REMARK_SUCCESS;
         }
         return String.format(message, Messages.format(editedPerson));
-    }
-
-    /**
-     * Returns one line per person, showing their full UUID and name, so the user can see how much
-     * of the UUID to type to tell them apart.
-     */
-    private static String formatUuids(List<Person> persons) {
-        return persons.stream()
-                .map(person -> person.getUuid() + " " + person.getName())
-                .collect(Collectors.joining("\n"));
     }
 
     @Override
