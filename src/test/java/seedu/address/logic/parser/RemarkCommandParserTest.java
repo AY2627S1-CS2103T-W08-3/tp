@@ -107,6 +107,11 @@ public class RemarkCommandParserTest {
         assertParseFailure(parser, "aaaaaaa r/\"Discuss r/ clause",
                 "Unclosed quoted remark. Add a closing double quote after the remark, "
                         + "or remove the opening quote.");
+
+        // EP: A control character trimmed from the value must not hide an unclosed quote.
+        assertParseFailure(parser, "aaaaaaa r/" + ((char) 0) + "\"Discuss clause",
+                "Unclosed quoted remark. Add a closing double quote after the remark, "
+                        + "or remove the opening quote.");
     }
 
     @Test

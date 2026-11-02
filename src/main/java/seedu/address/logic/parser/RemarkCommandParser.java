@@ -44,10 +44,7 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
         try {
             argMultimap = ArgumentTokenizer.tokenizeWithQuotedValues(args, PREFIX_REMARK);
         } catch (ParseException e) {
-            if (ArgumentTokenizer.MESSAGE_UNMATCHED_QUOTE.equals(e.getMessage())) {
-                throw new ParseException(MESSAGE_UNCLOSED_REMARK_QUOTE, e);
-            }
-            throw e;
+            throw new ParseException(MESSAGE_UNCLOSED_REMARK_QUOTE, e);
         }
 
         String preamble = argMultimap.getPreamble();
