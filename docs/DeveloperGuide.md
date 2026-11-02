@@ -221,7 +221,8 @@ The following class diagrams show the classes involved in parsing and executing 
 
 <img src="images/ParserClass.png" width="600"/>
 
-`RemarkCommandParser` delegates tokenisation and remark validation to the shared parser utilities. It removes dashes
+`RemarkCommandParser` uses the shared tokenizer to separate fields and `ParserUtil.parseRemark` to trim the remark.
+It checks the command syntax and UUID; there is no separate constraint on the remark's text. It removes dashes
 from the identifier and lowercases it, then checks that 7 to 32 hexadecimal characters remain. A short UUID typed from
 a card (e.g. `1a2b3c4`) and a full UUID copied from the data file are therefore treated alike. A missing or invalid
 identifier, a missing `r/` prefix, and a repeated `r/` prefix are reported as a `ParseException` before a command
@@ -703,6 +704,45 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Steps 3b1-3b2 are repeated until the name is unique.
       Use case resumes at step 4.
+
+**Use case: UC5 - Add or change a client's remark**
+
+**MSS**
+
+1.  User enters `remark UUID_PREFIX r/REMARK`, identifying a client by UUID prefix.
+2.  ClientConnect checks the command format and finds exactly one client with a matching UUID.
+3.  ClientConnect replaces that client's remark and shows an `Added remark` or `Updated remark` success message.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. The UUID prefix is missing or has an invalid format, or the `r/` field is missing.
+
+    * 2a1. ClientConnect shows a specific error with the remark command usage.
+    * 2a2. User corrects the command and re-enters it.
+
+      Use case resumes at step 2.
+
+* 2b. The remark contains an unquoted repeated `r/` field or malformed quotation marks.
+
+    * 2b1. ClientConnect explains the syntax error and how to correct it.
+    * 2b2. User corrects the command and re-enters it.
+
+      Use case resumes at step 2.
+
+* 2c. No client has a UUID matching the prefix, or more than one client matches it.
+
+    * 2c1. ClientConnect reports that no client matches, or lists the full UUIDs of all matches.
+    * 2c2. User re-enters the command with the correct or a more specific UUID prefix.
+
+      Use case resumes at step 2.
+
+* 3a. The supplied `r/` value is empty.
+
+    * 3a1. ClientConnect stores an empty remark and shows a `Removed remark` success message.
+
+      Use case ends.
 
 ### Non-Functional Requirements
 
