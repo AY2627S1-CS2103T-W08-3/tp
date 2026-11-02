@@ -1,0 +1,40 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Model MODEL_COLOR_T1
+participant ":ModelManager" as ModelManager MODEL_COLOR
+participant "deletedPersons:Deque" as Deque MODEL_COLOR
+participant ":AddressBook" as AddressBook MODEL_COLOR
+end box
+
+[-> ModelManager : restoreLastDeletedPerson()
+activate ModelManager
+
+ModelManager -> Deque : element()
+activate Deque
+
+Deque --> ModelManager : lastDeleted
+deactivate Deque
+
+ModelManager -> AddressBook : addPerson(index, lastDeleted.person())
+activate AddressBook
+
+AddressBook --> ModelManager
+deactivate AddressBook
+
+ModelManager -> Deque : pop()
+activate Deque
+
+Deque --> ModelManager
+deactivate Deque
+
+ModelManager -> ModelManager : updateFilteredPersonList(\nPREDICATE_SHOW_ALL_PERSONS)
+activate ModelManager
+
+ModelManager --> ModelManager
+deactivate ModelManager
+
+[<-- ModelManager
+deactivate ModelManager
+@enduml
