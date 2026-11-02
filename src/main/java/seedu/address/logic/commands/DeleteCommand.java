@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
@@ -71,21 +70,12 @@ public class DeleteCommand extends Command {
         }
         if (matches.size() > 1) {
             logger.info(matches.size() + " persons match UUID prefix " + targetUuidPrefix);
-            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuidPrefix, formatUuids(matches)));
+            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuidPrefix,
+                    Messages.formatUuids(matches)));
         }
 
         assert matches.size() == 1 : "Exactly one person should match at this point";
         return matches.get(0);
-    }
-
-    /**
-     * Returns one line per person, showing their full UUID and name, so the user can see how much
-     * of the UUID to type to tell them apart.
-     */
-    private static String formatUuids(List<Person> persons) {
-        return persons.stream()
-                .map(person -> person.getUuid() + " " + person.getName())
-                .collect(Collectors.joining("\n"));
     }
 
     @Override

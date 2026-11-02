@@ -64,7 +64,7 @@ public class EditCommand extends Command {
             "Invalid UUID prefix. It must contain 7 to 32 hexadecimal characters, ignoring dashes.";
     public static final String MESSAGE_NO_PERSON_WITH_UUID = "No person with UUID: %s";
     public static final String MESSAGE_AMBIGUOUS_UUID =
-            "Multiple persons match UUID: %s. Please use a more specific identifier.";
+            "Multiple persons match UUID: %s. Enter more characters of the UUID to pick one:\n%s";
 
     private static final String UUID_PREFIX_REGEX =
             "\\p{XDigit}{" + Person.SHORT_UUID_LENGTH + "," + Person.UUID_HEX_LENGTH + "}";
@@ -98,7 +98,8 @@ public class EditCommand extends Command {
             throw new CommandException(String.format(MESSAGE_NO_PERSON_WITH_UUID, targetUuid));
         }
         if (matches.size() > 1) {
-            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuid));
+            throw new CommandException(String.format(MESSAGE_AMBIGUOUS_UUID, targetUuid,
+                    Messages.formatUuids(matches)));
         }
 
         Person personToEdit = matches.get(0);

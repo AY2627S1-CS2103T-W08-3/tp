@@ -241,18 +241,21 @@ public class EditCommandTest {
     }
 
     @Test
-    public void execute_ambiguousUuid_failure() {
-        Person ambiguousPerson = new PersonBuilder(model.getAddressBook().getPersonList().get(0))
+    public void execute_ambiguousUuid_failureListingFullUuids() {
+        Person firstPerson = model.getAddressBook().getPersonList().get(0);
+        Person ambiguousPerson = new PersonBuilder(firstPerson)
                 .withName("Another Person")
                 .withUuid("aaaaaaa1-0000-0000-0000-000000000000")
                 .build();
         model.addPerson(ambiguousPerson);
+        String expectedMatches = firstPerson.getUuid() + " " + firstPerson.getName() + "\n"
+                + ambiguousPerson.getUuid() + " " + ambiguousPerson.getName();
 
         EditCommand editCommand = new EditCommand("aaaaaaa",
                 new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build());
 
         assertCommandFailure(editCommand, model,
-                String.format(EditCommand.MESSAGE_AMBIGUOUS_UUID, "aaaaaaa"));
+                String.format(EditCommand.MESSAGE_AMBIGUOUS_UUID, "aaaaaaa", expectedMatches));
     }
 
     @Test
