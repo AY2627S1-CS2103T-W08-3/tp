@@ -394,15 +394,12 @@ The command remains alive for execution; the end of this diagram does not mark i
 
 [![Parsing the sort asc command](images/SortSequenceDiagram.png)](images/SortSequenceDiagram.png)
 
-PlantUML source: [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
-
 **Execution:** This diagram continues inside the same `LogicManager#execute("sort asc")` call,
 after parsing returns. `LogicManager` executes `s` using `m:ModelManager`, supplied through
 the `Model` interface. The result `r:CommandResult` is returned to the caller.
 
 [![Executing the parsed sort command](images/SortExecutionSequenceDiagram.png)](images/SortExecutionSequenceDiagram.png)
 
-PlantUML source: [SortExecutionSequenceDiagram.puml](diagrams/SortExecutionSequenceDiagram.puml).
 Both diagrams use the shared [diagram style](diagrams/style.puml).
 
 The execution diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
