@@ -250,6 +250,8 @@ If no person matches, `RemarkCommand` throws a `CommandException` with the messa
 If more than one person matches, the `CommandException` lists the full UUID and name of each match, so that the user
 can enter more characters of the intended UUID. In both cases, no data is replaced. If the `r/` value is empty, the same
 successful path stores an empty `Remark`, which removes the displayed remark without requiring a separate command.
+The success message compares the old and new values to distinguish adding from replacing a nonempty remark. An empty
+`r/` value reports removal, including when the old remark is already empty, because it requests clearing the remark.
 
 ### Add command
 
@@ -858,7 +860,7 @@ testers are expected to do more *exploratory* testing.
    1. Incorrect sort commands to try: `sort`, `sort A-Z`, `sort asc extra`<br>
       Expected: The list order is unchanged. The status message shows an invalid command format error with the sort usage.
 
-### Adding or removing a remark
+### Adding, updating, or removing a remark
 
 1. Changing a remark by short UUID
 
@@ -868,7 +870,8 @@ testers are expected to do more *exploratory* testing.
       Expected: Bernice's card shows the remark `Likes to swim.` The status message starts with `Added remark to Person: Bernice Yu; ...`.
 
    1. Test case: `remark <Bernice's short UUID> r/To find out whether Bob is a saver/spender`<br>
-      Expected: Bernice's card shows the full remark, including `saver/spender`.
+      Expected: Bernice's card shows the full remark, including `saver/spender`. The status message starts with
+      `Updated remark for Person: Bernice Yu; ...`.
 
    1. Test case: `remark <Bernice's short UUID> r/"Discuss r/ clause"`<br>
       Expected: Bernice's card shows `Discuss r/ clause`, without the surrounding quotes.
