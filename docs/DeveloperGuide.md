@@ -382,18 +382,30 @@ The comparator remains active during subsequent additions, edits, and searches i
 same session. `list` shows all contacts while retaining the comparator. Restarting the
 application restores the saved order because the comparator is not persisted.
 
-#### Sequence diagram
+#### Sequence diagrams
 
-The following diagram illustrates the successful execution of `sort asc`.
-The object named `s` is the created `SortCommand`, `r` is its `CommandResult`, and `m`
-is the `ModelManager` supplied through the `Model` interface.
+The successful `sort asc` interaction is split into parsing and execution so that the labels
+remain readable. Both diagrams refer to the same command instance, `s:SortCommand`.
+Click either diagram to view the full-size image.
 
-![Sequence diagram for the successful sort asc command](images/SortSequenceDiagram.png)
+**Parsing:** `LogicManager` calls `AddressBookParser#parseCommand("sort asc")`, shown as the
+incoming call below. The parser creates `s` with `ASCENDING` and returns it to `LogicManager`.
+The command remains alive for execution; the end of this diagram does not mark its destruction.
 
-The editable PlantUML source is [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
-It uses the shared [diagram style](diagrams/style.puml).
+[![Parsing the sort asc command](images/SortSequenceDiagram.png)](images/SortSequenceDiagram.png)
 
-The diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
+PlantUML source: [SortSequenceDiagram.puml](diagrams/SortSequenceDiagram.puml).
+
+**Execution:** This diagram continues inside the same `LogicManager#execute("sort asc")` call,
+after parsing returns. `LogicManager` executes `s` using `m:ModelManager`, supplied through
+the `Model` interface. The result `r:CommandResult` is returned to the caller.
+
+[![Executing the parsed sort command](images/SortExecutionSequenceDiagram.png)](images/SortExecutionSequenceDiagram.png)
+
+PlantUML source: [SortExecutionSequenceDiagram.puml](diagrams/SortExecutionSequenceDiagram.puml).
+Both diagrams use the shared [diagram style](diagrams/style.puml).
+
+The execution diagram shows `SortCommand#getComparator()` selecting the comparator for the requested direction.
 Null checks, contact-count retrieval, assertions, logging, and subsequent storage
 interactions are omitted to keep the diagram focused on parsing and sorting.
 `sort desc` follows the same interaction sequence with `DESCENDING` and a reversed comparator.
