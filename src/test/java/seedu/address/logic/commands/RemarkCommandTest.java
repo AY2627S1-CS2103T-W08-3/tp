@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import seedu.address.logic.Messages;
+import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.ParserUtil;
 import seedu.address.logic.parser.RemarkCommandParser;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -117,6 +118,18 @@ public class RemarkCommandTest {
         assertCommandSuccess(command, model,
                 String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS,
                         Messages.format(editedPerson)), expectedModel);
+    }
+
+    @Test
+    public void parseAndExecute_quotedRemarkWithEmbeddedPrefix_savesLiteralText()
+            throws ParseException, CommandException {
+        // EP: A quoted field-looking prefix is saved in the person's remark.
+        String targetUuid = "aaaaaaa";
+        RemarkCommand command = new RemarkCommandParser().parse(targetUuid + " r/\"Discuss r/ clause\"");
+        command.execute(model);
+
+        assertEquals(new Remark("Discuss r/ clause"),
+                model.getPersonsByUuidPrefix(targetUuid).get(0).getRemark());
     }
 
     @Test

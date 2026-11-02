@@ -227,6 +227,18 @@ a card (e.g. `1a2b3c4`) and a full UUID copied from the data file are therefore 
 identifier, a missing `r/` prefix, and a repeated `r/` prefix are reported as a `ParseException` before a command
 reaches the model.
 
+`RemarkCommandParser` uses the shared quote-aware tokenizer, as `add` and `edit` do. A double quote at the start of
+the `r/` value opens a quoted value. Within it, a whitespace-preceded `r/` is remark text rather than another field.
+When the quotes surround the entire value, the tokenizer removes them and unescapes `\"` to `"` before creating the
+`Remark`. An unquoted second `r/` after whitespace is still rejected, with a remark-specific message explaining how
+to remove an accidental extra field or quote an intended literal `r/`. An `r/` embedded in a word, such as
+`saver/spender`, is ordinary text without quoting. This syntax distinguishes literal text from repeated fields.
+An unclosed quoted remark produces an error that asks the user to close or remove the opening quote. If a valid UUID
+is followed by remark text without `r/`, the parser reports the missing prefix instead of an invalid UUID.
+For `remark`, the parser also requires the first unescaped closing quote to end the value; text after it is rejected
+with an error explaining how to escape an intended inner quote. `ParserUtil.parseRemark` trims surrounding whitespace
+after the tokenizer removes the outer quotes, so leading and trailing spaces are not saved in either input form.
+
 <img src="images/RemarkClass.png" width="600"/>
 
 `RemarkCommand` treats a remark update as a replacement of the immutable `Person` value. It calls
@@ -855,11 +867,38 @@ testers are expected to do more *exploratory* testing.
    1. Test case: `remark <Bernice's short UUID> r/Likes to swim.`<br>
       Expected: Bernice's card shows the remark `Likes to swim.` The status message starts with `Added remark to Person: Bernice Yu; ...`.
 
+   1. Test case: `remark <Bernice's short UUID> r/To find out whether Bob is a saver/spender`<br>
+      Expected: Bernice's card shows the full remark, including `saver/spender`.
+
+   1. Test case: `remark <Bernice's short UUID> r/"Discuss r/ clause"`<br>
+      Expected: Bernice's card shows `Discuss r/ clause`, without the surrounding quotes.
+
+   1. Test case: `remark <Bernice's short UUID> r/"Client said \"call me\" about r/ renewal"`<br>
+      Expected: Bernice's card shows `Client said "call me" about r/ renewal`.
+
+   1. Test case: `remark <Bernice's short UUID> r/"Client said "call me\" about renewal"`<br>
+      Expected: Bernice's remark is unchanged. The status message says text follows the closing quote and asks the
+      user to escape the inner quote.
+
+   1. Test case: `remark <Bernice's short UUID> r/" remark"`, then `remark <Bernice's short UUID> r/ remark`<br>
+      Expected: Both commands save `remark`, without the leading space.
+
+   1. Test case: `remark <Bernice's short UUID> r/Discuss r/ clause`<br>
+      Expected: Bernice's remark is unchanged. The status message says only one `r/` field is allowed and explains
+      that a literal `r/` can be included by quoting the entire remark value.
+
+   1. Test case: `remark <Bernice's short UUID> r/"Discuss r/ clause` (no closing quote)<br>
+      Expected: Bernice's remark is unchanged. The status message asks the user to close the quoted remark or remove
+      the opening quote.
+
    1. Test case: `remark <Bernice's short UUID> r/`<br>
       Expected: Bernice's remark is removed. The status message starts with `Removed remark from Person: Bernice Yu; ...`.
 
    1. Test case: `remark <Bernice's short UUID>` (no `r/`)<br>
       Expected: The remark is unchanged. The status message shows `Missing remark prefix. Add r/ before the remark, or use r/ to remove the existing remark.`, followed by the command usage.
+
+   1. Test case: `remark <Bernice's short UUID> Call Bob` (text without `r/`)<br>
+      Expected: The remark is unchanged. The status message identifies the missing `r/` prefix and shows command usage.
 
    1. Test case: `remark 9999999 r/Hello`<br>
       Expected: No remark is changed. The status message shows `No person with UUID: 9999999`.

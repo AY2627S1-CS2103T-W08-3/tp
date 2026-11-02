@@ -238,12 +238,27 @@ Format: `remark UUID_PREFIX r/[REMARK]`
 * Updates the remark of the person whose UUID starts with `UUID_PREFIX`.
 * The UUID prefix must contain 7–32 hexadecimal characters after dashes are stripped; it is case-insensitive.
 * The match is made against every person in ClientConnect, not just the currently displayed list.
-* The `r/` prefix is compulsory. Omitting it results in an invalid command.
+* The `r/` prefix is compulsory. With a valid UUID, omitting it results in an error asking you to add `r/` before
+  the remark.
 * To remove an existing remark, enter `r/` without any text after it.
+* A second `r/` after whitespace outside a quoted remark is rejected as a repeated field. For example,
+  `remark 1a2b3c4 r/Discuss r/ clause` is rejected. The error asks you to remove the extra field or quote the
+  whole remark if `r/` is intended as text.
+* To include `r/` after whitespace in the remark, enclose the **entire remark value** in double quotes:
+  `remark 1a2b3c4 r/"Discuss r/ clause"` saves `Discuss r/ clause`. The surrounding quotes are not saved.
+  An `r/` without whitespace before it, as in `saver/spender`, can be entered without quotes.
+* Within a quoted remark, type `\"` to save a literal double quote. For example,
+  `r/"Client said \"call me\" about r/ renewal"` saves `Client said "call me" about r/ renewal`.
+  To save the surrounding quotes in `"VIP"`, type `r/"\"VIP\""`. If you omit the closing quote, the error
+  asks you to close the quoted remark or remove the opening quote. Text after the closing quote is rejected; escape
+  any quote that is meant to appear inside the remark.
+* Leading and trailing spaces in a remark are removed, even when the remark is enclosed in quotes. Both
+  `r/ remark` and `r/" remark"` save `remark`.
 
 Examples:
 * `remark 1a2b3c4 r/Likes to swim.` adds a remark to the contact whose card shows `#1a2b3c4`.
 * `remark 1a2b3c4 r/` removes the remark from the contact whose card shows `#1a2b3c4`.
+* `remark 1a2b3c4 r/To find out whether Bob is a saver/spender` saves the full note, including `saver/spender`.
 
 ### Locating persons by name or tag: `find`
 
