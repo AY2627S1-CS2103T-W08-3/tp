@@ -1,0 +1,68 @@
+@startuml
+!pragma teoz true
+!include style.puml
+
+skinparam ArrowFontStyle plain
+skinparam sequenceMessageAlign center
+skinparam sequenceArrowFontSize 20
+skinparam sequenceParticipantFontSize 20
+skinparam sequenceBoxFontSize 20
+skinparam TitleFontSize 22
+hide footbox
+
+title Sort command: execution
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant "s:SortCommand" as SortCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:ModelManager" as Model MODEL_COLOR
+end box
+
+'The caller has already invoked LogicManager.execute("sort asc").
+'Parsing has returned the command s shown in the parsing diagram.
+activate LogicManager
+LogicManager -> SortCommand : execute(m)
+activate SortCommand
+
+SortCommand -> SortCommand : getComparator()
+activate SortCommand
+SortCommand --> SortCommand : comparator
+deactivate SortCommand
+
+SortCommand -> Model : updateFilteredPersonList(\nPREDICATE_SHOW_ALL_PERSONS)
+activate Model
+Model --> SortCommand
+deactivate Model
+
+SortCommand -> Model : updatePersonListComparator(\ncomparator)
+activate Model
+Model --> SortCommand
+deactivate Model
+
+SortCommand -> SortCommand : getSuccessMessage()
+activate SortCommand
+SortCommand --> SortCommand : message
+deactivate SortCommand
+
+create CommandResult
+SortCommand -> CommandResult : CommandResult(message)
+activate CommandResult
+CommandResult --> SortCommand
+deactivate CommandResult
+
+SortCommand --> LogicManager : r
+deactivate SortCommand
+
+'Storage calls are omitted. LogicManager then returns to its caller.
+'An invisible layout message places destruction on the final return row.
+LogicManager -[hidden]> SortCommand
+destroy SortCommand
+& [<-- LogicManager : r
+deactivate LogicManager
+'The caller still references CommandResult.
+
+@enduml
